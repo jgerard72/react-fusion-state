@@ -1,10 +1,10 @@
 import React, { ReactNode } from 'react';
-export type GlobalState = {
+export type FusionGlobalState = {
     [key: string]: any;
 };
 type GlobalFusionStateContextType = {
-    state: GlobalState;
-    setState: React.Dispatch<React.SetStateAction<GlobalState>>;
+    state: FusionGlobalState;
+    setState: React.Dispatch<React.SetStateAction<FusionGlobalState>>;
     initializingKeys: Set<string>;
 };
 export declare const useGlobalState: () => GlobalFusionStateContextType;

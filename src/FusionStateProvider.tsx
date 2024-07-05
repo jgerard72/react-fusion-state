@@ -6,13 +6,13 @@ import React, {
   useRef,
 } from 'react';
 
-export type GlobalState = {
+export type FusionGlobalState = {
   [key: string]: any;
 };
 
 type GlobalFusionStateContextType = {
-  state: GlobalState;
-  setState: React.Dispatch<React.SetStateAction<GlobalState>>;
+  state: FusionGlobalState;
+  setState: React.Dispatch<React.SetStateAction<FusionGlobalState>>;
   initializingKeys: Set<string>;
 };
 
@@ -33,7 +33,7 @@ export const useGlobalState = (): GlobalFusionStateContextType => {
 export const FusionStateProvider: React.FC<{children: ReactNode}> = ({
   children,
 }) => {
-  const [state, setState] = useState<GlobalState>({});
+  const [state, setState] = useState<FusionGlobalState>({});
   const initializingKeys = useRef<Set<string>>(new Set());
 
   return (

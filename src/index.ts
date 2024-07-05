@@ -1,3 +1,3 @@
 export {useFusionState} from './useFusionState';
-export {FusionStateProvider, GlobalState} from './FusionStateProvider';
+export {FusionStateProvider, FusionGlobalState} from './FusionStateProvider';
 export {useFusionStateLog} from './useFusionStateLog';
