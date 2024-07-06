@@ -82,14 +82,14 @@ const CounterComponent: React.FC = () => {
 export default CounterComponent;
 ```
 
-**3. useGetFusionState**
+**3. useFusionStateLog**
 
-The **useGetFusionState** hook is used to retrieve the global state.
+The **useFusionStateLog** hook is used to retrieve the global state.
 
 Prototype:
 
 ```bash
-const useGetFusionState = (keys?: string[]): any;
+const useFusionStateLog = (keys?: string[]): any;
 ```
 
 Parameters:
@@ -104,11 +104,11 @@ Parameters:
 
 ```bash
 import React from 'react';
-import { useGetFusionState } from 'react-fusion-state';
+import { useFusionStateLog } from 'react-fusion-state';
 
 const StateViewer: React.FC = () => {
-  const allState = useGetFusionState();
-  const specificState = useGetFusionState(['count', 'nonExistentKey']);
+  const allState = useFusionStateLog();
+  const specificState = useFusionStateLog(['count', 'nonExistentKey']);
 
   return (
     <div>
@@ -135,7 +135,7 @@ Here is a complete example of how to use **ReactFusionState** in a React applica
 
 ```bash
 import React from 'react';
-import { useFusionState, useGetFusionState } from 'react-fusion-state';
+import { useFusionState, useFusionStateLog } from 'react-fusion-state';
 
 const CounterComponent: React.FC = () => {
   const [count, setCount] = useFusionState<number>('count', 0);
@@ -162,8 +162,8 @@ const AnotherComponent: React.FC = () => {
 };
 
 const StateViewer: React.FC = () => {
-  const allState = useGetFusionState();
-  const specificState = useGetFusionState(['count', 'count2', 'toto']);
+  const allState = useFusionStateLog();
+  const specificState = useFusionStateLog(['count', 'count2', 'toto']);
 
   return (
     <div>
