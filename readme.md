@@ -163,7 +163,7 @@ const AnotherComponent: React.FC = () => {
 
 const StateViewer: React.FC = () => {
   const allState = useFusionStateLog();
-  const specificState = useFusionStateLog(['count', 'count2', 'toto']);
+  const specificState = useFusionStateLog(['count', 'count2', 'nonExistentKey']);
 
   return (
     <div>
@@ -220,4 +220,4 @@ Fork the **ReactFusionState** project, include your changes, and submit a pull r
 This project is licensed under the **MIT License**.
 
 ## Author
-This project is maintained by Jacques GERARD.
+This project is maintained by [Jacques GERARD](https://www.linkedin.com/in/jgerard/)
