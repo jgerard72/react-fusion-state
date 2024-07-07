@@ -220,6 +220,8 @@ git push --force && git push --tags: Pushes the commits and tags to GitHub, forc
 publish:beta
 ```
 
+**publish:beta**
+
 ```bash
 npm run version:beta: Increments the pre-release version with the preid "beta".
 npm run publish:beta:only:
@@ -229,6 +231,8 @@ git tag -a v$(npm pkg get version | tr -d '\"') -m 'Beta release': Adds a git ta
 git push --force && git push --tags: Pushes the commits and tags to GitHub, forcing the push to ensure the squashed commit is applied.
 publish:release
 ```
+
+**publish:release**
 
 ```bash
 npm run version:patch: Increments the patch version.
