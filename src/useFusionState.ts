@@ -1,5 +1,5 @@
 import {useGlobalState, GlobalState} from './FusionStateProvider';
-import {useRef, useCallback, useEffect, useState} from 'react';
+import {useRef, useEffect, useState, useCallback} from 'react';
 
 type SetValue<T> = React.Dispatch<React.SetStateAction<T>>;
 
@@ -10,30 +10,32 @@ export const useFusionState = <T>(
   const {state, setState, initializingKeys} = useGlobalState();
   const isInitialized = useRef(false);
 
-  if (!isInitialized.current) {
-    if (initialValue !== undefined && state[key] === undefined) {
-      if (initializingKeys.has(key) || state[key] !== undefined) {
-        throw new Error(`ReactFusionState Error: Key "${key}" already exists.`);
-      }
-      initializingKeys.add(key);
-      const newState = {...state, [key]: initialValue};
-      state[key] = initialValue;
-      initializingKeys.delete(key);
-      setState(newState);
-      isInitialized.current = true;
-    } else if (state[key] === undefined) {
-      throw new Error(
-        `ReactFusionState Error: Key "${key}" does not exist and no initial value provided.`,
-      );
-    } else {
-      isInitialized.current = true;
+  // Initialisation synchrone de la clé si elle n'existe pas encore
+  if (
+    !isInitialized.current &&
+    initialValue !== undefined &&
+    state[key] === undefined
+  ) {
+    if (initializingKeys.has(key)) {
+      throw new Error(`ReactFusionState Error: Key "${key}" already exists.`);
     }
+    initializingKeys.add(key);
+    state[key] = initialValue;
+    setState(prevState => ({...prevState, [key]: initialValue}));
+    initializingKeys.delete(key);
+    isInitialized.current = true;
   }
 
-  const [localValue, setLocalValue] = useState<T>(() => {
-    return state[key];
-  });
+  if (!isInitialized.current && state[key] === undefined) {
+    throw new Error(
+      `ReactFusionState Error: Key "${key}" does not exist and no initial value provided.`,
+    );
+  }
 
+  // Utilisation de useState pour le suivi local de la valeur
+  const [localValue, setLocalValue] = useState<T>(() => state[key]);
+
+  // Synchronisation de localValue avec l'état global
   useEffect(() => {
     if (state[key] !== localValue) {
       setLocalValue(state[key]);
