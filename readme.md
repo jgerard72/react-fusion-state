@@ -206,39 +206,6 @@ ReactDOM.render(
 );
 ```
 
-## Explanation of Scripts
-
-**publish:alpha**
-
-```bash
-npm run version:alpha: Increments the pre-release version with the preid "alpha".
-npm run publish:alpha:only:
-npm publish --tag alpha: Publishes the package on npm with the tag alpha.
-git add package.json && git commit --squash -m 'Alpha release v$(npm pkg get version | tr -d '\"')': Adds and commits the package.json file with the new version number and squashes it into a single commit.
-git tag -a v$(npm pkg get version | tr -d '\"') -m 'Alpha release': Adds a git tag with the new version.
-git push --force && git push --tags: Pushes the commits and tags to GitHub, forcing the push to ensure the squashed commit is applied.
-publish:beta
-```
-
-```bash
-npm run version:beta: Increments the pre-release version with the preid "beta".
-npm run publish:beta:only:
-npm publish --tag beta: Publishes the package on npm with the tag beta.
-git add package.json && git commit --squash -m 'Beta release v$(npm pkg get version | tr -d '\"')': Adds and commits the package.json file with the new version number and squashes it into a single commit.
-git tag -a v$(npm pkg get version | tr -d '\"') -m 'Beta release': Adds a git tag with the new version.
-git push --force && git push --tags: Pushes the commits and tags to GitHub, forcing the push to ensure the squashed commit is applied.
-publish:release
-```
-
-```bash
-npm run version:patch: Increments the patch version.
-npm run publish:release:only:
-npm publish: Publishes the package on npm without a specific tag, making it the latest stable release.
-git add package.json && git commit --squash -m 'Release v$(npm pkg get version | tr -d '\"')': Adds and commits the package.json file with the new version number and squashes it into a single commit.
-git tag -a v$(npm pkg get version | tr -d '\"') -m 'Release': Adds a git tag with the new version.
-git push --force && git push --tags: Pushes the commits and tags to GitHub, forcing the push to ensure the squashed commit is applied.
-```
-
 ## Bugs
 
 If you find a bug, please post it as a new issue on the **GitHub** repository.
