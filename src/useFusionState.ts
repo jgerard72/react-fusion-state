@@ -10,7 +10,6 @@ export const useFusionState = <T>(
   const {state, setState, initializingKeys} = useGlobalState();
   const isInitialized = useRef(false);
 
-  // Initialisation synchrone de la clé si elle n'existe pas encore
   if (
     !isInitialized.current &&
     initialValue !== undefined &&
@@ -32,10 +31,8 @@ export const useFusionState = <T>(
     );
   }
 
-  // Utilisation de useState pour le suivi local de la valeur
   const [localValue, setLocalValue] = useState<T>(() => state[key]);
 
-  // Synchronisation de localValue avec l'état global
   useEffect(() => {
     if (state[key] !== localValue) {
       setLocalValue(state[key]);
