@@ -18,6 +18,7 @@ yarn add react-fusion-state
 ```
 
 ## Usage
+
 **1. FusionStateProvider**
 
 The **FusionStateProvider** component is used to provide the global state context to your React application.
@@ -220,4 +221,5 @@ Fork the **ReactFusionState** project, include your changes, and submit a pull r
 This project is licensed under the **MIT License**.
 
 ## Author
+
 This project is maintained by [Jacques GERARD](https://www.linkedin.com/in/jgerard/)

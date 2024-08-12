@@ -1,24 +1,18 @@
 {
   "name": "react-fusion-state",
-  "version": "0.0.5-alpha.1",
+  "version": "0.0.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Jacques GERARD <jgrd93@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jgerard72/react-fusion-state"
+  },
   "scripts": {
     "build": "rm -rf dist/* && tsc",
     "format": "prettier --write .",
-    "lint": "eslint .",
-    "prepublishOnly": "npm run build",
-    "publish:alpha": "npm run version:alpha && npm run publish:alpha:only",
-    "publish:beta": "npm run version:beta && npm run publish:beta:only",
-    "publish:release": "npm run version:patch && npm run publish:release:only",
-    "version:alpha": "npm version prerelease --preid=alpha",
-    "version:beta": "npm version prerelease --preid=beta",
-    "version:patch": "npm version patch",
-    "publish:alpha:only": "npm publish --tag alpha && git add package.json && git commit --squash -m 'Alpha release v$(npm pkg get version | tr -d '\"')' && git tag -a v$(npm pkg get version | tr -d '\"') -m 'Alpha release' && git push --force && git push --tags",
-    "publish:beta:only": "npm publish --tag beta && git add package.json && git commit --squash -m 'Beta release v$(npm pkg get version | tr -d '\"')' && git tag -a v$(npm pkg get version | tr -d '\"') -m 'Beta release' && git push --force && git push --tags",
-    "publish:release:only": "npm publish && git add package.json && git commit --squash -m 'Release v$(npm pkg get version | tr -d '\"')' && git tag -a v$(npm pkg get version | tr -d '\"') -m 'Release' && git push --force && git push --tags"
+    "lint": "eslint ."
   },
   "keywords": [
     "react",
