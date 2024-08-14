@@ -1,4 +1,4 @@
-![Alt text](images/ReactFusionState.png)
+![Alt text](images/react-fusion-state.png)
 
 **ReactFusionState** is a global state management library for React and React Native applications, designed to be simple and efficient.
 It allows you to create and manage global states without the need for atoms, similar to RecoilState but more streamlined.
