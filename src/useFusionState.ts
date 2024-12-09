@@ -1,56 +1,55 @@
-import {useGlobalState, GlobalState} from './FusionStateProvider';
-import {useRef, useEffect, useState, useCallback} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useGlobalState, GlobalState } from './FusionStateProvider';
 
-type SetValue<T> = React.Dispatch<React.SetStateAction<T>>;
+type SetStateAction<T> = T | ((prevState: T) => T);
+type StateUpdater<T> = (value: SetStateAction<T>) => void;
 
-export const useFusionState = <T>(
+export function useFusionState<T>(
   key: string,
-  initialValue?: T,
-): [T, SetValue<T>] => {
-  const {state, setState, initializingKeys} = useGlobalState();
-  const isInitialized = useRef(false);
+  initialValue?: T
+): [T, StateUpdater<T>] {
+  const { state, setState, initializingKeys } = useGlobalState();
+  const isInitialized = useRef<boolean>(false);
 
-  if (
-    !isInitialized.current &&
-    initialValue !== undefined &&
-    state[key] === undefined
-  ) {
-    if (initializingKeys.has(key)) {
-      throw new Error(`ReactFusionState Error: Key "${key}" already exists.`);
+  const initializeState = useCallback(() => {
+    if (!isInitialized.current) {
+      if (initialValue !== undefined && !(key in state)) {
+        if (initializingKeys.has(key)) {
+          throw new Error(`ReactFusionState Error: Key "${key}" already exists`);
+        }
+        initializingKeys.add(key);
+        setState((prev) => ({ ...prev, [key]: initialValue }));
+        initializingKeys.delete(key);
+        isInitialized.current = true;
+      } else if (!(key in state)) {
+        throw new Error(`ReactFusionState Error: Key "${key}" does not exist and no initial value provided`);
+      } else {
+        isInitialized.current = true;
+      }
     }
-    initializingKeys.add(key);
-    state[key] = initialValue;
-    setState(prevState => ({...prevState, [key]: initialValue}));
-    initializingKeys.delete(key);
-    isInitialized.current = true;
-  }
-
-  if (!isInitialized.current && state[key] === undefined) {
-    throw new Error(
-      `ReactFusionState Error: Key "${key}" does not exist and no initial value provided.`,
-    );
-  }
-
-  const [localValue, setLocalValue] = useState<T>(() => state[key]);
+  }, [initialValue, key, state, setState, initializingKeys]);
 
   useEffect(() => {
-    if (state[key] !== localValue) {
-      setLocalValue(state[key]);
+    initializeState();
+  }, [initializeState]);
+
+  const [localValue, setLocalValue] = useState<T>(() => state[key] as T);
+
+  useEffect(() => {
+    const newValue = state[key] as T;
+    if (newValue !== localValue) {
+      setLocalValue(newValue);
     }
-  }, [state, key, localValue]);
+  }, [state, key]);
 
-  const setValue: SetValue<T> = useCallback(
-    newValue => {
-      setState((prevState: GlobalState) => {
-        const updatedValue =
-          typeof newValue === 'function'
-            ? (newValue as (prevState: T) => T)(prevState[key])
-            : newValue;
-        return {...prevState, [key]: updatedValue};
-      });
-    },
-    [key, setState],
-  );
+  const setValue = useCallback<StateUpdater<T>>((newValue) => {
+    setState((prevState) => ({
+      ...prevState,
+      [key]: typeof newValue === 'function'
+        ? (newValue as (prev: T) => T)(prevState[key] as T)
+        : newValue
+    }));
+  }, [key, setState]);
 
-  return [localValue as T, setValue];
-};
+  return [localValue, setValue];
+}
