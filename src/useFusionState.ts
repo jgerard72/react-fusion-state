@@ -10,16 +10,17 @@ export function useFusionState<T>(
 ): [T, StateUpdater<T>] {
   const { state, setState, initializingKeys } = useGlobalState();
   const isInitialized = useRef<boolean>(false);
+  const initializing = useRef<Set<string>>(new Set());
 
   const initializeState = useCallback(() => {
     if (!isInitialized.current) {
       if (initialValue !== undefined && !(key in state)) {
-        if (initializingKeys.has(key)) {
-          throw new Error(`ReactFusionState Error: Key "${key}" already exists`);
+        if (initializing.current.has(key)) {
+          throw new Error(`ReactFusionState Error: Key "${key}" is already being initialized`);
         }
-        initializingKeys.add(key);
+        initializing.current.add(key);
         setState((prev) => ({ ...prev, [key]: initialValue }));
-        initializingKeys.delete(key);
+        initializing.current.delete(key);
         isInitialized.current = true;
       } else if (!(key in state)) {
         throw new Error(`ReactFusionState Error: Key "${key}" does not exist and no initial value provided`);
@@ -27,7 +28,7 @@ export function useFusionState<T>(
         isInitialized.current = true;
       }
     }
-  }, [initialValue, key, state, setState, initializingKeys]);
+  }, [initialValue, key, state, setState]);
 
   useEffect(() => {
     initializeState();
@@ -40,7 +41,7 @@ export function useFusionState<T>(
     if (newValue !== localValue) {
       setLocalValue(newValue);
     }
-  }, [state, key]);
+  }, [state, key, localValue]);
 
   const setValue = useCallback<StateUpdater<T>>((newValue) => {
     setState((prevState) => ({

@@ -6,7 +6,6 @@ import React, {
   useRef,
 } from 'react';
 
-// Define state types
 export type GlobalState = Record<string, unknown>;
 
 interface GlobalFusionStateContextType {
@@ -15,12 +14,10 @@ interface GlobalFusionStateContextType {
   initializingKeys: Set<string>;
 }
 
-// Create context with undefined default
 const GlobalStateContext = createContext<
   GlobalFusionStateContextType | undefined
 >(undefined);
 
-// Custom hook for accessing global state
 export const useGlobalState = () => {
   const context = useContext(GlobalStateContext);
 
@@ -33,7 +30,6 @@ export const useGlobalState = () => {
   return context;
 };
 
-// Provider component
 export const FusionStateProvider = ({children}: {children: ReactNode}) => {
   const [state, setState] = useState<GlobalState>({});
   const initializingKeys = useRef<Set<string>>(new Set());
