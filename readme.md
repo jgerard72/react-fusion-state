@@ -223,3 +223,14 @@ This project is licensed under the **MIT License**.
 ## Author
 
 This project is maintained by [Jacques GERARD](https://www.linkedin.com/in/jgerard/)
+
+## Recent Improvements (March 2025)
+
+The following improvements have been made to enhance the quality and maintainability of the project:
+
+1. **Type Safety**: Replaced `any` with a more specific type `SelectedState` in the `useFusionStateLog` hook.
+2. **Error Handling**: Enhanced error messages in the `useFusionState` hook for better context and resolution suggestions.
+3. **Performance Optimization**: Used `lodash.isequal` for deep comparison in the `useFusionStateLog` hook to prevent unnecessary re-renders.
+4. **Documentation**: Added JSDoc comments to the `useFusionState` hook to improve code understanding.
+
+These changes focus on improving the code's quality and maintainability.

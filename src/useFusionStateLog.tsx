@@ -1,17 +1,21 @@
 import {useGlobalState} from './FusionStateProvider';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useRef} from 'react';
+import isEqual from 'lodash.isequal';
 
 type StateKey = string;
+type SelectedState = Record<string, unknown>;
 
-export const useFusionStateLog = (keys?: StateKey[]): any => {
+export const useFusionStateLog = (keys?: StateKey[]): SelectedState => {
   const {state} = useGlobalState();
-  const [selectedState, setSelectedState] = useState<any>({});
+  const [selectedState, setSelectedState] = useState<SelectedState>({});
+
+  const previousKeys = useRef<StateKey[] | undefined>(undefined);
 
   useEffect(() => {
-    if (!keys) {
+    if (!keys || isEqual(keys, previousKeys.current)) {
       setSelectedState(state);
     } else {
-      const result: any = {};
+      const result: SelectedState = {};
       keys.forEach(key => {
         if (state.hasOwnProperty(key)) {
           result[key] = state[key];
@@ -19,7 +23,8 @@ export const useFusionStateLog = (keys?: StateKey[]): any => {
       });
       setSelectedState(result);
     }
-  }, [keys?.toString(), state]);
+    previousKeys.current = keys;
+  }, [state]);
 
   return selectedState;
 };

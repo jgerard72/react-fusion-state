@@ -1,3 +1,4 @@
 type StateKey = string;
-export declare const useFusionStateLog: (keys?: StateKey[]) => any;
+type SelectedState = Record<string, unknown>;
+export declare const useFusionStateLog: (keys?: StateKey[]) => SelectedState;
 export {};

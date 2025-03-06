@@ -25,9 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FusionStateProvider = exports.useGlobalState = void 0;
 const react_1 = __importStar(require("react"));
-// Create context with undefined default
 const GlobalStateContext = (0, react_1.createContext)(undefined);
-// Custom hook for accessing global state
 const useGlobalState = () => {
     const context = (0, react_1.useContext)(GlobalStateContext);
     if (!context) {
@@ -36,7 +34,6 @@ const useGlobalState = () => {
     return context;
 };
 exports.useGlobalState = useGlobalState;
-// Provider component
 const FusionStateProvider = ({ children }) => {
     const [state, setState] = (0, react_1.useState)({});
     const initializingKeys = (0, react_1.useRef)(new Set());
