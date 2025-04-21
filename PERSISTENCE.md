@@ -1,309 +1,258 @@
-# Persistance d'état dans React Fusion State
+# Guide de persistance pour React Fusion State
 
-React Fusion State offre une fonctionnalité optionnelle de persistance d'état qui permet de sauvegarder l'état global dans un stockage persistant (localStorage, AsyncStorage, etc.) et de le restaurer lors du rechargement de l'application.
+Ce document détaille les fonctionnalités de persistance d'état offertes par React Fusion State, vous permettant de sauvegarder et restaurer l'état de votre application entre les sessions.
 
-## Fonctionnalités
+## Concepts de base
 
-- ✨ **Flexible** : Compatible avec différentes méthodes de stockage (web, React Native, Expo)
-- 🔄 **Configurable** : Contrôlez quelles parties de l'état sont persistées
-- ⚡ **Performant** : Option de debounce pour limiter les écritures
-- 🧩 **Extensible** : Créez vos propres adaptateurs de stockage
-- 🎯 **Optionnel** : Utilisez-le uniquement si vous en avez besoin
+La persistance dans React Fusion State permet de :
+- Sauvegarder automatiquement l'état global dans un stockage persistant (localStorage, AsyncStorage, etc.)
+- Restaurer l'état au redémarrage de l'application
+- Sélectionner quelles parties de l'état doivent être persistées
+- Configurer le comportement précis de la persistance
 
-## Comment l'utiliser
+## Configuration simple
 
-### 1. Créez un adaptateur de stockage
+### Activer la persistance pour toutes les clés
 
-Commencez par créer un adaptateur qui implémente l'interface `StorageAdapter` :
-
-```tsx
-import { StorageAdapter } from 'react-fusion-state';
-
-// Pour le web avec localStorage
-class LocalStorageAdapter implements StorageAdapter {
-  async getItem(key: string): Promise<string | null> {
-    try {
-      return localStorage.getItem(key);
-    } catch (error) {
-      console.error('Error reading from localStorage:', error);
-      return null;
-    }
-  }
-
-  async setItem(key: string, value: string): Promise<void> {
-    try {
-      localStorage.setItem(key, value);
-    } catch (error) {
-      console.error('Error writing to localStorage:', error);
-    }
-  }
-
-  async removeItem(key: string): Promise<void> {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error removing from localStorage:', error);
-    }
-  }
-}
-
-// Pour React Native avec AsyncStorage
-class AsyncStorageAdapter implements StorageAdapter {
-  async getItem(key: string): Promise<string | null> {
-    try {
-      // Importez AsyncStorage selon votre projet
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-      return await AsyncStorage.getItem(key);
-    } catch (error) {
-      console.error('Error reading from AsyncStorage:', error);
-      return null;
-    }
-  }
-
-  async setItem(key: string, value: string): Promise<void> {
-    try {
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-      await AsyncStorage.setItem(key, value);
-    } catch (error) {
-      console.error('Error writing to AsyncStorage:', error);
-    }
-  }
-
-  async removeItem(key: string): Promise<void> {
-    try {
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-      await AsyncStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error removing from AsyncStorage:', error);
-    }
-  }
-}
+```jsx
+<FusionStateProvider persistence={true}>
+  <App />
+</FusionStateProvider>
 ```
 
-### 2. Configurez la persistance dans FusionStateProvider
+Avec cette configuration, tout l'état sera sauvegardé dans le stockage par défaut (localStorage sur le web, AsyncStorage sur React Native).
 
-Ensuite, utilisez l'adaptateur dans votre FusionStateProvider :
+### Persister uniquement certaines clés
 
-```tsx
-import { FusionStateProvider } from 'react-fusion-state';
+```jsx
+<FusionStateProvider persistence={['user', 'theme', 'settings']}>
+  <App />
+</FusionStateProvider>
+```
 
-const App = () => {
-  // Créez votre adaptateur
-  const storageAdapter = new LocalStorageAdapter();
-  
+Cette configuration limite la persistance aux clés spécifiées, ce qui est utile pour éviter de sauvegarder des données temporaires ou sensibles.
+
+## Configuration avancée
+
+Pour un contrôle plus précis, vous pouvez fournir un objet de configuration :
+
+```jsx
+<FusionStateProvider 
+  persistence={{
+    // Préfixe pour les clés dans le stockage
+    keyPrefix: 'myApp',
+    
+    // Délai avant sauvegarde en ms (debounce)
+    debounce: 500,
+    
+    // Adaptateur de stockage personnalisé (optionnel)
+    adapter: myCustomStorageAdapter,
+    
+    // Clés spécifiques à persister (optionnel)
+    persistKeys: ['user.profile', 'app.settings']
+  }}
+>
+  <App />
+</FusionStateProvider>
+```
+
+## Filtrage avancé avec fonctions
+
+Vous pouvez également utiliser une fonction pour filtrer dynamiquement les clés à persister :
+
+```jsx
+<FusionStateProvider 
+  persistence={{
+    // Fonction de filtrage qui reçoit la clé et sa valeur
+    persistKeys: (key, value) => {
+      // Ne pas sauvegarder les grands tableaux
+      if (Array.isArray(value) && value.length > 100) return false;
+      
+      // Sauvegarder uniquement les clés spécifiques
+      return key.startsWith('persist.') || key === 'user' || key === 'theme';
+    }
+  }}
+>
+  <App />
+</FusionStateProvider>
+```
+
+## Adapter personnalisé
+
+Par défaut, React Fusion State détecte automatiquement la meilleure méthode de stockage disponible. Vous pouvez également fournir votre propre adaptateur :
+
+```jsx
+// Créez un adaptateur personnalisé
+const myStorageAdapter = {
+  getItem: async (key) => {
+    // Votre logique de lecture
+    return value;
+  },
+  setItem: async (key, value) => {
+    // Votre logique d'écriture
+  },
+  removeItem: async (key) => {
+    // Votre logique de suppression
+  }
+};
+
+// Utilisez-le dans le provider
+<FusionStateProvider 
+  persistence={{
+    adapter: myStorageAdapter
+  }}
+>
+  <App />
+</FusionStateProvider>
+```
+
+## Callback de sauvegarde personnalisé
+
+Pour un contrôle total sur le processus de sauvegarde, vous pouvez fournir un callback personnalisé :
+
+```jsx
+<FusionStateProvider 
+  persistence={{
+    customSaveCallback: async (state, adapter, keyPrefix) => {
+      // Transformez les données avant de les sauvegarder
+      const transformedState = {
+        ...state,
+        lastSaved: new Date().toISOString()
+      };
+      
+      // Sauvegardez par sections
+      await adapter.setItem(`${keyPrefix}_user`, JSON.stringify(transformedState.user));
+      await adapter.setItem(`${keyPrefix}_settings`, JSON.stringify(transformedState.settings));
+      
+      // Effectuez d'autres opérations selon vos besoins
+      console.log('État sauvegardé à', new Date());
+    }
+  }}
+>
+  <App />
+</FusionStateProvider>
+```
+
+## Meilleures pratiques
+
+### Performance
+
+- Utilisez `debounce` pour limiter les sauvegardes fréquentes
+- Persistez uniquement les données nécessaires
+- Évitez de persister de grands objets ou tableaux
+
+### Sécurité
+
+- Ne persistez pas d'informations sensibles (jetons d'authentification, mots de passe)
+- Utilisez un adaptateur de stockage sécurisé pour les données sensibles
+- Considérez le chiffrement des données persistées si nécessaire
+
+### Structure des données
+
+- Utilisez un préfixe de nom d'application pour éviter les collisions
+- Structurez vos clés d'état de manière organisée (ex: 'auth.user', 'app.settings')
+- Utilisez des préfixes cohérents pour les données à persister (ex: 'persist.user')
+
+## Exemples complets
+
+### Exemple React Web avec localStorage
+
+```jsx
+import React from 'react';
+import { FusionStateProvider, useFusionState } from 'react-fusion-state';
+
+function App() {
   return (
-    <FusionStateProvider
-      initialState={{
-        user: null,
-        settings: { theme: 'light' },
-        temporaryData: { searchResults: [] }
-      }}
+    <FusionStateProvider 
       persistence={{
-        adapter: storageAdapter,
-        keyPrefix: 'myapp',
-        // Persister uniquement les clés spécifiées
-        persistKeys: ['user', 'settings'],
-        loadOnInit: true,
-        saveOnChange: true,
-        debounceTime: 300, // ms
+        keyPrefix: 'myWebApp',
+        debounce: 300,
+        persistKeys: ['user', 'theme', 'settings']
       }}
     >
-      {/* Vos composants */}
+      <UserProfile />
+      <ThemeToggle />
     </FusionStateProvider>
   );
-};
-```
+}
 
-### 3. Utilisez normalement vos hooks useFusionState
-
-L'état sera automatiquement persisté et restauré selon votre configuration :
-
-```tsx
-const UserProfile = () => {
-  // Cet état sera persisté car 'user' est dans persistKeys
-  const [user, setUser] = useFusionState('user', null);
+function UserProfile() {
+  const [user, setUser] = useFusionState('user', { name: '', email: '' });
   
   return (
     <div>
-      {user ? (
-        <div>
-          <h2>Bienvenue, {user.name}!</h2>
-          <button onClick={() => setUser(null)}>Déconnexion</button>
-        </div>
-      ) : (
-        <button onClick={() => setUser({ id: 1, name: 'John' })}>Connexion</button>
-      )}
+      <input 
+        value={user.name}
+        onChange={e => setUser({...user, name: e.target.value})}
+        placeholder="Nom"
+      />
+      <input 
+        value={user.email}
+        onChange={e => setUser({...user, email: e.target.value})}
+        placeholder="Email"
+      />
     </div>
   );
-};
-```
+}
 
-## Options de configuration
-
-L'objet `persistence` accepte les propriétés suivantes :
-
-| Propriété | Type | Obligatoire | Description |
-|-----------|------|-------------|-------------|
-| `adapter` | `StorageAdapter` | Oui | Adaptateur d'interface avec le stockage |
-| `keyPrefix` | `string` | Non | Préfixe pour les clés de stockage (défaut : 'fusion_state') |
-| `persistKeys` | `string[] \| ((key: string) => boolean)` | Non | Clés à persister (toutes par défaut) |
-| `loadOnInit` | `boolean` | Non | Charger l'état au démarrage (défaut : false) |
-| `saveOnChange` | `boolean` | Non | Sauvegarder l'état à chaque changement (défaut : false) |
-| `debounceTime` | `number` | Non | Délai avant sauvegarde en ms (défaut : 0) |
-
-## Filtrage des clés à persister
-
-Vous pouvez spécifier les clés d'état à persister de deux façons :
-
-### Avec un tableau de clés
-
-```tsx
-persistence={{
-  adapter: storageAdapter,
-  // Seulement ces clés seront persistées
-  persistKeys: ['user', 'settings', 'cart'],
-}}
-```
-
-### Avec une fonction de filtrage
-
-```tsx
-persistence={{
-  adapter: storageAdapter,
-  // Persister seulement les clés qui commencent par "persist_"
-  persistKeys: (key) => key.startsWith('persist_'),
-}}
-```
-
-## Exemples d'adaptateurs personnalisés
-
-### Adaptateur pour IndexedDB
-
-```tsx
-class IndexedDBAdapter implements StorageAdapter {
-  private dbName: string;
-  private storeName: string;
-
-  constructor(dbName = 'fusionStateDB', storeName = 'state') {
-    this.dbName = dbName;
-    this.storeName = storeName;
-  }
-
-  private async getDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, 1);
-      
-      request.onerror = () => reject(request.error);
-      
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          db.createObjectStore(this.storeName);
-        }
-      };
-      
-      request.onsuccess = () => resolve(request.result);
-    });
-  }
-
-  async getItem(key: string): Promise<string | null> {
-    try {
-      const db = await this.getDB();
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(this.storeName, 'readonly');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.get(key);
-        
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result || null);
-      });
-    } catch (error) {
-      console.error('Error reading from IndexedDB:', error);
-      return null;
-    }
-  }
-
-  async setItem(key: string, value: string): Promise<void> {
-    try {
-      const db = await this.getDB();
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(this.storeName, 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.put(value, key);
-        
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve();
-      });
-    } catch (error) {
-      console.error('Error writing to IndexedDB:', error);
-    }
-  }
-
-  async removeItem(key: string): Promise<void> {
-    try {
-      const db = await this.getDB();
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(this.storeName, 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.delete(key);
-        
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve();
-      });
-    } catch (error) {
-      console.error('Error removing from IndexedDB:', error);
-    }
-  }
+function ThemeToggle() {
+  const [theme, setTheme] = useFusionState('theme', 'light');
+  
+  return (
+    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+      {theme === 'light' ? '🌙' : '☀️'}
+    </button>
+  );
 }
 ```
 
-### Adaptateur pour MMKV (React Native)
+### Exemple React Native avec AsyncStorage
 
-```tsx
-class MMKVAdapter implements StorageAdapter {
-  private storage: any;
-  
-  constructor() {
-    // Requiert: npm install react-native-mmkv
-    const { MMKV } = require('react-native-mmkv');
-    this.storage = new MMKV();
-  }
-  
-  async getItem(key: string): Promise<string | null> {
-    try {
-      return this.storage.getString(key);
-    } catch (error) {
-      console.error('Error reading from MMKV:', error);
-      return null;
-    }
-  }
-  
-  async setItem(key: string, value: string): Promise<void> {
-    try {
-      this.storage.set(key, value);
-    } catch (error) {
-      console.error('Error writing to MMKV:', error);
-    }
-  }
-  
-  async removeItem(key: string): Promise<void> {
-    try {
-      this.storage.delete(key);
-    } catch (error) {
-      console.error('Error removing from MMKV:', error);
-    }
-  }
+```jsx
+import React from 'react';
+import { View, TextInput, Button } from 'react-native';
+import { FusionStateProvider, useFusionState } from 'react-fusion-state';
+
+export default function App() {
+  return (
+    <FusionStateProvider 
+      persistence={{
+        keyPrefix: 'myNativeApp',
+        debounce: 500
+      }}
+    >
+      <View style={{ flex: 1, padding: 20 }}>
+        <UserSettings />
+      </View>
+    </FusionStateProvider>
+  );
 }
-```
 
-## Bonnes pratiques
-
-1. **Ne persistez que ce qui est nécessaire** - Évitez de stocker des données temporaires ou volumineuses.
-
-2. **Utilisez le debounce** - Pour les valeurs qui changent fréquemment, utilisez `debounceTime` pour réduire les écritures.
-
-3. **Considérez la sécurité** - N'utilisez pas cette méthode pour stocker des informations sensibles non chiffrées.
-
-4. **Gérez les erreurs** - Testez votre application dans des conditions où le stockage pourrait ne pas être disponible.
-
-5. **Prévoyez la migration de données** - Ajoutez une version à vos données persistées pour gérer les migrations dans les futures versions de l'application. 
+function UserSettings() {
+  const [settings, setSettings] = useFusionState('settings', {
+    notifications: true,
+    darkMode: false,
+    fontSize: 'medium'
+  });
+  
+  return (
+    <View>
+      <Button 
+        title={`Notifications: ${settings.notifications ? 'ON' : 'OFF'}`}
+        onPress={() => setSettings({
+          ...settings, 
+          notifications: !settings.notifications
+        })}
+      />
+      
+      <Button 
+        title={`Mode: ${settings.darkMode ? 'Dark' : 'Light'}`}
+        onPress={() => setSettings({
+          ...settings, 
+          darkMode: !settings.darkMode
+        })}
+      />
+    </View>
+  );
+}
+``` 
