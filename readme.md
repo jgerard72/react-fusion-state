@@ -2,6 +2,11 @@
 
 Une bibliothèque simple et légère pour gérer l'état global de vos applications React.
 
+[![npm version](https://img.shields.io/npm/v/react-fusion-state.svg?style=flat-square)](https://www.npmjs.com/package/react-fusion-state)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org/)
+
 ## Installation
 
 ```bash
@@ -78,7 +83,24 @@ function Affichage() {
 <FusionStateProvider persistence={['user', 'theme']}>
   <App />
 </FusionStateProvider>
+
+// Configuration avancée avec callback personnalisé
+<FusionStateProvider 
+  persistence={{
+    keyPrefix: 'myApp',
+    debounce: 500,
+    customSaveCallback: async (state, adapter, keyPrefix) => {
+      // Logique personnalisée pour sauvegarder l'état
+      console.log('Sauvegarde personnalisée:', state);
+      await adapter.setItem(`${keyPrefix}_custom`, JSON.stringify(state));
+    }
+  }}
+>
+  <App />
+</FusionStateProvider>
 ```
+
+Pour plus de détails sur les options de persistance, consultez [PERSISTENCE.md](./PERSISTENCE.md).
 
 ### Mode debug
 
@@ -201,6 +223,16 @@ function App() {
 
 export default App;
 ```
+
+## Documentation
+
+- [Guide de persistance](./PERSISTENCE.md) - Options détaillées pour la persistance des données
+- [Changelog](./CHANGELOG.md) - Historique des versions et changements
+- [Contribuer](./CONTRIBUTING.md) - Guide pour contribuer au projet
+
+## Contribuer
+
+Les contributions sont les bienvenues ! Consultez [CONTRIBUTING.md](./CONTRIBUTING.md) pour plus d'informations.
 
 ## License
 
