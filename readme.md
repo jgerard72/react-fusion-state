@@ -1,236 +1,207 @@
-![Alt text](images/react-fusion-state.png)
+# React Fusion State
 
-**ReactFusionState** is a global state management library for React and React Native applications, designed to be simple and efficient.
-It allows you to create and manage global states without the need for atoms, similar to RecoilState but more streamlined.
+Une bibliothèque simple et légère pour gérer l'état global de vos applications React.
 
 ## Installation
 
-To install **ReactFusionState**, use **npm** or **yarn**:
-
 ```bash
 npm install react-fusion-state
-```
-
-or
-
-```bash
+# ou
 yarn add react-fusion-state
 ```
 
-## Usage
+## Fonctionnalités
 
-**1. FusionStateProvider**
+- 🚀 **Léger et rapide** - Moins de 2KB (minifié + gzippé)
+- 🔄 **API familière** - Similaire à useState de React
+- 🌐 **État global partagé** - Communication facile entre composants
+- 💾 **Persistance automatique** - Sauvegarde optionnelle de l'état
+- 📱 **Compatible React Native** - Fonctionne aussi sur mobile
 
-The **FusionStateProvider** component is used to provide the global state context to your React application.
+## Utilisation
 
-**Props**:
+### 1. Enveloppez votre application avec le provider
 
-- **children: ReactNode** - The child components that will have access to the global state.
+```jsx
+import { FusionStateProvider } from 'react-fusion-state';
 
-**Example**:
-
-```bash
-import React from "react";
-import { FusionStateProvider } from "react-fusion-state";
-import App from "./App";
-
-const Root = () => (
-  <FusionStateProvider>
-    <App />
-  </FusionStateProvider>
-);
-
-export default Root;
+function App() {
+  return (
+    <FusionStateProvider>
+      <VotreApplication />
+    </FusionStateProvider>
+  );
+}
 ```
 
-**2. useFusionState**
+### 2. Utilisez l'état global avec useFusionState
 
-The **useFusionState** hook is used to create and manage a global state.
-
-**Prototype**:
-
-```bash
-const useFusionState = <T,>(key: string, initialValue?: T): [T, React.Dispatch<React.SetStateAction<T>>];
-```
-
-**Parameters**:
-
-- **key: string** - The unique key for the state.
-- **initialValue?: T** - The initial value for the state. If not provided and the key does not exist, an error will be thrown.
-
-Returns:
-
-- **[T, React.Dispatch<React.SetStateAction<T>>]** - An array containing the state and a function to update the state.
-
-**Example**:
-
-```bash
-import React from 'react';
+```jsx
 import { useFusionState } from 'react-fusion-state';
 
-const CounterComponent: React.FC = () => {
-  const [count, setCount] = useFusionState<number>('count', 0);
-
+function Compteur() {
+  // Fonctionne comme useState, mais partagé globalement
+  const [count, setCount] = useFusionState('counter', 0);
+  
   return (
     <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-      <button onClick={() => setCount(count - 1)}>Decrement</button>
+      <p>Compteur: {count}</p>
+      <button onClick={() => setCount(count + 1)}>+</button>
+      <button onClick={() => setCount(count - 1)}>-</button>
     </div>
   );
-};
-
-export default CounterComponent;
+}
 ```
 
-**3. useFusionStateLog**
+### 3. Accédez au même état depuis n'importe où
 
-The **useFusionStateLog** hook is used to retrieve the global state.
-
-Prototype:
-
-```bash
-const useFusionStateLog = (keys?: string[]): any;
+```jsx
+function Affichage() {
+  // Utilise la même valeur 'counter' que le composant Compteur
+  const [count] = useFusionState('counter', 0);
+  
+  return <p>Valeur actuelle: {count}</p>;
+}
 ```
 
-Parameters:
+## Options
 
-- **keys?: string[]** - An optional array of keys to retrieve specific states. If not provided, all states will be returned.
+### Persistance des données
 
-**Returns**:
+```jsx
+// Activez la persistance automatique (localStorage/AsyncStorage)
+<FusionStateProvider persistence={true}>
+  <App />
+</FusionStateProvider>
 
-- **any** - The global state or the specified states.
+// Persister uniquement certaines clés
+<FusionStateProvider persistence={['user', 'theme']}>
+  <App />
+</FusionStateProvider>
+```
 
-**Example**:
+### Mode debug
 
-```bash
+```jsx
+// Activez le mode debug en développement
+<FusionStateProvider debug={true}>
+  <App />
+</FusionStateProvider>
+```
+
+## Utilisation avec React Native
+
+React Fusion State fonctionne parfaitement avec React Native sans configuration supplémentaire.
+
+```jsx
 import React from 'react';
-import { useFusionStateLog } from 'react-fusion-state';
+import { View, Text, Button } from 'react-native';
+import { FusionStateProvider, useFusionState } from 'react-fusion-state';
 
-const StateViewer: React.FC = () => {
-  const allState = useFusionStateLog();
-  const specificState = useFusionStateLog(['count', 'nonExistentKey']);
-
+// Composant de navigation
+function NavigationScreen() {
+  const [screenData, setScreenData] = useFusionState('navigation.data', {});
+  
+  // Stockez des données pour d'autres écrans
+  const navigateWithData = () => {
+    setScreenData({ userId: 123, lastVisited: new Date() });
+    // ... puis naviguer vers l'écran suivant
+  };
+  
   return (
-    <div>
-      <div>
-        <h3>All State</h3>
-        <pre>{JSON.stringify(allState, null, 2)}</pre>
-      </div>
-      <div>
-        <h3>Specific State</h3>
-        <pre>{JSON.stringify(specificState, null, 2)}</pre>
-      </div>
-    </div>
+    <View>
+      <Button title="Aller à l'écran Profil" onPress={navigateWithData} />
+    </View>
   );
-};
+}
 
-export default StateViewer;
+// Composant profil sur un autre écran
+function ProfileScreen() {
+  // Accédez aux mêmes données, même sur un autre écran
+  const [screenData] = useFusionState('navigation.data', {});
+  
+  return (
+    <View>
+      <Text>ID utilisateur: {screenData.userId}</Text>
+      <Text>Dernière visite: {screenData.lastVisited?.toString()}</Text>
+    </View>
+  );
+}
+
+// Configuration avec persistance pour survivre aux redémarrages de l'app
+export default function App() {
+  return (
+    <FusionStateProvider 
+      persistence={true}  // Utilise automatiquement AsyncStorage sur React Native
+      initialState={{
+        'app.version': '1.0.0',
+        'user.settings': { notifications: true }
+      }}
+    >
+      {/* Votre navigation ou composants ici */}
+    </FusionStateProvider>
+  );
+}
 ```
 
-## Complete Example
+### Avantages spécifiques pour React Native
 
-Here is a complete example of how to use **ReactFusionState** in a React application, including accessing the global state in a different component.
+- **Persistance automatique** - Utilise AsyncStorage sans configuration
+- **Partage entre écrans** - Évite de passer des props à travers la navigation 
+- **État cohérent** - Même après le démontage et remontage d'écrans
+- **Performance** - Optimisé pour éviter les re-rendus inutiles sur mobile
 
-**App.tsx**:
+## Exemple complet
 
-```bash
+```jsx
 import React from 'react';
-import { useFusionState, useFusionStateLog } from 'react-fusion-state';
+import { FusionStateProvider, useFusionState } from 'react-fusion-state';
 
-const CounterComponent: React.FC = () => {
-  const [count, setCount] = useFusionState<number>('count', 0);
-
+// Composant qui modifie l'état
+function ThemeToggle() {
+  const [theme, setTheme] = useFusionState('theme', 'light');
+  
   return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-      <button onClick={() => setCount(count - 1)}>Decrement</button>
+    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+      {theme === 'light' ? '🌙' : '☀️'}
+    </button>
+  );
+}
+
+// Composant qui utilise l'état
+function ThemedComponent() {
+  const [theme] = useFusionState('theme', 'light');
+  
+  return (
+    <div style={{ 
+      background: theme === 'light' ? '#fff' : '#333',
+      color: theme === 'light' ? '#333' : '#fff',
+      padding: '20px'
+    }}>
+      <h2>Thème: {theme}</h2>
     </div>
   );
-};
+}
 
-const AnotherComponent: React.FC = () => {
-  const [count, setCount] = useFusionState<number>('count');
-
+// Application
+function App() {
   return (
-    <div>
-      <p>Count in AnotherComponent: {count}</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-      <button onClick={() => setCount(count - 1)}>Decrement</button>
-    </div>
-  );
-};
-
-const StateViewer: React.FC = () => {
-  const allState = useFusionStateLog();
-  const specificState = useFusionStateLog(['count', 'count2', 'nonExistentKey']);
-
-  return (
-    <div>
+    <FusionStateProvider 
+      initialState={{ version: '1.0' }}
+      persistence={true}
+      debug={process.env.NODE_ENV === 'development'}
+    >
       <div>
-        <h3>All State</h3>
-        <pre>{JSON.stringify(allState, null, 2)}</pre>
+        <ThemeToggle />
+        <ThemedComponent />
       </div>
-      <div>
-        <h3>Specific State</h3>
-        <pre>{JSON.stringify(specificState, null, 2)}</pre>
-      </div>
-    </div>
+    </FusionStateProvider>
   );
-};
-
-const App: React.FC = () => (
-  <div>
-    <CounterComponent />
-    <AnotherComponent />
-    <StateViewer />
-  </div>
-);
+}
 
 export default App;
 ```
 
-**index.tsx**:
-
-```bash
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { FusionStateProvider } from 'react-fusion-state';
-import App from './App';
-
-ReactDOM.render(
-  <FusionStateProvider>
-    <App />
-  </FusionStateProvider>,
-  document.getElementById('root')
-);
-```
-
-## Bugs
-
-If you find a bug, please post it as a new issue on the **GitHub** repository.
-
-## Contribute
-
-Would like to contribute to the project ?
-Fork the **ReactFusionState** project, include your changes, and submit a pull request back to the main repository.
-
 ## License
 
-This project is licensed under the **MIT License**.
-
-## Author
-
-This project is maintained by [Jacques GERARD](https://www.linkedin.com/in/jgerard/)
-
-## Recent Improvements (March 2025)
-
-The following improvements have been made to enhance the quality and maintainability of the project:
-
-1. **Type Safety**: Replaced `any` with a more specific type `SelectedState` in the `useFusionStateLog` hook.
-2. **Error Handling**: Enhanced error messages in the `useFusionState` hook for better context and resolution suggestions.
-3. **Performance Optimization**: Used `lodash.isequal` for deep comparison in the `useFusionStateLog` hook to prevent unnecessary re-renders.
-4. **Documentation**: Added JSDoc comments to the `useFusionState` hook to improve code understanding.
-
-These changes focus on improving the code's quality and maintainability.
+MIT

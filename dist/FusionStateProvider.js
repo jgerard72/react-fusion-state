@@ -22,26 +22,252 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FusionStateProvider = exports.useGlobalState = void 0;
 const react_1 = __importStar(require("react"));
+const types_1 = require("@core/types");
+const storageAdapters_1 = require("@storage/storageAdapters");
+const autoDetect_1 = require("@storage/autoDetect");
+const utils_1 = require("@core/utils");
 const GlobalStateContext = (0, react_1.createContext)(undefined);
+/**
+ * Hook to access the global state context
+ * @returns The global state context
+ * @throws Error if used outside of a FusionStateProvider
+ */
 const useGlobalState = () => {
     const context = (0, react_1.useContext)(GlobalStateContext);
     if (!context) {
-        throw new Error('ReactFusionState Error: useFusionState must be used within a FusionStateProvider');
+        throw new Error(types_1.FusionStateErrorMessages.PROVIDER_MISSING);
     }
     return context;
 };
 exports.useGlobalState = useGlobalState;
-const FusionStateProvider = ({ children }) => {
-    const [state, setState] = (0, react_1.useState)({});
+/**
+ * Convertit la configuration de persistance simplifiée en configuration complète
+ */
+function normalizePersistenceConfig(config) {
+    if (!config)
+        return undefined;
+    // Créer un adaptateur de stockage par défaut
+    const defaultAdapter = (0, autoDetect_1.detectBestStorageAdapter)();
+    // Si c'est un boolean (true), configurer la persistance avec des valeurs par défaut
+    // Par défaut, nous ne voulons persister que les clés explicitement marquées
+    if (typeof config === 'boolean') {
+        return {
+            adapter: defaultAdapter,
+            // L'interface PersistenceConfig accepte soit un tableau de clés, soit une fonction de filtre
+            persistKeys: (key) => key.startsWith('persist.'),
+            loadOnInit: true,
+            saveOnChange: true,
+        };
+    }
+    // Si c'est un tableau de chaînes, ce sont les clés à persister
+    if (Array.isArray(config)) {
+        return {
+            adapter: defaultAdapter,
+            persistKeys: config,
+            loadOnInit: true,
+            saveOnChange: true,
+        };
+    }
+    // Si l'objet contient adapter mais pas de keyPrefix, c'est probablement un PersistenceConfig complet
+    if ('adapter' in config && !('keyPrefix' in config)) {
+        return config;
+    }
+    // Sinon, c'est un SimplePersistenceConfig
+    const simpleConfig = config;
+    // Définir la fonction de filtre de clés - préfixe persist. par défaut si aucune clé spécifiée
+    let keyFilter;
+    if (simpleConfig.persistKeys) {
+        if (Array.isArray(simpleConfig.persistKeys)) {
+            keyFilter = simpleConfig.persistKeys;
+        }
+        else if (typeof simpleConfig.persistKeys === 'function') {
+            // Utiliser la fonction de filtrage personnalisée
+            keyFilter = (key) => {
+                const filterFn = simpleConfig.persistKeys;
+                // On passe null comme valeur car à ce stade on ne connaît pas encore la valeur
+                // La valeur réelle sera passée plus tard lors du filtrage
+                return filterFn(key, null);
+            };
+        }
+    }
+    else {
+        keyFilter = (key) => key.startsWith('persist.');
+    }
+    return {
+        adapter: simpleConfig.adapter || defaultAdapter,
+        persistKeys: keyFilter,
+        keyPrefix: simpleConfig.keyPrefix,
+        debounceTime: simpleConfig.debounce,
+        loadOnInit: true,
+        saveOnChange: true,
+    };
+}
+/**
+ * Provider component for React Fusion State
+ * Manages the global state and provides access to all child components
+ */
+exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence }) => {
+    var _a, _b, _c, _d, _e, _f, _g;
+    // Normaliser la configuration de persistance
+    const normalizedPersistence = (0, react_1.useMemo)(() => normalizePersistenceConfig(persistence), [persistence]);
+    // Initialize storage - use NoopStorage if not configured
+    const persistenceRef = (0, react_1.useRef)(normalizedPersistence);
+    const storageAdapter = (0, react_1.useMemo)(() => { var _a; return ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)(); }, []);
+    const keyPrefix = ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.keyPrefix) || 'fusion_state';
+    const shouldLoadOnInit = (_c = (_b = persistenceRef.current) === null || _b === void 0 ? void 0 : _b.loadOnInit) !== null && _c !== void 0 ? _c : true; // Défaut: charger
+    const shouldSaveOnChange = (_e = (_d = persistenceRef.current) === null || _d === void 0 ? void 0 : _d.saveOnChange) !== null && _e !== void 0 ? _e : true; // Défaut: sauvegarder
+    const debounceTime = (_g = (_f = persistenceRef.current) === null || _f === void 0 ? void 0 : _f.debounceTime) !== null && _g !== void 0 ? _g : 0;
+    // State management
+    const [state, setStateRaw] = (0, react_1.useState)(initialState);
     const initializingKeys = (0, react_1.useRef)(new Set());
-    const value = {
+    const isInitialLoadDone = (0, react_1.useRef)(false);
+    const prevPersistedState = (0, react_1.useRef)({});
+    // Load state from storage on initialization
+    (0, react_1.useEffect)(() => {
+        if (shouldLoadOnInit && !isInitialLoadDone.current && storageAdapter) {
+            const loadStateFromStorage = () => __awaiter(void 0, void 0, void 0, function* () {
+                try {
+                    const storedDataRaw = yield storageAdapter.getItem(`${keyPrefix}_all`);
+                    if (storedDataRaw) {
+                        const storedData = JSON.parse(storedDataRaw);
+                        // Merge with initial state - stored data takes precedence
+                        setStateRaw(prevState => (Object.assign(Object.assign({}, prevState), storedData)));
+                        // Store for comparison
+                        prevPersistedState.current = Object.assign({}, storedData);
+                    }
+                    isInitialLoadDone.current = true;
+                    if (debug) {
+                        console.log('[FusionState] Loaded state from storage:', storedDataRaw ? JSON.parse(storedDataRaw) : null);
+                    }
+                }
+                catch (error) {
+                    console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(error)));
+                }
+            });
+            loadStateFromStorage();
+        }
+    }, [storageAdapter, keyPrefix, shouldLoadOnInit, debug]);
+    // Function to filter state based on persistKeys
+    const filterPersistKeys = (0, react_1.useMemo)(() => {
+        return (newState) => {
+            var _a;
+            const persistKeys = (_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.persistKeys;
+            if (!persistKeys)
+                return Object.assign({}, newState);
+            const filteredState = {};
+            if (Array.isArray(persistKeys)) {
+                // If persistKeys is an array, only save those keys
+                persistKeys.forEach(key => {
+                    if (key in newState) {
+                        filteredState[key] = newState[key];
+                    }
+                });
+            }
+            else if (typeof persistKeys === 'function') {
+                // If persistKeys is a function, use it to filter keys
+                Object.keys(newState).forEach(key => {
+                    const filterFn = persistKeys;
+                    if (filterFn(key, newState[key])) {
+                        filteredState[key] = newState[key];
+                    }
+                });
+            }
+            return filteredState;
+        };
+    }, []);
+    // Function to save state to storage
+    const saveStateToStorage = (0, react_1.useMemo)(() => {
+        const save = (newState) => __awaiter(void 0, void 0, void 0, function* () {
+            if (!storageAdapter || !shouldSaveOnChange)
+                return;
+            try {
+                // Filter keys if persistence.persistKeys is defined
+                const stateToSave = filterPersistKeys(newState);
+                // Check if anything changed from previously saved state
+                const hasChanged = !(0, utils_1.simpleDeepEqual)(stateToSave, prevPersistedState.current);
+                // Only save if there are changes
+                if (!hasChanged)
+                    return;
+                // Check if customSaveCallback is provided in the persistence config
+                // SimplePersistenceConfig peut avoir customSaveCallback, mais pas PersistenceConfig
+                const persistenceConfig = persistenceRef.current;
+                if (persistenceConfig) {
+                    const customSaveCallback = 'customSaveCallback' in persistenceConfig
+                        ? persistenceConfig.customSaveCallback
+                        : undefined;
+                    if (customSaveCallback &&
+                        typeof customSaveCallback === 'function') {
+                        // Use the custom save callback if provided
+                        yield customSaveCallback(stateToSave, storageAdapter, keyPrefix);
+                    }
+                    else {
+                        // Save all state in one key for simplicity (default behavior)
+                        yield storageAdapter.setItem(`${keyPrefix}_all`, JSON.stringify(stateToSave));
+                    }
+                }
+                else {
+                    // If no persistence config, use default behavior
+                    yield storageAdapter.setItem(`${keyPrefix}_all`, JSON.stringify(stateToSave));
+                }
+                // Update reference for future comparisons
+                prevPersistedState.current = Object.assign({}, stateToSave);
+                if (debug) {
+                    console.log('[FusionState] Saved state to storage:', stateToSave);
+                }
+            }
+            catch (error) {
+                console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR, String(error)));
+            }
+        });
+        // Return debounced version if needed
+        return debounceTime > 0 ? (0, utils_1.debounce)(save, debounceTime) : save;
+    }, [
+        storageAdapter,
+        keyPrefix,
+        shouldSaveOnChange,
+        debug,
+        debounceTime,
+        filterPersistKeys,
+    ]);
+    // Wrap setState to add debugging and persistence
+    const setState = (0, react_1.useMemo)(() => {
+        const setStateWithPersistence = (updater) => {
+            setStateRaw(prevState => {
+                const nextState = typeof updater === 'function' ? updater(prevState) : updater;
+                // Trigger persistence if needed
+                if (shouldSaveOnChange) {
+                    saveStateToStorage(nextState);
+                }
+                // Debug logging
+                if (debug) {
+                    console.log('[FusionState] State updated:', {
+                        previous: prevState,
+                        next: nextState,
+                        diff: Object.fromEntries(Object.entries(nextState).filter(([key, value]) => prevState[key] !== value)),
+                    });
+                }
+                return nextState;
+            });
+        };
+        return setStateWithPersistence;
+    }, [debug, setStateRaw, shouldSaveOnChange, saveStateToStorage]);
+    const value = (0, react_1.useMemo)(() => ({
         state,
         setState,
         initializingKeys: initializingKeys.current,
-    };
+    }), [state, setState]);
     return (react_1.default.createElement(GlobalStateContext.Provider, { value: value }, children));
-};
-exports.FusionStateProvider = FusionStateProvider;
+});
+//# sourceMappingURL=FusionStateProvider.js.map
