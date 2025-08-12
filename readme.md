@@ -1,13 +1,32 @@
 # React Fusion State
 
-A simple and lightweight library for managing global state in your React applications.
+<div align="center">
+
+![React Fusion State](./images/react-fusion-state.png)
+
+**A simple, lightweight, and universal state management library for React & React Native**
 
 [![npm version](https://img.shields.io/npm/v/react-fusion-state.svg?style=flat-square)](https://www.npmjs.com/package/react-fusion-state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org/)
 
-## Installation
+</div>
+
+---
+
+## ✨ Why React Fusion State?
+
+- 🚀 **Lightweight** - Less than 2KB (minified + gzipped)
+- 🔄 **Familiar API** - Works like React's `useState`
+- 🌍 **Universal** - Same code for React & React Native
+- 💾 **Smart Persistence** - Automatic localStorage/AsyncStorage
+- 🛡️ **TypeScript First** - Full type safety out of the box
+- ⚡ **Zero Configuration** - Works immediately, customize when needed
+
+---
+
+## 📦 Installation
 
 ```bash
 npm install react-fusion-state
@@ -15,103 +34,201 @@ npm install react-fusion-state
 yarn add react-fusion-state
 ```
 
-## Features
+## 🚀 Quick Start
 
-- 🚀 **Lightweight and fast** - Less than 2KB (minified + gzipped)
-- 🔄 **Familiar API** - Similar to React's useState
-- 🌐 **Shared global state** - Easy communication between components
-- 💾 **Automatic persistence** - Optional state saving with AsyncStorage/localStorage
-- 📱 **React Native compatible** - Works on mobile with AsyncStorage adapter
-- 🛡️ **TypeScript first** - Full TypeScript support with custom error classes
-- 🔧 **Error handling** - Built-in error callbacks for persistence operations
-- 🎯 **Performance optimized** - Reduced bundle size and optimized re-renders
-
-
-## Universal Usage
-
-**The same API works everywhere - ReactJS, React Native, TypeScript, JavaScript.**
-
-### 1. Basic Setup (Web & Mobile)
+### 1. Wrap your app
 
 ```jsx
-import { FusionStateProvider, useFusionState } from 'react-fusion-state';
+import { FusionStateProvider } from 'react-fusion-state';
 
-// Same setup for React & React Native
 function App() {
   return (
     <FusionStateProvider>
-      <YourApplication />
+      <YourApp />
     </FusionStateProvider>
   );
 }
+```
+
+### 2. Use global state anywhere
+
+```jsx
+import { useFusionState } from 'react-fusion-state';
 
 function Counter() {
-  // Same API everywhere - web, mobile, TypeScript, JavaScript
   const [count, setCount] = useFusionState('counter', 0);
 
   return (
-    <div> {/* or <View> in React Native */}
-      <p>Count: {count}</p> {/* or <Text> in React Native */}
+    <div>
+      <h2>Count: {count}</h2>
       <button onClick={() => setCount(count + 1)}>+</button>
       <button onClick={() => setCount(count - 1)}>-</button>
     </div>
   );
 }
 
-// Access the same state from ANY component
 function Display() {
-  const [count] = useFusionState('counter', 0);
-  return <p>Current: {count}</p>; {/* or <Text> in React Native */}
+  const [count] = useFusionState('counter', 0); // Same state!
+  return <p>Current count: {count}</p>;
 }
 ```
 
-## Data Persistence
+**That's it!** 🎉 Both components share the same state automatically.
 
-React Fusion State can automatically save your state between sessions.
+---
+
+## 🌟 Key Features
+
+### Universal Compatibility
+
+**The exact same code works everywhere:**
 
 ```jsx
-// Enable persistence for all state
+// ✅ React Web
+import { View, Text, Button } from 'react'; // Web components
+
+// ✅ React Native  
+import { View, Text, Button } from 'react-native'; // Native components
+
+// Same logic everywhere!
+function MyComponent() {
+  const [theme, setTheme] = useFusionState('theme', 'light');
+  
+  return (
+    <View>
+      <Text>Theme: {theme}</Text>
+      <Button 
+        title="Toggle" 
+        onPress={() => setTheme(theme === 'light' ? 'dark' : 'light')} 
+      />
+    </View>
+  );
+}
+```
+
+### Smart Persistence
+
+State automatically persists between sessions:
+
+```jsx
+// ✅ Web: Uses localStorage automatically
+// ✅ React Native: Uses AsyncStorage (with adapter)
+// ✅ Tests: Uses memory storage
+
 <FusionStateProvider persistence={true}>
-  <App />
-</FusionStateProvider>
-
-// Persist only specific keys
-<FusionStateProvider persistence={['user', 'theme']}>
-  <App />
-</FusionStateProvider>
-
-// Advanced options
-<FusionStateProvider 
-  persistence={{
-    keyPrefix: 'myApp',     // Storage prefix
-    debounce: 500,          // Delay before saving in ms
-    persistKeys: ['user']   // Keys to persist
-  }}
->
   <App />
 </FusionStateProvider>
 ```
 
-Persistence automatically uses localStorage on web and AsyncStorage on React Native.
-
-
-## Error Handling
-
-Handle persistence errors gracefully:
+### Advanced State Management
 
 ```jsx
-<FusionStateProvider
+function UserProfile() {
+  // Complex state with TypeScript
+  const [user, setUser] = useFusionState<User>('user', {
+    name: '',
+    email: '',
+    preferences: { theme: 'light' }
+  });
+
+  // Partial updates work perfectly
+  const updateName = (name: string) => {
+    setUser(prev => ({ ...prev, name }));
+  };
+
+  return (
+    <form>
+      <input 
+        value={user.name}
+        onChange={e => updateName(e.target.value)}
+      />
+      <input 
+        value={user.email}
+        onChange={e => setUser(prev => ({ ...prev, email: e.target.value }))}
+      />
+    </form>
+  );
+}
+```
+
+---
+
+## 📱 React Native Setup
+
+### Installation
+
+```bash
+npm install @react-native-async-storage/async-storage
+cd ios && pod install  # iOS only
+```
+
+### Configuration
+
+```jsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FusionStateProvider, createAsyncStorageAdapter } from 'react-fusion-state';
+
+const asyncStorageAdapter = createAsyncStorageAdapter(AsyncStorage);
+
+export default function App() {
+  return (
+    <FusionStateProvider 
+      persistence={{
+        adapter: asyncStorageAdapter,
+        persistKeys: ['user', 'settings'] // Optional: only persist specific keys
+      }}
+    >
+      <YourApp />
+    </FusionStateProvider>
+  );
+}
+```
+
+### Cross-Screen State Sharing
+
+```jsx
+// Screen 1
+function ProfileScreen() {
+  const [user, setUser] = useFusionState('user', { name: 'John' });
+  
+  return (
+    <View>
+      <TextInput 
+        value={user.name}
+        onChangeText={name => setUser({...user, name})}
+      />
+      <Button title="Go to Settings" onPress={() => navigate('Settings')} />
+    </View>
+  );
+}
+
+// Screen 2 - Same state automatically!
+function SettingsScreen() {
+  const [user] = useFusionState('user', { name: 'John' });
+  
+  return (
+    <View>
+      <Text>Hello {user.name}!</Text> {/* Shows updated name */}
+    </View>
+  );
+}
+```
+
+---
+
+## ⚙️ Advanced Configuration
+
+### Selective Persistence
+
+```jsx
+<FusionStateProvider 
   persistence={{
-    adapter: asyncStorageAdapter,
-    persistKeys: ['user', 'settings'],
-    onSaveError: (error, state) => {
-      console.error('Failed to save state:', error);
-      // Show user notification
-      showToast('Failed to save data');
-    },
-    onLoadError: (error, key) => {
-      console.error('Failed to load data for key:', key, error);
-      // Handle missing data gracefully
+    // Only persist user data and settings
+    persistKeys: ['user', 'settings', 'theme'],
+    
+    // Or use a function for complex logic
+    persistKeys: (key, value) => {
+      return key.startsWith('persist.') && typeof value !== 'function';
     }
   }}
 >
@@ -119,165 +236,318 @@ Handle persistence errors gracefully:
 </FusionStateProvider>
 ```
 
-## Debug Mode
+### Performance Optimization
 
 ```jsx
-// Enable debug mode in development
+<FusionStateProvider 
+  persistence={{
+    // Debounce saves to reduce writes
+    debounce: 500,
+    
+    // Custom key prefix
+    keyPrefix: 'MyApp_v2',
+    
+    // Error handling
+    onSaveError: (error, state) => {
+      console.error('Save failed:', error);
+      showNotification('Failed to save data');
+    },
+    
+    onLoadError: (error, key) => {
+      console.warn(`Failed to load ${key}:`, error);
+    }
+  }}
+>
+  <App />
+</FusionStateProvider>
+```
+
+### Custom Storage
+
+```jsx
+import { StorageAdapter } from 'react-fusion-state';
+
+const myCustomStorage: StorageAdapter = {
+  async getItem(key: string): Promise<string | null> {
+    return await myDatabase.get(key);
+  },
+  async setItem(key: string, value: string): Promise<void> {
+    await myDatabase.set(key, value);
+  },
+  async removeItem(key: string): Promise<void> {
+    await myDatabase.delete(key);
+  }
+};
+
+<FusionStateProvider persistence={{ adapter: myCustomStorage }}>
+  <App />
+</FusionStateProvider>
+```
+
+---
+
+## 🔧 Development & Debugging
+
+### Debug Mode
+
+```jsx
 <FusionStateProvider debug={true}>
   <App />
 </FusionStateProvider>
 ```
 
-## Usage with React Native
+### State Inspector
 
-React Fusion State works perfectly with React Native. For persistence, you need to install AsyncStorage and use the provided adapter.
+```jsx
+import { useFusionStateLog } from 'react-fusion-state';
 
-### Installation for React Native
+function DebugPanel() {
+  // Watch specific keys
+  const state = useFusionStateLog(['user', 'counter'], {
+    trackChanges: true,
+    consoleLog: true
+  });
 
-```bash
-npm install @react-native-async-storage/async-storage
-# or
-yarn add @react-native-async-storage/async-storage
-
-# For iOS
-cd ios && pod install
+  return (
+    <div>
+      <h3>Current State</h3>
+      <pre>{JSON.stringify(state, null, 2)}</pre>
+    </div>
+  );
+}
 ```
 
-### Configuration with AsyncStorage
+---
+
+## 📚 Complete Example
 
 ```jsx
 import React from 'react';
-import { View, Text, Button } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   FusionStateProvider, 
-  useFusionState,
-  createAsyncStorageAdapter 
+  useFusionState, 
+  useFusionStateLog 
 } from 'react-fusion-state';
 
-// Create the AsyncStorage adapter
-const asyncStorageAdapter = createAsyncStorageAdapter(AsyncStorage);
-
-// Navigation component
-function NavigationScreen() {
-  const [screenData, setScreenData] = useFusionState('navigation.data', {});
-  
-  // Store data for other screens
-  const navigateWithData = () => {
-    setScreenData({ userId: 123, lastVisited: new Date() });
-    // ... then navigate to next screen
-  };
-  
-  return (
-    <View>
-      <Button title="Go to Profile Screen" onPress={navigateWithData} />
-    </View>
-  );
-}
-
-// Profile component on another screen
-function ProfileScreen() {
-  // Access the same data, even on another screen
-  const [screenData] = useFusionState('navigation.data', {});
-  
-  return (
-    <View>
-      <Text>User ID: {screenData.userId}</Text>
-      <Text>Last visit: {screenData.lastVisited?.toString()}</Text>
-    </View>
-  );
-}
-
-// Configuration with AsyncStorage persistence
-export default function App() {
-  return (
-    <FusionStateProvider 
-      persistence={{
-        adapter: asyncStorageAdapter,
-        keyPrefix: 'MyApp',
-        persistKeys: ['user', 'navigation.data'],
-        debounce: 500
-      }}
-      initialState={{
-        'app.version': '1.0.0',
-        'user.settings': { notifications: true }
-      }}
-    >
-      {/* Your navigation or components here */}
-    </FusionStateProvider>
-  );
-}
-```
-
-### React Native Specific Benefits
-
-- **AsyncStorage persistence** - Provided adapter for AsyncStorage
-- **Cross-screen sharing** - Avoid passing props through navigation 
-- **Consistent state** - Even after screen unmounting and remounting
-- **Performance** - Optimized to avoid unnecessary re-renders on mobile
-- **Automatic detection** - Detects React Native environment automatically
-
-## Complete Example
-
-```jsx
-import React from 'react';
-import { FusionStateProvider, useFusionState } from 'react-fusion-state';
-
-// Component that modifies state
+// Theme toggle component
 function ThemeToggle() {
   const [theme, setTheme] = useFusionState('theme', 'light');
   
   return (
-    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-      {theme === 'light' ? '🌙' : '☀️'}
+    <button 
+      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      style={{ 
+        background: theme === 'light' ? '#fff' : '#333',
+        color: theme === 'light' ? '#333' : '#fff'
+      }}
+    >
+      {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
     </button>
   );
 }
 
-// Component that uses state
-function ThemedComponent() {
-  const [theme] = useFusionState('theme', 'light');
-  
+// User profile component
+function UserProfile() {
+  const [user, setUser] = useFusionState('user', {
+    name: '',
+    email: '',
+    age: 0
+  });
+
   return (
-    <div style={{ 
-      background: theme === 'light' ? '#fff' : '#333',
-      color: theme === 'light' ? '#333' : '#fff',
-      padding: '20px'
-    }}>
-      <h2>Theme: {theme}</h2>
+    <div>
+      <h2>Profile</h2>
+      <input 
+        placeholder="Name"
+        value={user.name}
+        onChange={e => setUser({...user, name: e.target.value})}
+      />
+      <input 
+        placeholder="Email"
+        value={user.email}
+        onChange={e => setUser({...user, email: e.target.value})}
+      />
+      <input 
+        type="number"
+        placeholder="Age"
+        value={user.age}
+        onChange={e => setUser({...user, age: parseInt(e.target.value) || 0})}
+      />
     </div>
   );
 }
 
-// Application
-function App() {
+// Shopping cart
+function ShoppingCart() {
+  const [cart, setCart] = useFusionState('cart', []);
+  
+  const addItem = (item) => {
+    setCart([...cart, { id: Date.now(), ...item }]);
+  };
+
+  return (
+    <div>
+      <h2>Cart ({cart.length} items)</h2>
+      <button onClick={() => addItem({ name: 'Apple', price: 1.99 })}>
+        Add Apple
+      </button>
+      <ul>
+        {cart.map(item => (
+          <li key={item.id}>{item.name} - ${item.price}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// Debug panel
+function DebugPanel() {
+  const state = useFusionStateLog(['theme', 'user', 'cart']);
+  
+  return (
+    <details>
+      <summary>🐛 Debug State</summary>
+      <pre style={{ background: '#f5f5f5', padding: '10px' }}>
+        {JSON.stringify(state, null, 2)}
+      </pre>
+    </details>
+  );
+}
+
+// Main application
+export default function App() {
   return (
     <FusionStateProvider 
-      initialState={{ version: '1.0' }}
-      persistence={true}
+      persistence={{
+        persistKeys: ['theme', 'user'], // Don't persist cart
+        debounce: 300,
+        onSaveError: (error) => console.error('Save failed:', error)
+      }}
       debug={process.env.NODE_ENV === 'development'}
     >
-      <div>
+      <div style={{ padding: '20px' }}>
+        <h1>🚀 React Fusion State Demo</h1>
+        
         <ThemeToggle />
-        <ThemedComponent />
+        <UserProfile />
+        <ShoppingCart />
+        <DebugPanel />
+        
+        <footer style={{ marginTop: '40px', color: '#666' }}>
+          <p>✨ All state is automatically shared and persisted!</p>
+        </footer>
       </div>
     </FusionStateProvider>
   );
 }
-
-export default App;
 ```
 
-## Documentation
+---
 
-- [Persistence Guide](./PERSISTENCE.md) - Detailed options for data persistence
-- [Changelog](./CHANGELOG.md) - Version history and changes
-- [Contributing](./CONTRIBUTING.md) - Guide for contributing to the project
+## 🔍 API Reference
 
-## Contributing
+### `<FusionStateProvider>`
 
-Contributions are welcome! Check out [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Your app components |
+| `initialState` | `object` | `{}` | Initial state values |
+| `persistence` | `boolean \| string[] \| object` | `false` | Persistence configuration |
+| `debug` | `boolean` | `false` | Enable debug logging |
 
-## License
+### `useFusionState<T>(key, initialValue)`
 
-MIT
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `key` | `string` | Unique state key |
+| `initialValue` | `T` | Default value if key doesn't exist |
+| **Returns** | `[T, (value: T \| (prev: T) => T) => void]` | State and setter |
+
+### `useFusionStateLog(keys?, options?)`
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `keys` | `string[]` | Keys to watch (optional) |
+| `options` | `object` | Logging options |
+| **Returns** | `object` | Current state snapshot |
+
+---
+
+## 🎯 Best Practices
+
+### 1. Use Descriptive Keys
+```jsx
+// ✅ Good
+const [user, setUser] = useFusionState('user.profile', defaultUser);
+const [theme, setTheme] = useFusionState('app.theme', 'light');
+
+// ❌ Avoid
+const [data, setData] = useFusionState('d', {});
+```
+
+### 2. Initialize with Proper Types
+```typescript
+interface User {
+  name: string;
+  email: string;
+}
+
+// ✅ TypeScript will enforce the type
+const [user, setUser] = useFusionState<User>('user', {
+  name: '',
+  email: ''
+});
+```
+
+### 3. Use Selective Persistence
+```jsx
+// ✅ Only persist what matters
+<FusionStateProvider persistence={['user', 'settings', 'theme']}>
+```
+
+### 4. Handle Errors Gracefully
+```jsx
+<FusionStateProvider 
+  persistence={{
+    onSaveError: (error) => {
+      // Don't crash, just log
+      console.warn('Save failed:', error);
+    }
+  }}
+>
+```
+
+---
+
+## 🚨 Migration from v0.1.x
+
+React Fusion State v0.2.0 is **100% backward compatible**. No changes needed!
+
+### New in v0.2.0
+- ✅ React Native support with AsyncStorage
+- ✅ Enhanced error handling
+- ✅ Performance optimizations
+- ✅ Better TypeScript support
+- ✅ Universal environment detection
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📄 License
+
+MIT © [Jacques GERARD](https://github.com/jgerard72)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the React community**
+
+[⭐ Star on GitHub](https://github.com/jgerard72/react-fusion-state) | [📦 NPM Package](https://www.npmjs.com/package/react-fusion-state) | [🐛 Report Issues](https://github.com/jgerard72/react-fusion-state/issues)
+
+</div>
