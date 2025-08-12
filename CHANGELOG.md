@@ -78,9 +78,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Coming Soon
-- Enhanced `useFusionStateLog` hook for easier debugging
-- Specialized hooks (`useToggle`, `useCounter`, etc.)
-- React 18 optimizations with `useDeferredValue` and `useTransition`
-- Improved persistence for large applications
-- Complete API documentation
+### Future Considerations
+- React 18 optimizations with `useDeferredValue` and `useTransition` (if needed)
+- Advanced persistence patterns for enterprise applications
