@@ -4,7 +4,7 @@
 
 ![React Fusion State](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/images/react-fusion-state.png)
 
-**A simple, lightweight, and universal state management library for React & React Native**
+**Simple Redux replacement for React & React Native**
 
 [![npm version](https://img.shields.io/npm/v/react-fusion-state.svg?style=flat-square)](https://www.npmjs.com/package/react-fusion-state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -17,12 +17,13 @@
 
 ## ✨ Why React Fusion State?
 
-- 🚀 **Lightweight** - ~7.3KB (minified + gzipped)
-- 🔄 **Familiar API** - Works like React's `useState`
+**Replace Redux with something simple:**
+
+- 🚀 **7x smaller** than Redux Toolkit (~7KB vs 50KB+)
+- 🔄 **No boilerplate** - Works like `useState` but global
 - 🌍 **Universal** - Same code for React & React Native
-- 💾 **Smart Persistence** - Automatic localStorage/AsyncStorage
-- 🛡️ **TypeScript First** - Full type safety out of the box
-- ⚡ **Zero Configuration** - Works immediately, customize when needed
+- 💾 **Built-in persistence** - No extra setup needed
+- ⚡ **Zero configuration** - Just works out of the box
 
 ---
 
@@ -74,6 +75,24 @@ function Display() {
 ```
 
 **That's it!** 🎉 Both components share the same state automatically.
+
+### 🆚 Compare with Redux
+
+```jsx
+// ❌ Redux - Complex setup
+const store = createStore(reducer);
+const increment = () => ({ type: 'INCREMENT' });
+const reducer = (state = {count: 0}, action) => {
+  switch (action.type) {
+    case 'INCREMENT': return {count: state.count + 1};
+    default: return state;
+  }
+};
+
+// ✅ React Fusion State - Simple
+const [count, setCount] = useFusionState('count', 0);
+setCount(count + 1); // Done!
+```
 
 ---
 
@@ -213,6 +232,46 @@ function SettingsScreen() {
   );
 }
 ```
+
+---
+
+## 🔧 Error Handling
+
+Handle persistence errors gracefully:
+
+```jsx
+<FusionStateProvider
+  persistence={{
+    adapter: asyncStorageAdapter,
+    persistKeys: ['user', 'settings'],
+    debounce: 500,
+    
+    // Handle save errors (network issues, quota exceeded, etc.)
+    onSaveError: (error, state) => {
+      console.error('Failed to save state:', error);
+      // Show user notification
+      showToast('Failed to save data - changes may be lost');
+      // Could implement retry logic here
+    },
+    
+    // Handle load errors (corrupted data, network issues, etc.)
+    onLoadError: (error, key) => {
+      console.error('Failed to load data for key:', key, error);
+      // Use fallback values or reset to defaults
+      // App continues to work with initial state
+    }
+  }}
+>
+  <App />
+</FusionStateProvider>
+```
+
+### Common Error Scenarios
+
+- **Storage Quota Exceeded**: Browser localStorage is full
+- **Network Issues**: AsyncStorage fails on React Native  
+- **Corrupted Data**: Invalid JSON in storage
+- **Permission Denied**: Storage access restricted
 
 ---
 

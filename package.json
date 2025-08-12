@@ -13,7 +13,6 @@
   "scripts": {
     "build": "rm -rf dist/* && tsc -p tsconfig-build.json",
     "format": "prettier --write .",
-    "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
