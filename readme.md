@@ -168,13 +168,25 @@ function Counter() {
 **The exact same code works everywhere:**
 
 ```jsx
-// ✅ React Web
-import { View, Text, Button } from 'react'; // Web components
+// ✅ ReactJS
+import React from 'react';
+
+function MyComponent() {
+  const [theme, setTheme] = useFusionState('theme', 'light');
+  
+  return (
+    <div>
+      <p>Theme: {theme}</p>
+      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+        Toggle
+      </button>
+    </div>
+  );
+}
 
 // ✅ React Native  
-import { View, Text, Button } from 'react-native'; // Native components
+import { View, Text, Button } from 'react-native';
 
-// Same logic everywhere!
 function MyComponent() {
   const [theme, setTheme] = useFusionState('theme', 'light');
   
@@ -195,7 +207,7 @@ function MyComponent() {
 State automatically persists between sessions:
 
 ```jsx
-// ✅ Web: Uses localStorage automatically
+// ✅ ReactJS: Uses localStorage automatically
 // ✅ React Native: Uses AsyncStorage (with adapter)
 // ✅ Tests: Uses memory storage
 
