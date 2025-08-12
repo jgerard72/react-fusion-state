@@ -1,25 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.simpleDeepEqual = exports.deepClone = exports.debounce = exports.formatErrorMessage = void 0;
+const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
 /**
- * Formats error messages by replacing placeholders with actual values
- * @param message - Error message template with placeholders
- * @param values - Values to replace placeholders
- * @returns Formatted error message
+ * Format error messages - simplified version
  */
 const formatErrorMessage = (message, ...values) => {
-    return values.reduce((msg, value, index) => {
-        return msg.replace(`{${index}}`, value);
-    }, message);
+    return values.reduce((msg, value, index) => msg.replace(`{${index}}`, value), message);
 };
 exports.formatErrorMessage = formatErrorMessage;
 /**
- * Creates a debounced function that delays invoking the provided function
- * until after the specified wait time has elapsed since the last invocation.
- *
- * @param fn - The function to debounce
- * @param delay - The delay in milliseconds
- * @returns A debounced version of the function
+ * Simplified debounce function
  */
 function debounce(fn, delay) {
     let timer = null;
@@ -31,28 +25,13 @@ function debounce(fn, delay) {
 }
 exports.debounce = debounce;
 /**
- * Creates a deep copy of an object using JSON serialization.
- * Note: This will lose functions and other non-serializable values.
- *
- * @param obj - The object to clone
- * @returns A deep copy of the object
+ * Simplified deep clone
  */
-function deepClone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
+const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
 exports.deepClone = deepClone;
 /**
- * Checks if two values are deeply equal using JSON stringification.
- * This is simpler than full deep equality but sufficient for many cases.
- *
- * @param a - First value
- * @param b - Second value
- * @returns True if values are deeply equal
+ * Optimized deep comparison
  */
-function simpleDeepEqual(a, b) {
-    if (a === b)
-        return true;
-    return JSON.stringify(a) === JSON.stringify(b);
-}
+const simpleDeepEqual = (a, b) => a === b || (0, lodash_isequal_1.default)(a, b);
 exports.simpleDeepEqual = simpleDeepEqual;
 //# sourceMappingURL=utils.js.map

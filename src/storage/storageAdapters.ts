@@ -48,32 +48,40 @@ export const createNoopStorageAdapter = (): StorageAdapter => ({
  * Create a localStorage adapter for web applications
  * @returns A storage adapter that uses browser's localStorage
  */
-export const createLocalStorageAdapter = (): StorageAdapter => ({
-  async getItem(key: string): Promise<string | null> {
-    try {
-      return localStorage.getItem(key);
-    } catch (error) {
-      console.error('Error reading from localStorage:', error);
-      return null;
-    }
-  },
+export const createLocalStorageAdapter = (): StorageAdapter => {
+  // Vérifier si localStorage est disponible
+  if (typeof localStorage === 'undefined') {
+    console.warn('localStorage is not available, falling back to noop adapter');
+    return createNoopStorageAdapter();
+  }
 
-  async setItem(key: string, value: string): Promise<void> {
-    try {
-      localStorage.setItem(key, value);
-    } catch (error) {
-      console.error('Error writing to localStorage:', error);
-    }
-  },
+  return {
+    async getItem(key: string): Promise<string | null> {
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        console.error('Error reading from localStorage:', error);
+        return null;
+      }
+    },
 
-  async removeItem(key: string): Promise<void> {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error removing from localStorage:', error);
-    }
-  },
-});
+    async setItem(key: string, value: string): Promise<void> {
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        console.error('Error writing to localStorage:', error);
+      }
+    },
+
+    async removeItem(key: string): Promise<void> {
+      try {
+        localStorage.removeItem(key);
+      } catch (error) {
+        console.error('Error removing from localStorage:', error);
+      }
+    },
+  };
+};
 
 // For backward compatibility
 export const NoopStorageAdapter = createNoopStorageAdapter;

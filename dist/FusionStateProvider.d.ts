@@ -14,11 +14,11 @@ interface FusionStateProviderProps {
     /** Enable debug mode which logs state changes to console */
     debug?: boolean;
     /**
-     * Configuration pour la persistance - peuvent être:
-     * - true: active la persistance pour toutes les clés avec les valeurs par défaut
-     * - tableau de chaînes: active la persistance uniquement pour les clés spécifiées
-     * - objet: configuration détaillée avec clés, préfixe, etc.
-     * - objet complet PersistenceConfig: configuration avancée (rétrocompatibilité)
+     * Persistence configuration - can be:
+     * - true: enable persistence for all keys with default values
+     * - string array: enable persistence only for specified keys
+     * - object: detailed configuration with keys, prefix, etc.
+     * - complete PersistenceConfig object: advanced configuration (backward compatibility)
      */
     persistence?: boolean | string[] | SimplePersistenceConfig | PersistenceConfig;
 }

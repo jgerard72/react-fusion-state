@@ -1,15 +1,15 @@
 import { StorageAdapter } from './storageAdapters';
 /**
- * Détecte automatiquement l'adaptateur de stockage le plus approprié
- * en fonction de l'environnement d'exécution.
+ * Automatically detects the most appropriate storage adapter
+ * based on the runtime environment.
  *
- * @returns Le meilleur adaptateur de stockage disponible
+ * @returns The best available storage adapter
  */
 export declare function detectBestStorageAdapter(): StorageAdapter;
 /**
- * Crée un adaptateur de stockage en mémoire pour les tests ou lorsque
- * la persistance n'est pas disponible.
+ * Creates an in-memory storage adapter for tests or when
+ * persistence is not available.
  *
- * @returns Un adaptateur qui stocke les données en mémoire
+ * @returns An adapter that stores data in memory
  */
 export declare function createMemoryStorageAdapter(): StorageAdapter;

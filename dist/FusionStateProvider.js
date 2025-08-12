@@ -53,25 +53,22 @@ const useGlobalState = () => {
 };
 exports.useGlobalState = useGlobalState;
 /**
- * Convertit la configuration de persistance simplifiée en configuration complète
+ * Normalize persistence configuration - simplified version
  */
 function normalizePersistenceConfig(config) {
     if (!config)
         return undefined;
-    // Créer un adaptateur de stockage par défaut
     const defaultAdapter = (0, autoDetect_1.detectBestStorageAdapter)();
-    // Si c'est un boolean (true), configurer la persistance avec des valeurs par défaut
-    // Par défaut, nous ne voulons persister que les clés explicitement marquées
+    // Boolean: default persistence
     if (typeof config === 'boolean') {
         return {
             adapter: defaultAdapter,
-            // L'interface PersistenceConfig accepte soit un tableau de clés, soit une fonction de filtre
             persistKeys: (key) => key.startsWith('persist.'),
             loadOnInit: true,
             saveOnChange: true,
         };
     }
-    // Si c'est un tableau de chaînes, ce sont les clés à persister
+    // Array: specific keys
     if (Array.isArray(config)) {
         return {
             adapter: defaultAdapter,
@@ -80,36 +77,17 @@ function normalizePersistenceConfig(config) {
             saveOnChange: true,
         };
     }
-    // Si l'objet contient adapter mais pas de keyPrefix, c'est probablement un PersistenceConfig complet
+    // Complete PersistenceConfig
     if ('adapter' in config && !('keyPrefix' in config)) {
         return config;
     }
-    // Sinon, c'est un SimplePersistenceConfig
-    const simpleConfig = config;
-    // Définir la fonction de filtre de clés - préfixe persist. par défaut si aucune clé spécifiée
-    let keyFilter;
-    if (simpleConfig.persistKeys) {
-        if (Array.isArray(simpleConfig.persistKeys)) {
-            keyFilter = simpleConfig.persistKeys;
-        }
-        else if (typeof simpleConfig.persistKeys === 'function') {
-            // Utiliser la fonction de filtrage personnalisée
-            keyFilter = (key) => {
-                const filterFn = simpleConfig.persistKeys;
-                // On passe null comme valeur car à ce stade on ne connaît pas encore la valeur
-                // La valeur réelle sera passée plus tard lors du filtrage
-                return filterFn(key, null);
-            };
-        }
-    }
-    else {
-        keyFilter = (key) => key.startsWith('persist.');
-    }
+    // SimplePersistenceConfig
+    const simple = config;
     return {
-        adapter: simpleConfig.adapter || defaultAdapter,
-        persistKeys: keyFilter,
-        keyPrefix: simpleConfig.keyPrefix,
-        debounceTime: simpleConfig.debounce,
+        adapter: simple.adapter || defaultAdapter,
+        persistKeys: simple.persistKeys || ((key) => key.startsWith('persist.')),
+        keyPrefix: simple.keyPrefix,
+        debounceTime: simple.debounce,
         loadOnInit: true,
         saveOnChange: true,
     };
@@ -120,14 +98,14 @@ function normalizePersistenceConfig(config) {
  */
 exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence }) => {
     var _a, _b, _c, _d, _e, _f, _g;
-    // Normaliser la configuration de persistance
+    // Normalize persistence configuration
     const normalizedPersistence = (0, react_1.useMemo)(() => normalizePersistenceConfig(persistence), [persistence]);
     // Initialize storage - use NoopStorage if not configured
     const persistenceRef = (0, react_1.useRef)(normalizedPersistence);
     const storageAdapter = (0, react_1.useMemo)(() => { var _a; return ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)(); }, []);
     const keyPrefix = ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.keyPrefix) || 'fusion_state';
-    const shouldLoadOnInit = (_c = (_b = persistenceRef.current) === null || _b === void 0 ? void 0 : _b.loadOnInit) !== null && _c !== void 0 ? _c : true; // Défaut: charger
-    const shouldSaveOnChange = (_e = (_d = persistenceRef.current) === null || _d === void 0 ? void 0 : _d.saveOnChange) !== null && _e !== void 0 ? _e : true; // Défaut: sauvegarder
+    const shouldLoadOnInit = (_c = (_b = persistenceRef.current) === null || _b === void 0 ? void 0 : _b.loadOnInit) !== null && _c !== void 0 ? _c : true; // Default: load
+    const shouldSaveOnChange = (_e = (_d = persistenceRef.current) === null || _d === void 0 ? void 0 : _d.saveOnChange) !== null && _e !== void 0 ? _e : true; // Default: save
     const debounceTime = (_g = (_f = persistenceRef.current) === null || _f === void 0 ? void 0 : _f.debounceTime) !== null && _g !== void 0 ? _g : 0;
     // State management
     const [state, setStateRaw] = (0, react_1.useState)(initialState);
@@ -153,7 +131,13 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                     }
                 }
                 catch (error) {
+                    const errorObj = error instanceof Error ? error : new Error(String(error));
                     console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(error)));
+                    // Appeler le callback d'erreur si fourni
+                    const config = persistenceRef.current;
+                    if (config === null || config === void 0 ? void 0 : config.onLoadError) {
+                        config.onLoadError(errorObj, `${keyPrefix}_all`);
+                    }
                 }
             });
             loadStateFromStorage();
@@ -192,9 +176,9 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
         const save = (newState) => __awaiter(void 0, void 0, void 0, function* () {
             if (!storageAdapter || !shouldSaveOnChange)
                 return;
+            // Filter keys if persistence.persistKeys is defined
+            const stateToSave = filterPersistKeys(newState);
             try {
-                // Filter keys if persistence.persistKeys is defined
-                const stateToSave = filterPersistKeys(newState);
                 // Check if anything changed from previously saved state
                 const hasChanged = !(0, utils_1.simpleDeepEqual)(stateToSave, prevPersistedState.current);
                 // Only save if there are changes
@@ -228,7 +212,13 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                 }
             }
             catch (error) {
+                const errorObj = error instanceof Error ? error : new Error(String(error));
                 console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR, String(error)));
+                // Appeler le callback d'erreur si fourni
+                const config = persistenceRef.current;
+                if (config === null || config === void 0 ? void 0 : config.onSaveError) {
+                    config.onSaveError(errorObj, stateToSave);
+                }
             }
         });
         // Return debounced version if needed

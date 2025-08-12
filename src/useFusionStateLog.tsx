@@ -74,63 +74,51 @@ export const useFusionStateLog = (
     [changeDetection],
   );
 
-  // Filter state based on keys
+  // Filter state based on keys - optimized
   const filteredState = useMemo(() => {
-    // If keys are the same as before, don't recalculate
-    if (keys && isEqual(keys, previousKeys.current)) {
-      return undefined; // Skip calculation, will handle in useEffect
-    }
-
-    // If no keys provided, use the entire state
+    // If no keys, return all state
     if (!keys || keys.length === 0) {
       return state;
     }
 
-    // Otherwise, filter to include only the requested keys
+    // Filter only requested keys
     const result: SelectedState = {};
-    keys.forEach(key => {
+    for (const key of keys) {
       if (key in state) {
         result[key] = state[key];
       }
-    });
-
-    previousKeys.current = keys;
+    }
     return result;
   }, [state, keys]);
 
   useEffect(() => {
-    if (!filteredState) return; // Skip if no new filtered state
-
-    // Calculate changes if needed
+    // Calculate changes if requested
     let changes: SelectedState | undefined;
 
     if (trackChanges) {
       changes = {};
-      Object.entries(filteredState).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(filteredState)) {
         const prevValue = previousState.current[key];
-        const hasChanged = !compareValues(value, prevValue);
-
-        if (hasChanged) {
-          changes![key] = {
+        if (!compareValues(value, prevValue)) {
+          changes[key] = {
             previous: prevValue,
             current: value,
           };
         }
-      });
-
-      // If no changes detected, don't update
+      }
+      // If no changes, no need to continue
       if (Object.keys(changes).length === 0) {
         changes = undefined;
       }
     }
 
-    // Update selected state with filtered state
+    // Update selected state
     setSelectedState(filteredState);
 
-    // Save current state as previous for next comparison
+    // Save for next comparison
     previousState.current = {...filteredState};
 
-    // Log to console if enabled
+    // Log if enabled
     if (consoleLog && (changes || !trackChanges)) {
       const logData = formatter
         ? formatter(filteredState, changes)

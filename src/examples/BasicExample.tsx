@@ -1,7 +1,7 @@
 import React from 'react';
 import {FusionStateProvider, useFusionState, useFusionStateLog} from '../index';
 
-// Type pour les todo items
+// Type for todo items
 interface Todo {
   id: number;
   text: string;

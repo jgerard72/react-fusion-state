@@ -3,7 +3,7 @@ import {FusionStateProvider, useFusionState} from '../index';
 import {StorageAdapter} from '../storage/storageAdapters';
 
 /**
- * Exemple d'adaptateur pour localStorage
+ * Example localStorage adapter
  */
 class LocalStorageAdapter implements StorageAdapter {
   async getItem(key: string): Promise<string | null> {
@@ -33,16 +33,16 @@ class LocalStorageAdapter implements StorageAdapter {
 }
 
 /**
- * Exemple d'adaptateur pour React Native avec AsyncStorage
- * Vous devez installer @react-native-async-storage/async-storage
+ * Example React Native adapter with AsyncStorage
+ * You need to install @react-native-async-storage/async-storage
  *
- * Décommentez ce code pour l'utiliser dans React Native :
+ * Uncomment this code to use it in React Native:
  */
 /*
 class AsyncStorageAdapter implements StorageAdapter {
   async getItem(key: string): Promise<string | null> {
     try {
-      // Importez AsyncStorage depuis le package adapté à votre projet
+      // Import AsyncStorage from the package adapted to your project
       // import AsyncStorage from '@react-native-async-storage/async-storage';
       return await AsyncStorage.getItem(key);
     } catch (error) {
@@ -69,62 +69,56 @@ class AsyncStorageAdapter implements StorageAdapter {
 }
 */
 
-// Composant Counter avec stockage persistant
+// Persistent counter component
 function PersistentCounter() {
   const [count, setCount] = useFusionState<number>('counter', 0);
 
   return (
     <div className="counter">
-      <h2>Counter: {count}</h2>
-      <p>Ce compteur persiste après rechargement de la page !</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-      <button onClick={() => setCount(count - 1)}>Decrement</button>
+      <h2>Persistent Counter: {count}</h2>
+      <button onClick={() => setCount(count + 1)}>+</button>
+      <button onClick={() => setCount(count - 1)}>-</button>
       <button onClick={() => setCount(0)}>Reset</button>
+      <p>This counter value persists between page reloads!</p>
     </div>
   );
 }
 
-// Settings avec stockage persistant mais sélectif
+// Persistent settings component
 function PersistentSettings() {
-  const [settings, setSettings] = useFusionState('settings', {
+  const [settings, setSettings] = useFusionState<{
+    theme: string;
+    fontSize: string;
+    notifications: boolean;
+  }>('settings', {
     theme: 'light',
     fontSize: 'medium',
     notifications: true,
   });
 
-  const updateSetting = (key: string, value: any) => {
-    setSettings({...settings, [key]: value});
-  };
-
   return (
     <div className="settings">
-      <h2>Settings</h2>
-      <p>Ces paramètres persistent, ils sont inclus dans persistKeys</p>
+      <h2>Persistent Settings</h2>
 
       <div>
-        <label>
-          Theme:
-          <select
-            value={settings.theme}
-            onChange={e => updateSetting('theme', e.target.value)}>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </select>
-        </label>
+        <label>Theme: </label>
+        <select
+          value={settings.theme}
+          onChange={e => setSettings({...settings, theme: e.target.value})}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
       </div>
 
       <div>
-        <label>
-          Font Size:
-          <select
-            value={settings.fontSize}
-            onChange={e => updateSetting('fontSize', e.target.value)}>
-            <option value="small">Small</option>
-            <option value="medium">Medium</option>
-            <option value="large">Large</option>
-          </select>
-        </label>
+        <label>Font Size: </label>
+        <select
+          value={settings.fontSize}
+          onChange={e => setSettings({...settings, fontSize: e.target.value})}>
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+        </select>
       </div>
 
       <div>
@@ -132,25 +126,35 @@ function PersistentSettings() {
           <input
             type="checkbox"
             checked={settings.notifications}
-            onChange={e => updateSetting('notifications', e.target.checked)}
+            onChange={e =>
+              setSettings({...settings, notifications: e.target.checked})
+            }
           />
           Enable Notifications
         </label>
       </div>
+
+      <p>
+        Current settings: Theme={settings.theme}, Size={settings.fontSize},
+        Notifications={settings.notifications ? 'On' : 'Off'}
+      </p>
+      <p>These settings persist between page reloads!</p>
     </div>
   );
 }
 
-// Données temporaires - non persistantes
+// Temporary data component (not persisted)
 function TemporaryData() {
-  const [tempData, setTempData] = useFusionState('tempData', {
+  const [tempData, setTempData] = useFusionState<{
+    searchQuery: string;
+    lastUpdated: string;
+  }>('tempData', {
     searchQuery: '',
     lastUpdated: new Date().toISOString(),
   });
 
-  const updateSearch = (query: string) => {
+  const updateSearchQuery = (query: string) => {
     setTempData({
-      ...tempData,
       searchQuery: query,
       lastUpdated: new Date().toISOString(),
     });
@@ -158,28 +162,30 @@ function TemporaryData() {
 
   return (
     <div className="temp-data">
-      <h2>Temporary Data</h2>
-      <p>
-        Ces données ne persistent pas, car 'tempData' n'est pas dans persistKeys
-      </p>
+      <h2>Temporary Data (Not Persisted)</h2>
 
-      <input
-        type="text"
-        value={tempData.searchQuery}
-        onChange={e => updateSearch(e.target.value)}
-        placeholder="Search query (not persisted)"
-      />
+      <div>
+        <label>Search Query: </label>
+        <input
+          type="text"
+          value={tempData.searchQuery}
+          onChange={e => updateSearchQuery(e.target.value)}
+          placeholder="Type something..."
+        />
+      </div>
 
-      <p>Last Updated: {new Date(tempData.lastUpdated).toLocaleTimeString()}</p>
+      <p>Search Query: {tempData.searchQuery}</p>
+      <p>Last Updated: {new Date(tempData.lastUpdated).toLocaleString()}</p>
+      <p>This data does NOT persist between page reloads.</p>
     </div>
   );
 }
 
-// Application principale avec persistance configurée
+// Main application with configured persistence
 export default function PersistenceApp() {
-  // Créez votre adaptateur de stockage
+  // Create your storage adapter
   const storageAdapter = new LocalStorageAdapter();
-  // Pour React Native, utilisez AsyncStorageAdapter
+  // For React Native, use AsyncStorageAdapter
 
   return (
     <FusionStateProvider
@@ -199,15 +205,15 @@ export default function PersistenceApp() {
       persistence={{
         adapter: storageAdapter,
         keyPrefix: 'myapp',
-        // Uniquement persister counter et settings, pas tempData
+        // Only persist counter and settings, not tempData
         persistKeys: ['counter', 'settings'],
         loadOnInit: true,
         saveOnChange: true,
-        debounceTime: 300, // Attend 300ms avant de sauvegarder
+        debounceTime: 300, // Wait 300ms before saving
       }}>
       <div className="persistence-example">
-        <h1>React Fusion State avec Persistence</h1>
-        <p>Rafraîchissez la page pour voir les valeurs persister !</p>
+        <h1>React Fusion State with Persistence</h1>
+        <p>Refresh the page to see values persist!</p>
 
         <PersistentCounter />
         <PersistentSettings />

@@ -21,97 +21,99 @@ export interface GlobalFusionStateContextType {
   initializingKeys: Set<string>;
 }
 
+/** Simplified type for persistence keys */
+export type PersistenceKeys =
+  | boolean
+  | string[]
+  | ((key: string, value: unknown) => boolean);
+
 /**
- * Configuration simplifiée pour la persistance.
- * Utilisée pour la nouvelle API simplifiée du FusionStateProvider.
+ * Simplified configuration for persistence.
+ * Used for the new simplified FusionStateProvider API.
  */
-export interface SimplePersistenceConfig<
-  T extends Record<string, unknown> = GlobalState,
-> {
+export interface SimplePersistenceConfig {
   /**
-   * Clés à persister - si non fournies, toutes les clés d'état seront persistées
-   * Peut être un tableau de clés ou une fonction de filtre
-   * La fonction de filtre peut maintenant recevoir la valeur actuelle de l'état pour une prise de décision plus précise
+   * Keys to persist - if not provided, all state keys will be persisted
+   * Can be an array of keys or a filter function
    */
-  persistKeys?: keyof T extends string
-    ? boolean | (keyof T)[] | ((key: string, value?: unknown) => boolean)
-    : boolean | string[] | ((key: string, value?: unknown) => boolean);
+  persistKeys?: PersistenceKeys;
 
   /**
-   * Préfixe de clé de stockage pour l'espace de noms (défaut: 'fusion_state')
-   * Cela aide à éviter les collisions avec d'autres stockages dans la même application.
+   * Storage key prefix for namespacing (default: 'fusion_state')
+   * This helps avoid collisions with other storage in the same application.
    */
   keyPrefix?: string;
 
   /**
-   * Temps de debounce en ms (0 = sauvegarde immédiate)
-   * Augmenter cette valeur réduit le nombre d'écritures mais peut perdre les changements récents
+   * Debounce time in ms (0 = immediate save)
+   * Increasing this value reduces the number of writes but may lose recent changes
    */
   debounce?: number;
 
   /**
-   * Adaptateur de stockage personnalisé (facultatif)
-   * Si non spécifié, le meilleur adaptateur disponible sera automatiquement détecté
+   * Custom storage adapter (optional)
+   * If not specified, the best available adapter will be automatically detected
    */
   adapter?: StorageAdapter;
 
-  /** Fonction de callback personnalisée pour gérer la sauvegarde (appelée à la place de la logique par défaut) */
+  /** Custom callback function to handle saving (called instead of default logic) */
   customSaveCallback?: (
     state: GlobalState,
     adapter: StorageAdapter,
     keyPrefix: string,
   ) => Promise<void>;
+
+  /** Callback called on storage read error */
+  onLoadError?: (error: Error, key: string) => void;
+
+  /** Callback called on storage write error */
+  onSaveError?: (error: Error, state: GlobalState) => void;
 }
 
 /**
- * Configuration pour la persistance d'état en stockage.
- * Définit comment l'état doit être sauvegardé et chargé.
+ * Configuration for state persistence in storage.
+ * Defines how state should be saved and loaded.
  */
-export interface PersistenceConfig<
-  T extends Record<string, unknown> = GlobalState,
-> {
+export interface PersistenceConfig {
   /**
-   * L'adaptateur de stockage qui gère les opérations de lecture/écriture.
-   * Implémentez l'interface StorageAdapter pour votre plateforme spécifique.
+   * The storage adapter that handles read/write operations.
+   * Implement the StorageAdapter interface for your specific platform.
    */
   adapter: StorageAdapter;
 
   /**
-   * Préfixe de clé de stockage pour l'espace de noms (défaut: 'fusion_state')
-   * Cela aide à éviter les collisions avec d'autres stockages dans la même application.
+   * Storage key prefix for namespacing (default: 'fusion_state')
+   * This helps avoid collisions with other storage in the same application.
    */
   keyPrefix?: string;
 
   /**
-   * Clés à persister - si non fournies, toutes les clés d'état seront persistées
-   * Peut être un tableau de clés ou une fonction de filtre
-   * La fonction de filtre peut maintenant recevoir la valeur actuelle de l'état pour une prise de décision plus précise
+   * Keys to persist - if not provided, all state keys will be persisted
+   * Can be an array of keys or a filter function
    */
-  persistKeys?: keyof T extends string
-    ? (keyof T)[] | ((key: string, value?: unknown) => boolean)
-    : string[] | ((key: string, value?: unknown) => boolean);
+  persistKeys?: PersistenceKeys;
 
   /**
-   * Charger l'état depuis le stockage à l'initialisation
-   * Lorsque vrai, le provider tentera de restaurer l'état depuis le stockage à son montage.
+   * Load state from storage on initialization
+   * When true, the provider will attempt to restore state from storage on mount.
    */
   loadOnInit?: boolean;
 
   /**
-   * Sauvegarder l'état dans le stockage quand il change
-   * Lorsque vrai, les changements à l'état seront automatiquement persistés.
+   * Save state to storage when it changes
+   * When true, state changes will be automatically persisted.
    */
   saveOnChange?: boolean;
 
   /**
-   * Temps de debounce en ms pour sauvegarder les changements d'état
-   * (défaut: 0, signifiant sauvegarde immédiate)
-   * Des valeurs plus élevées réduisent les écritures mais peuvent perdre des changements récents à la fermeture de l'app.
+   * Debounce time in ms for saving state changes
+   * (default: 0, meaning immediate save)
+   * Higher values reduce writes but may lose recent changes on app close.
    */
   debounceTime?: number;
 }
 
-/** Messages d'erreur enum pour des rapports d'erreur cohérents */
+/** Error messages enum for consistent error reporting */
 export enum FusionStateErrorMessages {
   PROVIDER_MISSING = 'ReactFusionState Error: useFusionState must be used within a FusionStateProvider',
   KEY_ALREADY_INITIALIZING = 'ReactFusionState Error: Key "{0}" is already being initialized. Consider checking if the key is being initialized elsewhere or if there\'s a logic error.',
@@ -121,14 +123,45 @@ export enum FusionStateErrorMessages {
   STORAGE_ADAPTER_MISSING = 'ReactFusionState Error: Storage adapter is required for persistence configuration',
 }
 
+/** Specific error types for React Fusion State */
+export class FusionStateError extends Error {
+  constructor(
+    public readonly code: keyof typeof FusionStateErrorMessages,
+    message: string,
+    public readonly context?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = 'FusionStateError';
+  }
+}
+
+/** Specific error for persistence issues */
+export class PersistenceError extends FusionStateError {
+  constructor(
+    message: string,
+    public readonly operation: 'read' | 'write',
+    public readonly storageKey?: string,
+    context?: Record<string, unknown>,
+  ) {
+    super(
+      operation === 'read'
+        ? 'PERSISTENCE_READ_ERROR'
+        : 'PERSISTENCE_WRITE_ERROR',
+      message,
+      context,
+    );
+    this.name = 'PersistenceError';
+  }
+}
+
 /**
- * Options pour la consommation de fusion state
+ * Options for fusion state consumption
  */
 export interface UseFusionStateOptions {
   /**
-   * Sauter la synchronisation d'état local pour l'optimisation des performances
-   * Lorsque vrai, le hook lira directement depuis l'état global, ce qui peut améliorer les performances
-   * mais peut causer plus de re-rendus dans certains cas.
+   * Skip local state synchronization for performance optimization
+   * When true, the hook will read directly from global state, which may improve performance
+   * but can cause more re-renders in some cases.
    */
   skipLocalState?: boolean;
 }

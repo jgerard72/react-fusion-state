@@ -9,4 +9,4 @@ import { StateUpdater, UseFusionStateOptions } from '@core/types';
  * @returns {[T, StateUpdater<T>]} - Returns the current state value and a function to update it.
  * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
  */
-export declare function useFusionState<T>(key: string, initialValue?: T, options?: UseFusionStateOptions): [T, StateUpdater<T>];
+export declare function useFusionState<T = unknown>(key: string, initialValue?: T, options?: UseFusionStateOptions): [T, StateUpdater<T>];

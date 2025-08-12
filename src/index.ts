@@ -3,15 +3,6 @@ export {useFusionState} from '@core/useFusionState';
 export {FusionStateProvider, useGlobalState} from '@core/FusionStateProvider';
 export {useFusionStateLog} from '@core/useFusionStateLog';
 
-// Hooks composés (simplifiés)
-export {
-  usePersistentState,
-  useFrequentState,
-  useFormState,
-  useCounter,
-  useToggle,
-} from '@core/composedHooks';
-
 // Types principaux
 export type {
   GlobalState,
@@ -22,20 +13,25 @@ export type {
   SimplePersistenceConfig,
   UseFusionStateOptions,
 } from '@core/types';
-export {FusionStateErrorMessages} from '@core/types';
+export {
+  FusionStateErrorMessages,
+  FusionStateError,
+  PersistenceError,
+} from '@core/types';
 
-// Utilitaires
+// Utilities
 export {formatErrorMessage, debounce, simpleDeepEqual} from '@core/utils';
 
-// Exports pour la persistance
+// Persistence exports
 export {
   createNoopStorageAdapter,
   createLocalStorageAdapter,
-  // Pour la compatibilité avec les versions précédentes
+  // For backward compatibility
   NoopStorageAdapter,
 } from '@storage/storageAdapters';
 export {
   detectBestStorageAdapter,
   createMemoryStorageAdapter,
 } from '@storage/autoDetect';
+export {createAsyncStorageAdapter} from '@storage/asyncStorageAdapter';
 export type {StorageAdapter} from '@storage/storageAdapters';

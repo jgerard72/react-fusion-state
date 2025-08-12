@@ -46,11 +46,11 @@ interface FusionStateProviderProps {
   /** Enable debug mode which logs state changes to console */
   debug?: boolean;
   /**
-   * Configuration pour la persistance - peuvent être:
-   * - true: active la persistance pour toutes les clés avec les valeurs par défaut
-   * - tableau de chaînes: active la persistance uniquement pour les clés spécifiées
-   * - objet: configuration détaillée avec clés, préfixe, etc.
-   * - objet complet PersistenceConfig: configuration avancée (rétrocompatibilité)
+   * Persistence configuration - can be:
+   * - true: enable persistence for all keys with default values
+   * - string array: enable persistence only for specified keys
+   * - object: detailed configuration with keys, prefix, etc.
+   * - complete PersistenceConfig object: advanced configuration (backward compatibility)
    */
   persistence?:
     | boolean
@@ -60,7 +60,7 @@ interface FusionStateProviderProps {
 }
 
 /**
- * Convertit la configuration de persistance simplifiée en configuration complète
+ * Normalize persistence configuration - simplified version
  */
 function normalizePersistenceConfig(
   config:
@@ -72,22 +72,19 @@ function normalizePersistenceConfig(
 ): PersistenceConfig | undefined {
   if (!config) return undefined;
 
-  // Créer un adaptateur de stockage par défaut
   const defaultAdapter = detectBestStorageAdapter();
 
-  // Si c'est un boolean (true), configurer la persistance avec des valeurs par défaut
-  // Par défaut, nous ne voulons persister que les clés explicitement marquées
+  // Boolean: default persistence
   if (typeof config === 'boolean') {
     return {
       adapter: defaultAdapter,
-      // L'interface PersistenceConfig accepte soit un tableau de clés, soit une fonction de filtre
       persistKeys: (key: string) => key.startsWith('persist.'),
       loadOnInit: true,
       saveOnChange: true,
     };
   }
 
-  // Si c'est un tableau de chaînes, ce sont les clés à persister
+  // Array: specific keys
   if (Array.isArray(config)) {
     return {
       adapter: defaultAdapter,
@@ -97,40 +94,19 @@ function normalizePersistenceConfig(
     };
   }
 
-  // Si l'objet contient adapter mais pas de keyPrefix, c'est probablement un PersistenceConfig complet
+  // Complete PersistenceConfig
   if ('adapter' in config && !('keyPrefix' in config)) {
     return config as PersistenceConfig;
   }
 
-  // Sinon, c'est un SimplePersistenceConfig
-  const simpleConfig = config as SimplePersistenceConfig;
-
-  // Définir la fonction de filtre de clés - préfixe persist. par défaut si aucune clé spécifiée
-  let keyFilter;
-  if (simpleConfig.persistKeys) {
-    if (Array.isArray(simpleConfig.persistKeys)) {
-      keyFilter = simpleConfig.persistKeys;
-    } else if (typeof simpleConfig.persistKeys === 'function') {
-      // Utiliser la fonction de filtrage personnalisée
-      keyFilter = (key: string) => {
-        const filterFn = simpleConfig.persistKeys as (
-          key: string,
-          value: unknown,
-        ) => boolean;
-        // On passe null comme valeur car à ce stade on ne connaît pas encore la valeur
-        // La valeur réelle sera passée plus tard lors du filtrage
-        return filterFn(key, null);
-      };
-    }
-  } else {
-    keyFilter = (key: string) => key.startsWith('persist.');
-  }
-
+  // SimplePersistenceConfig
+  const simple = config as SimplePersistenceConfig;
   return {
-    adapter: simpleConfig.adapter || defaultAdapter,
-    persistKeys: keyFilter,
-    keyPrefix: simpleConfig.keyPrefix,
-    debounceTime: simpleConfig.debounce,
+    adapter: simple.adapter || defaultAdapter,
+    persistKeys:
+      simple.persistKeys || ((key: string) => key.startsWith('persist.')),
+    keyPrefix: simple.keyPrefix,
+    debounceTime: simple.debounce,
     loadOnInit: true,
     saveOnChange: true,
   };
@@ -142,7 +118,7 @@ function normalizePersistenceConfig(
  */
 export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
   ({children, initialState = {}, debug = false, persistence}) => {
-    // Normaliser la configuration de persistance
+    // Normalize persistence configuration
     const normalizedPersistence = useMemo(
       () => normalizePersistenceConfig(persistence),
       [persistence],
@@ -156,8 +132,8 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     );
 
     const keyPrefix = persistenceRef.current?.keyPrefix || 'fusion_state';
-    const shouldLoadOnInit = persistenceRef.current?.loadOnInit ?? true; // Défaut: charger
-    const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true; // Défaut: sauvegarder
+    const shouldLoadOnInit = persistenceRef.current?.loadOnInit ?? true; // Default: load
+    const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true; // Default: save
     const debounceTime = persistenceRef.current?.debounceTime ?? 0;
 
     // State management
@@ -197,12 +173,20 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
               );
             }
           } catch (error) {
+            const errorObj =
+              error instanceof Error ? error : new Error(String(error));
             console.error(
               formatErrorMessage(
                 FusionStateErrorMessages.PERSISTENCE_READ_ERROR,
                 String(error),
               ),
             );
+
+            // Appeler le callback d'erreur si fourni
+            const config = persistenceRef.current as SimplePersistenceConfig;
+            if (config?.onLoadError) {
+              config.onLoadError(errorObj, `${keyPrefix}_all`);
+            }
           }
         };
 
@@ -248,10 +232,10 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       const save = async (newState: GlobalState) => {
         if (!storageAdapter || !shouldSaveOnChange) return;
 
-        try {
-          // Filter keys if persistence.persistKeys is defined
-          const stateToSave = filterPersistKeys(newState);
+        // Filter keys if persistence.persistKeys is defined
+        const stateToSave = filterPersistKeys(newState);
 
+        try {
           // Check if anything changed from previously saved state
           const hasChanged = !simpleDeepEqual(
             stateToSave,
@@ -299,12 +283,20 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
             console.log('[FusionState] Saved state to storage:', stateToSave);
           }
         } catch (error) {
+          const errorObj =
+            error instanceof Error ? error : new Error(String(error));
           console.error(
             formatErrorMessage(
               FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR,
               String(error),
             ),
           );
+
+          // Appeler le callback d'erreur si fourni
+          const config = persistenceRef.current as SimplePersistenceConfig;
+          if (config?.onSaveError) {
+            config.onSaveError(errorObj, stateToSave);
+          }
         }
       };
 

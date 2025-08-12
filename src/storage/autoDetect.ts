@@ -5,51 +5,78 @@ import {
 } from './storageAdapters';
 
 /**
- * Détecte automatiquement l'adaptateur de stockage le plus approprié
- * en fonction de l'environnement d'exécution.
+ * Automatically detects the most appropriate storage adapter
+ * based on the runtime environment.
  *
- * @returns Le meilleur adaptateur de stockage disponible
+ * @returns The best available storage adapter
  */
 export function detectBestStorageAdapter(): StorageAdapter {
-  // Vérifier si localStorage est disponible (environnement navigateur)
-  if (typeof window !== 'undefined' && window.localStorage) {
+  // Detect React Native first (more reliable)
+  if (isReactNativeEnvironment()) {
+    console.info(
+      '[FusionState] React Native environment detected. ' +
+        'Use a custom AsyncStorage adapter for persistence.',
+    );
+    return createNoopStorageAdapter();
+  }
+
+  // Check if localStorage is available (browser environment)
+  if (isWebEnvironment()) {
     try {
-      // Tester si localStorage est réellement disponible (peut être désactivé)
+      // Test if localStorage is actually available (can be disabled)
       window.localStorage.setItem('fusion_test', 'test');
       window.localStorage.removeItem('fusion_test');
       return createLocalStorageAdapter();
     } catch (e) {
-      console.warn('localStorage détecté mais non disponible:', e);
+      console.warn('[FusionState] localStorage detected but not available:', e);
     }
   }
 
-  // Si nous sommes dans un environnement React Native, essayer de détecter AsyncStorage
-  // Note: Ceci est une détection heuristique car nous ne pouvons pas importer AsyncStorage directement
-  if (
-    typeof global !== 'undefined' &&
-    typeof navigator !== 'undefined' &&
-    navigator.product === 'ReactNative'
-  ) {
-    try {
-      // L'utilisateur devra fournir un adaptateur personnalisé pour AsyncStorage
-      console.warn(
-        'Environnement React Native détecté. ' +
-          'Veuillez fournir explicitement un adaptateur pour AsyncStorage.',
-      );
-    } catch (e) {
-      // Ignorer les erreurs potentielles
-    }
-  }
-
-  // Fallback: utiliser un adaptateur qui ne fait rien
+  // Fallback: use a no-op adapter
+  console.info('[FusionState] No storage detected, using memory-only mode.');
   return createNoopStorageAdapter();
 }
 
 /**
- * Crée un adaptateur de stockage en mémoire pour les tests ou lorsque
- * la persistance n'est pas disponible.
+ * Detects if we are in a React Native environment
+ */
+function isReactNativeEnvironment(): boolean {
+  // Method 1: Check navigator.product
+  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    return true;
+  }
+
+  // Method 2: Check existence of global without window
+  if (typeof global !== 'undefined' && typeof window === 'undefined') {
+    return true;
+  }
+
+  // Method 3: Check React Native specific APIs
+  if (
+    typeof global !== 'undefined' &&
+    // @ts-ignore - Runtime check
+    (global.__fbBatchedBridge || global.nativeCallSyncHook)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Detects if we are in a web environment
+ */
+function isWebEnvironment(): boolean {
+  return (
+    typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+  );
+}
+
+/**
+ * Creates an in-memory storage adapter for tests or when
+ * persistence is not available.
  *
- * @returns Un adaptateur qui stocke les données en mémoire
+ * @returns An adapter that stores data in memory
  */
 export function createMemoryStorageAdapter(): StorageAdapter {
   const storage = new Map<string, string>();

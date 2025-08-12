@@ -19,51 +19,35 @@ import {formatErrorMessage} from '@core/utils';
  * @returns {[T, StateUpdater<T>]} - Returns the current state value and a function to update it.
  * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
  */
-export function useFusionState<T>(
+export function useFusionState<T = unknown>(
   key: string,
   initialValue?: T,
   options?: UseFusionStateOptions,
 ): [T, StateUpdater<T>] {
   const {state, setState, initializingKeys} = useGlobalState();
-  const isInitialized = useRef<boolean>(false);
   const skipLocalState = options?.skipLocalState ?? false;
-  // Keep a local reference to track initializing keys during the initialization process
-  const initializing = useRef<Set<string>>(new Set());
 
-  // Initialization logic for the state key
-  const initializeState = useCallback(() => {
-    if (!isInitialized.current) {
-      if (initialValue !== undefined && !(key in state)) {
-        if (initializingKeys.has(key)) {
-          throw new Error(
-            formatErrorMessage(
-              FusionStateErrorMessages.KEY_ALREADY_INITIALIZING,
-              key,
-            ),
-          );
-        }
-
-        // Use the local ref for tracking initialization
-        initializing.current.add(key);
-        setState(prev => ({...prev, [key]: initialValue}));
-        initializing.current.delete(key);
-        isInitialized.current = true;
-      } else if (!(key in state)) {
+  // Simplified initialization
+  useEffect(() => {
+    if (initialValue !== undefined && !(key in state)) {
+      if (initializingKeys.has(key)) {
         throw new Error(
           formatErrorMessage(
-            FusionStateErrorMessages.KEY_MISSING_NO_INITIAL,
+            FusionStateErrorMessages.KEY_ALREADY_INITIALIZING,
             key,
           ),
         );
-      } else {
-        isInitialized.current = true;
       }
+      setState(prev => ({...prev, [key]: initialValue}));
+    } else if (!(key in state) && initialValue === undefined) {
+      throw new Error(
+        formatErrorMessage(
+          FusionStateErrorMessages.KEY_MISSING_NO_INITIAL,
+          key,
+        ),
+      );
     }
-  }, [initialValue, key, state, setState, initializingKeys]);
-
-  useEffect(() => {
-    initializeState();
-  }, [initializeState]);
+  }, [key, initialValue, state, setState, initializingKeys]);
 
   // Use local state only if not skipping it (performance optimization)
   const [localValue, setLocalValue] = useState<T>(() => state[key] as T);

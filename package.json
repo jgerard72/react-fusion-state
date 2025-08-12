@@ -1,14 +1,14 @@
 {
   "name": "react-fusion-state",
-  "version": "0.0.67",
-  "homepage": "https://github.com/jgerard72/react-fusion-state/master/imags/react-fusion-state.png",
+  "version": "0.2.0",
+  "homepage": "https://github.com/jgerard72/react-fusion-state/blob/master/images/react-fusion-state.png",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Jacques GERARD <jgrd93@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jgerard72/react-fusion-state"
+    "url": "git+https://github.com/jgerard72/react-fusion-state.git"
   },
   "scripts": {
     "build": "rm -rf dist/* && tsc -p tsconfig-build.json",

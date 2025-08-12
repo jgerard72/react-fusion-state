@@ -36,39 +36,46 @@ exports.createNoopStorageAdapter = createNoopStorageAdapter;
  * Create a localStorage adapter for web applications
  * @returns A storage adapter that uses browser's localStorage
  */
-const createLocalStorageAdapter = () => ({
-    getItem(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                return localStorage.getItem(key);
-            }
-            catch (error) {
-                console.error('Error reading from localStorage:', error);
-                return null;
-            }
-        });
-    },
-    setItem(key, value) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                localStorage.setItem(key, value);
-            }
-            catch (error) {
-                console.error('Error writing to localStorage:', error);
-            }
-        });
-    },
-    removeItem(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                localStorage.removeItem(key);
-            }
-            catch (error) {
-                console.error('Error removing from localStorage:', error);
-            }
-        });
-    },
-});
+const createLocalStorageAdapter = () => {
+    // Vérifier si localStorage est disponible
+    if (typeof localStorage === 'undefined') {
+        console.warn('localStorage is not available, falling back to noop adapter');
+        return (0, exports.createNoopStorageAdapter)();
+    }
+    return {
+        getItem(key) {
+            return __awaiter(this, void 0, void 0, function* () {
+                try {
+                    return localStorage.getItem(key);
+                }
+                catch (error) {
+                    console.error('Error reading from localStorage:', error);
+                    return null;
+                }
+            });
+        },
+        setItem(key, value) {
+            return __awaiter(this, void 0, void 0, function* () {
+                try {
+                    localStorage.setItem(key, value);
+                }
+                catch (error) {
+                    console.error('Error writing to localStorage:', error);
+                }
+            });
+        },
+        removeItem(key) {
+            return __awaiter(this, void 0, void 0, function* () {
+                try {
+                    localStorage.removeItem(key);
+                }
+                catch (error) {
+                    console.error('Error removing from localStorage:', error);
+                }
+            });
+        },
+    };
+};
 exports.createLocalStorageAdapter = createLocalStorageAdapter;
 // For backward compatibility
 exports.NoopStorageAdapter = exports.createNoopStorageAdapter;
