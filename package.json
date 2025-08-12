@@ -20,6 +20,13 @@
     "prepare": "npm run build",
     "dev": "tsc -w -p tsconfig-build.json"
   },
+  "files": [
+    "dist",
+    "images",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.md"
+  ],
   "keywords": [
     "react",
     "state-management",

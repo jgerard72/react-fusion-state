@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![React Fusion State](./images/react-fusion-state.png)
+![React Fusion State](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/images/react-fusion-state.png)
 
 **A simple, lightweight, and universal state management library for React & React Native**
 
