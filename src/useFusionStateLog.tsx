@@ -1,7 +1,7 @@
-import {useGlobalState} from '@core/FusionStateProvider';
+import {useGlobalState} from './FusionStateProvider';
 import {useEffect, useState, useRef, useMemo, useCallback} from 'react';
 import isEqual from 'lodash.isequal';
-import {simpleDeepEqual} from '@core/utils';
+import {simpleDeepEqual} from './utils';
 
 type StateKey = string;
 type SelectedState = Record<string, unknown>;

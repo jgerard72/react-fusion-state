@@ -1,4 +1,4 @@
-import { StateUpdater, UseFusionStateOptions } from '@core/types';
+import { StateUpdater, UseFusionStateOptions } from './types';
 /**
  * Custom hook to manage a piece of state within the global fusion state.
  *

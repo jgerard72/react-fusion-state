@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useFusionState = void 0;
 const react_1 = require("react");
-const FusionStateProvider_1 = require("@core/FusionStateProvider");
-const types_1 = require("@core/types");
-const utils_1 = require("@core/utils");
+const FusionStateProvider_1 = require("./FusionStateProvider");
+const types_1 = require("./types");
+const utils_1 = require("./utils");
 /**
  * Custom hook to manage a piece of state within the global fusion state.
  *

@@ -1,7 +1,7 @@
 // Core hooks
-export {useFusionState} from '@core/useFusionState';
-export {FusionStateProvider, useGlobalState} from '@core/FusionStateProvider';
-export {useFusionStateLog} from '@core/useFusionStateLog';
+export {useFusionState} from './useFusionState';
+export {FusionStateProvider, useGlobalState} from './FusionStateProvider';
+export {useFusionStateLog} from './useFusionStateLog';
 
 // Types principaux
 export type {
@@ -12,15 +12,15 @@ export type {
   PersistenceConfig,
   SimplePersistenceConfig,
   UseFusionStateOptions,
-} from '@core/types';
+} from './types';
 export {
   FusionStateErrorMessages,
   FusionStateError,
   PersistenceError,
-} from '@core/types';
+} from './types';
 
 // Utilities
-export {formatErrorMessage, debounce, simpleDeepEqual} from '@core/utils';
+export {formatErrorMessage, debounce, simpleDeepEqual} from './utils';
 
 // Persistence exports
 export {
@@ -28,10 +28,10 @@ export {
   createLocalStorageAdapter,
   // For backward compatibility
   NoopStorageAdapter,
-} from '@storage/storageAdapters';
+} from './storage/storageAdapters';
 export {
   detectBestStorageAdapter,
   createMemoryStorageAdapter,
-} from '@storage/autoDetect';
-export {createAsyncStorageAdapter} from '@storage/asyncStorageAdapter';
-export type {StorageAdapter} from '@storage/storageAdapters';
+} from './storage/autoDetect';
+export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
+export type {StorageAdapter} from './storage/storageAdapters';

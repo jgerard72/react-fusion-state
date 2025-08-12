@@ -14,10 +14,10 @@ import {
   FusionStateErrorMessages,
   PersistenceConfig,
   SimplePersistenceConfig,
-} from '@core/types';
-import {createNoopStorageAdapter} from '@storage/storageAdapters';
-import {detectBestStorageAdapter} from '@storage/autoDetect';
-import {debounce, formatErrorMessage, simpleDeepEqual} from '@core/utils';
+} from './types';
+import {createNoopStorageAdapter} from './storage/storageAdapters';
+import {detectBestStorageAdapter} from './storage/autoDetect';
+import {debounce, formatErrorMessage, simpleDeepEqual} from './utils';
 
 const GlobalStateContext = createContext<
   GlobalFusionStateContextType | undefined

@@ -34,10 +34,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FusionStateProvider = exports.useGlobalState = void 0;
 const react_1 = __importStar(require("react"));
-const types_1 = require("@core/types");
-const storageAdapters_1 = require("@storage/storageAdapters");
-const autoDetect_1 = require("@storage/autoDetect");
-const utils_1 = require("@core/utils");
+const types_1 = require("./types");
+const storageAdapters_1 = require("./storage/storageAdapters");
+const autoDetect_1 = require("./storage/autoDetect");
+const utils_1 = require("./utils");
 const GlobalStateContext = (0, react_1.createContext)(undefined);
 /**
  * Hook to access the global state context

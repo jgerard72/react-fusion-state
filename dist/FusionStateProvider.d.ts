@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { GlobalState, GlobalFusionStateContextType, PersistenceConfig, SimplePersistenceConfig } from '@core/types';
+import { GlobalState, GlobalFusionStateContextType, PersistenceConfig, SimplePersistenceConfig } from './types';
 /**
  * Hook to access the global state context
  * @returns The global state context

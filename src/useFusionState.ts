@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {useGlobalState} from '@core/FusionStateProvider';
+import {useGlobalState} from './FusionStateProvider';
 import {
   GlobalState,
   SetStateAction,
   StateUpdater,
   FusionStateErrorMessages,
   UseFusionStateOptions,
-} from '@core/types';
-import {formatErrorMessage} from '@core/utils';
+} from './types';
+import {formatErrorMessage} from './utils';
 
 /**
  * Custom hook to manage a piece of state within the global fusion state.

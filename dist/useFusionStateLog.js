@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useFusionStateLog = void 0;
-const FusionStateProvider_1 = require("@core/FusionStateProvider");
+const FusionStateProvider_1 = require("./FusionStateProvider");
 const react_1 = require("react");
 const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
-const utils_1 = require("@core/utils");
+const utils_1 = require("./utils");
 /**
  * Hook to observe and track changes in the global fusion state
  *
