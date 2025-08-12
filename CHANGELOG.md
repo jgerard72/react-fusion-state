@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.4] - 2024-08-12
 
+### Added
+- **Expo Support**: Official Expo compatibility documented and confirmed
+- **Expo Examples**: Added specific Expo code examples and usage patterns
+- **Enhanced Keywords**: Added "expo" keyword for better NPM discoverability
+
 ### Fixed
 - **Documentation**: Corrected ReactJS component examples (div, p, button vs View, Text, Button)
 - **Technical Accuracy**: ReactJS now shows proper HTML elements, React Native shows RN components
 - **Terminology**: Consistent use of "ReactJS" instead of "Web" throughout documentation
-- **Examples**: Clear separation between ReactJS and React Native code samples
+- **Examples**: Clear separation between ReactJS, React Native, and Expo code samples
 
 ## [0.2.3] - 2024-08-12
 

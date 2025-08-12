@@ -4,7 +4,7 @@
 
 ![React Fusion State](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/images/react-fusion-state.png)
 
-**Simple Redux replacement for React & React Native**
+**Simple Redux replacement for React, React Native & Expo**
 
 [![npm version](https://img.shields.io/npm/v/react-fusion-state.svg?style=flat-square)](https://www.npmjs.com/package/react-fusion-state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -24,7 +24,7 @@
 | **Boilerplate** | Actions, Reducers, Store | None |
 | **Global State** | `useSelector(state => state.count)` | `useFusionState('count', 0)` |
 | **Persistence** | External plugin | Built-in |
-| **React Native** | Extra setup | Works out of the box |
+| **React Native/Expo** | Extra setup | Works out of the box |
 | **TypeScript** | Complex setup | Automatic |
 
 ## ✨ Why Switch from Redux?
@@ -35,18 +35,23 @@
 - 🔄 **No boilerplate** - Write less, do more  
 - 🧠 **Easy to learn** - If you know `useState`, you know this
 - 💾 **Persistence included** - localStorage/AsyncStorage built-in
-- 🌍 **Universal** - Same code everywhere
+- 🌍 **Universal** - Same code everywhere (React, React Native, Expo)
 - ⚡ **Just works** - No configuration needed
-- ✅ **Battle-tested** - Fully tested on ReactJS & React Native
+- ✅ **Battle-tested** - Fully tested on ReactJS, React Native & Expo
 
 ---
 
 ## 📦 Installation
 
 ```bash
+# ReactJS
 npm install react-fusion-state
 # or
 yarn add react-fusion-state
+
+# React Native / Expo
+npm install react-fusion-state
+# No additional setup needed! AsyncStorage auto-detection works out of the box
 ```
 
 ## 🚀 Quick Start
@@ -200,6 +205,22 @@ function MyComponent() {
     </View>
   );
 }
+
+// ✅ Expo (same as React Native)
+import { View, Text, Button } from 'react-native';
+// Works perfectly with Expo CLI, EAS, and Expo Go!
+
+function MyExpoComponent() {
+  const [user, setUser] = useFusionState('user', null);
+  // Persistence works automatically with AsyncStorage
+  
+  return (
+    <View>
+      <Text>User: {user?.name || 'Not logged in'}</Text>
+      <Button title="Login" onPress={() => setUser({name: 'John'})} />
+    </View>
+  );
+}
 ```
 
 ### Smart Persistence
@@ -209,6 +230,7 @@ State automatically persists between sessions:
 ```jsx
 // ✅ ReactJS: Uses localStorage automatically
 // ✅ React Native: Uses AsyncStorage (with adapter)
+// ✅ Expo: Uses AsyncStorage automatically (no setup!)
 // ✅ Tests: Uses memory storage
 
 <FusionStateProvider persistence={true}>

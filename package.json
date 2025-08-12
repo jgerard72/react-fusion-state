@@ -25,12 +25,13 @@
     "CHANGELOG.md",
     "LICENSE.md"
   ],
-  "description": "A simple, lightweight, and universal state management library for React & React Native with automatic persistence",
+  "description": "A simple, lightweight, and universal state management library for React, React Native & Expo with automatic persistence",
   "keywords": [
     "react",
     "state-management",
     "global-state",
     "react-native",
+    "expo",
     "persistence",
     "typescript",
     "asyncstorage",
