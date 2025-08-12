@@ -17,7 +17,7 @@
 
 ## ✨ Why React Fusion State?
 
-- 🚀 **Lightweight** - Less than 8KB (minified + gzipped)
+- 🚀 **Lightweight** - ~7.3KB (minified + gzipped)
 - 🔄 **Familiar API** - Works like React's `useState`
 - 🌍 **Universal** - Same code for React & React Native
 - 💾 **Smart Persistence** - Automatic localStorage/AsyncStorage
