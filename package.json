@@ -1,7 +1,7 @@
 {
   "name": "react-fusion-state",
   "version": "0.2.1",
-  "homepage": "https://github.com/jgerard72/react-fusion-state/blob/master/images/react-fusion-state.png",
+  "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Jacques GERARD <jgrd93@gmail.com>",
@@ -27,11 +27,17 @@
     "CHANGELOG.md",
     "LICENSE.md"
   ],
+  "description": "A simple, lightweight, and universal state management library for React & React Native with automatic persistence",
   "keywords": [
     "react",
     "state-management",
     "global-state",
-    "react-native"
+    "react-native",
+    "persistence",
+    "typescript",
+    "asyncstorage",
+    "localstorage",
+    "universal"
   ],
   "peerDependencies": {
     "react": "^18.0.0",
