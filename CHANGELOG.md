@@ -5,6 +5,13 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2024-08-12
+
+### Improved
+- **Package Metadata**: Enhanced NPM discoverability with better description and keywords
+- **Social Sharing**: Optimized homepage URL and package information for better sharing
+- **SEO**: Expanded keywords for improved NPM search visibility
+
 ## [0.2.1] - 2024-08-12
 
 ### Fixed
