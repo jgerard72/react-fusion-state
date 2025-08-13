@@ -5,6 +5,20 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2024-08-13
+
+### Improved
+- **Documentation**: Streamlined README from 755 to 120 lines (84% reduction)
+- **File Size**: Reduced README from 17.1kB to 3.8kB (76% lighter)
+- **Developer Experience**: Focused on essentials - quick start, clear examples
+- **Readability**: Perfect for busy developers (2-3 minute read)
+- **Professional**: Clean, concise, and scannable documentation
+
+### Optimized
+- **Package Size**: Further reduced to 21.3kB (from 24.9kB)
+- **Load Time**: Faster NPM page loading with lighter README
+- **User Journey**: Clear path from installation to usage in seconds
+
 ## [0.2.4] - 2024-08-12
 
 ### Added
