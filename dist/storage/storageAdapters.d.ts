@@ -29,8 +29,16 @@ export interface StorageAdapter {
  */
 export declare const createNoopStorageAdapter: () => StorageAdapter;
 /**
+ * Extended storage adapter interface that supports synchronous operations
+ */
+export interface ExtendedStorageAdapter extends StorageAdapter {
+    /** Optional synchronous getItem for localStorage compatibility */
+    getItemSync?: (key: string) => string | null;
+}
+/**
  * Create a localStorage adapter for web applications
+ * @param debug - Whether to enable debug logging
  * @returns A storage adapter that uses browser's localStorage
  */
-export declare const createLocalStorageAdapter: () => StorageAdapter;
+export declare const createLocalStorageAdapter: (debug?: boolean) => ExtendedStorageAdapter;
 export declare const NoopStorageAdapter: () => StorageAdapter;

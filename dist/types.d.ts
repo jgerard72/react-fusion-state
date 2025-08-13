@@ -85,6 +85,10 @@ export interface PersistenceConfig {
      * Higher values reduce writes but may lose recent changes on app close.
      */
     debounceTime?: number;
+    /** Callback called on storage read error */
+    onLoadError?: (error: Error, key: string) => void;
+    /** Callback called on storage write error */
+    onSaveError?: (error: Error, state: GlobalState) => void;
 }
 /** Error messages enum for consistent error reporting */
 export declare enum FusionStateErrorMessages {

@@ -35,4 +35,7 @@ export {
   isSSREnvironment,
 } from './storage/autoDetect';
 export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
-export type {StorageAdapter} from './storage/storageAdapters';
+export type {
+  StorageAdapter,
+  ExtendedStorageAdapter,
+} from './storage/storageAdapters';

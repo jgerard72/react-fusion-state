@@ -3,6 +3,7 @@ import { StorageAdapter } from './storageAdapters';
  * Crée un adaptateur AsyncStorage pour React Native
  *
  * @param AsyncStorage - L'instance AsyncStorage importée de @react-native-async-storage/async-storage
+ * @param debug - Whether to enable debug logging
  * @returns Un adaptateur compatible avec FusionState
  *
  * @example
@@ -21,4 +22,4 @@ export declare function createAsyncStorageAdapter(AsyncStorage: {
     getItem: (key: string) => Promise<string | null>;
     setItem: (key: string, value: string) => Promise<void>;
     removeItem: (key: string) => Promise<void>;
-}): StorageAdapter;
+}, debug?: boolean): StorageAdapter;

@@ -8,9 +8,10 @@ export declare function isSSREnvironment(): boolean;
  * Automatically detects the most appropriate storage adapter
  * based on the runtime environment.
  *
+ * @param debug - Whether to enable debug logging
  * @returns The best available storage adapter
  */
-export declare function detectBestStorageAdapter(): StorageAdapter;
+export declare function detectBestStorageAdapter(debug?: boolean): StorageAdapter;
 /**
  * Creates an in-memory storage adapter for tests or when
  * persistence is not available.

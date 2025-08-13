@@ -14,6 +14,7 @@ exports.createAsyncStorageAdapter = void 0;
  * Crée un adaptateur AsyncStorage pour React Native
  *
  * @param AsyncStorage - L'instance AsyncStorage importée de @react-native-async-storage/async-storage
+ * @param debug - Whether to enable debug logging
  * @returns Un adaptateur compatible avec FusionState
  *
  * @example
@@ -28,7 +29,7 @@ exports.createAsyncStorageAdapter = void 0;
  * >
  * ```
  */
-function createAsyncStorageAdapter(AsyncStorage) {
+function createAsyncStorageAdapter(AsyncStorage, debug = false) {
     return {
         getItem(key) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -36,7 +37,9 @@ function createAsyncStorageAdapter(AsyncStorage) {
                     return yield AsyncStorage.getItem(key);
                 }
                 catch (error) {
-                    console.error('Error reading from AsyncStorage:', error);
+                    if (debug) {
+                        console.error('Error reading from AsyncStorage:', error);
+                    }
                     return null;
                 }
             });
@@ -47,7 +50,9 @@ function createAsyncStorageAdapter(AsyncStorage) {
                     yield AsyncStorage.setItem(key, value);
                 }
                 catch (error) {
-                    console.error('Error writing to AsyncStorage:', error);
+                    if (debug) {
+                        console.error('Error writing to AsyncStorage:', error);
+                    }
                 }
             });
         },
@@ -57,7 +62,9 @@ function createAsyncStorageAdapter(AsyncStorage) {
                     yield AsyncStorage.removeItem(key);
                 }
                 catch (error) {
-                    console.error('Error removing from AsyncStorage:', error);
+                    if (debug) {
+                        console.error('Error removing from AsyncStorage:', error);
+                    }
                 }
             });
         },

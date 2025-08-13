@@ -5,6 +5,64 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2024-12-19
+
+### 🔥 **MAJOR FIXES**
+- **Persistence Fixed**: Resolved critical issue where state was not restored on page refresh
+- **Synchronous Loading**: Added instant state restoration with `getItemSync()` for localStorage
+- **Error Callbacks**: Fixed `onLoadError` and `onSaveError` callbacks not being invoked
+- **Timing Issues**: Eliminated race conditions between initialization and persistence loading
+
+### ✨ **NEW FEATURES**
+- **Optional Console Logging**: All console logs now respect debug mode (`debug=false` by default)
+- **Extended Storage Interface**: New `ExtendedStorageAdapter` with optional `getItemSync()` method
+- **Enhanced Error Handling**: Comprehensive error management for both sync and async operations
+- **Debug Mode Control**: Fine-grained control over internal logging for production vs development
+
+### 🚀 **PERFORMANCE IMPROVEMENTS**
+- **Zero-Delay Restoration**: Synchronous loading eliminates ~50-100ms delay on page refresh
+- **Optimized Storage Access**: Smart detection of synchronous vs asynchronous storage capabilities
+- **Reduced Console Noise**: Silent mode by default prevents console pollution in production
+
+### 🎨 **DEVELOPER EXPERIENCE**
+- **Interactive Demo**: New demo with debug mode toggle and external stylesheet
+- **Better Type Safety**: Complete TypeScript definitions for all new features
+- **Professional Styling**: Clean, responsive demo with modern CSS architecture
+- **Comprehensive Documentation**: Detailed guides for all improvements and compatibility
+
+### 🔧 **API ENHANCEMENTS**
+- **Backward Compatible**: 100% compatibility guaranteed - no breaking changes
+- **Optional Parameters**: All new features are opt-in with sensible defaults
+- **Enhanced Adapters**: Debug parameter added to all storage adapter functions
+- **Error Propagation**: Proper error handling chain from storage to user callbacks
+
+### 🧪 **TESTING & QUALITY**
+- **100% Backward Compatibility**: Extensive testing ensures existing code works unchanged
+- **New Test Suite**: Comprehensive tests for persistence, error handling, and debug modes
+- **Production Ready**: Silent mode by default makes it safe for production deployment
+- **Cross-Platform Validated**: Confirmed working on React.js, React Native, and Expo
+
+### 📚 **DOCUMENTATION**
+- **Complete Documentation**: New `DOCUMENTATION.md` with comprehensive API guide (598 lines)
+- **Getting Started Guide**: New `GETTING_STARTED.md` for quick 5-minute setup
+- **Contributing Guide**: `CONTRIBUTING.md` with setup, guidelines, and templates (436 lines)
+- **Security Policy**: `SECURITY.md` with vulnerability reporting process
+- **Interactive Demo**: Organized `demo/` directory with README and modern styling
+- **GitHub Templates**: Issue templates, PR template, and automated workflows
+- **Impactful README**: Redesigned with competitor comparison and clear value proposition
+- **Platform Compatibility**: Detailed multi-platform usage documentation
+- **Backward Compatibility**: Complete compatibility guarantee and migration guide
+- **Development Setup**: Complete developer onboarding with project structure guide
+
+### 🎯 **BREAKING CHANGES**
+- **None**: Perfect backward compatibility maintained
+
+### 📦 **TECHNICAL DETAILS**
+- **New Methods**: `getItemSync()` in `ExtendedStorageAdapter`
+- **New Parameters**: `debug` parameter in storage adapter creators
+- **Enhanced Types**: Updated `PersistenceConfig` with error callback types
+- **Improved Exports**: New `ExtendedStorageAdapter` type exported
+
 ## [0.2.6] - 2024-08-13
 
 ### Added

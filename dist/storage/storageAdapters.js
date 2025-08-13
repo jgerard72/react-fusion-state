@@ -34,12 +34,15 @@ const createNoopStorageAdapter = () => ({
 exports.createNoopStorageAdapter = createNoopStorageAdapter;
 /**
  * Create a localStorage adapter for web applications
+ * @param debug - Whether to enable debug logging
  * @returns A storage adapter that uses browser's localStorage
  */
-const createLocalStorageAdapter = () => {
+const createLocalStorageAdapter = (debug = false) => {
     // Vérifier si localStorage est disponible
     if (typeof localStorage === 'undefined') {
-        console.warn('localStorage is not available, falling back to noop adapter');
+        if (debug) {
+            console.warn('localStorage is not available, falling back to noop adapter');
+        }
         return (0, exports.createNoopStorageAdapter)();
     }
     return {
@@ -49,10 +52,23 @@ const createLocalStorageAdapter = () => {
                     return localStorage.getItem(key);
                 }
                 catch (error) {
-                    console.error('Error reading from localStorage:', error);
+                    if (debug) {
+                        console.error('Error reading from localStorage:', error);
+                    }
                     return null;
                 }
             });
+        },
+        getItemSync(key) {
+            try {
+                return localStorage.getItem(key);
+            }
+            catch (error) {
+                if (debug) {
+                    console.error('Error reading from localStorage:', error);
+                }
+                return null;
+            }
         },
         setItem(key, value) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -60,7 +76,9 @@ const createLocalStorageAdapter = () => {
                     localStorage.setItem(key, value);
                 }
                 catch (error) {
-                    console.error('Error writing to localStorage:', error);
+                    if (debug) {
+                        console.error('Error writing to localStorage:', error);
+                    }
                 }
             });
         },
@@ -70,7 +88,9 @@ const createLocalStorageAdapter = () => {
                     localStorage.removeItem(key);
                 }
                 catch (error) {
-                    console.error('Error removing from localStorage:', error);
+                    if (debug) {
+                        console.error('Error removing from localStorage:', error);
+                    }
                 }
             });
         },

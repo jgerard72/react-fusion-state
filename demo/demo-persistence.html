@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 React Fusion State - Persistence Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback, memo, createContext, useContext } = React;
+
+        // Simplified React Fusion State Implementation for Demo
+        const FusionStateContext = createContext(null);
+
+        const useFusionState = (key, initialValue) => {
+            const context = useContext(FusionStateContext);
+            if (!context) {
+                throw new Error('useFusionState must be used within a FusionStateProvider');
+            }
+            
+            const { state, setState } = context;
+            const value = state[key] !== undefined ? state[key] : initialValue;
+            
+            const setValue = useCallback((newValue) => {
+                setState(prevState => ({
+                    ...prevState,
+                    [key]: typeof newValue === 'function' ? newValue(value) : newValue
+                }));
+            }, [key, value, setState]);
+            
+            return [value, setValue];
+        };
+
+        const createLocalStorageAdapter = (debug = false) => {
+            if (typeof localStorage === 'undefined') {
+                if (debug) {
+                    console.warn('localStorage is not available, falling back to noop adapter');
+                }
+                return {
+                    async getItem() { return null; },
+                    getItemSync() { return null; },
+                    async setItem() {},
+                    async removeItem() {},
+                };
+            }
+
+            return {
+                async getItem(key) {
+                    try {
+                        return localStorage.getItem(key);
+                    } catch (error) {
+                        if (debug) {
+                            console.error('Error reading from localStorage:', error);
+                        }
+                        return null;
+                    }
+                },
+
+                getItemSync(key) {
+                    try {
+                        return localStorage.getItem(key);
+                    } catch (error) {
+                        if (debug) {
+                            console.error('Error reading from localStorage:', error);
+                        }
+                        return null;
+                    }
+                },
+
+                async setItem(key, value) {
+                    try {
+                        localStorage.setItem(key, value);
+                    } catch (error) {
+                        if (debug) {
+                            console.error('Error writing to localStorage:', error);
+                        }
+                    }
+                },
+
+                async removeItem(key) {
+                    try {
+                        localStorage.removeItem(key);
+                    } catch (error) {
+                        if (debug) {
+                            console.error('Error removing from localStorage:', error);
+                        }
+                    }
+                },
+            };
+        };
+
+        const FusionStateProvider = ({ children, persistence = false, debug = false }) => {
+            const adapter = useMemo(() => createLocalStorageAdapter(debug), [debug]);
+            const keyPrefix = 'demo_app';
+            
+            // Synchronous loading at startup
+            const [state, setState] = useState(() => {
+                if (persistence && adapter.getItemSync) {
+                    try {
+                        const stored = adapter.getItemSync(`${keyPrefix}_all`);
+                        if (stored) {
+                            const data = JSON.parse(stored);
+                            if (debug) {
+                                console.log('✅ State loaded from localStorage:', data);
+                            }
+                            return data;
+                        }
+                    } catch (error) {
+                        if (debug) {
+                            console.warn('⚠️ Loading error:', error);
+                        }
+                    }
+                }
+                return {};
+            });
+
+            const [isLoaded, setIsLoaded] = useState(true);
+
+            // Save when state changes
+            useEffect(() => {
+                if (persistence && adapter && isLoaded && Object.keys(state).length > 0) {
+                    const saveData = async () => {
+                        try {
+                            const dataToSave = JSON.stringify(state);
+                            await adapter.setItem(`${keyPrefix}_all`, dataToSave);
+                            if (debug) {
+                                console.log('💾 State saved:', state);
+                            }
+                        } catch (error) {
+                            if (debug) {
+                                console.error('❌ Save error:', error);
+                            }
+                        }
+                    };
+                    saveData();
+                }
+            }, [state, persistence, adapter, isLoaded, debug]);
+
+            const updateState = useCallback((updater) => {
+                setState(prevState => {
+                    const nextState = typeof updater === 'function' ? updater(prevState) : updater;
+                    
+                    if (debug) {
+                        console.log('[FusionState] State updated:', {
+                            previous: prevState,
+                            next: nextState,
+                            diff: Object.fromEntries(
+                                Object.entries(nextState).filter(
+                                    ([key, value]) => prevState[key] !== value,
+                                ),
+                            ),
+                        });
+                    }
+                    
+                    return nextState;
+                });
+            }, [debug]);
+
+            const value = useMemo(() => ({
+                state,
+                setState: updateState,
+            }), [state, updateState]);
+
+            return React.createElement(FusionStateContext.Provider, { value }, children);
+        };
+
+        // Counter Component
+        const PersistentCounter = () => {
+            const [count, setCount] = useFusionState('counter', 0);
+
+            return (
+                <div className="demo-box">
+                    <h3>
+                        <span className="emoji">🔢</span>
+                        Persistent Counter
+                    </h3>
+                    <div className="value">{count}</div>
+                    <div className="button-group">
+                        <button className="button primary" onClick={() => setCount(count + 1)}>
+                            ➕ Increment
+                        </button>
+                        <button className="button secondary" onClick={() => setCount(count - 1)}>
+                            ➖ Decrement
+                        </button>
+                        <button className="button danger" onClick={() => setCount(0)}>
+                            🔄 Reset
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Name Component
+        const PersistentName = () => {
+            const [name, setName] = useFusionState('name', '');
+
+            return (
+                <div className="demo-box">
+                    <h3>
+                        <span className="emoji">👤</span>
+                        Persistent Name
+                    </h3>
+                    <div className="input-group">
+                        <label htmlFor="name-input">Enter your name:</label>
+                        <input
+                            id="name-input"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Type your name here..."
+                        />
+                    </div>
+                    {name && (
+                        <div className="value">Hello, {name}! 👋</div>
+                    )}
+                </div>
+            );
+        };
+
+        // Debug Information Component
+        const DebugInfo = () => {
+            const [counter] = useFusionState('counter', 0);
+            const [name] = useFusionState('name', '');
+            
+            const storedData = localStorage.getItem('demo_app_all');
+            
+            return (
+                <div className="demo-box">
+                    <h3>
+                        <span className="emoji">🔍</span>
+                        Debug Information
+                    </h3>
+                    <div className="debug">
+                        <div>Current state:</div>
+                        <div>  • Counter: {counter}</div>
+                        <div>  • Name: "{name}"</div>
+                        <br />
+                        <div>localStorage (key: demo_app_all):</div>
+                        <div>  {storedData || 'No data'}</div>
+                        <br />
+                        <button 
+                            className="button danger"
+                            onClick={() => {
+                                localStorage.clear();
+                                window.location.reload();
+                            }}
+                        >
+                            🗑️ Clear localStorage & Reload
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main Application
+        const App = () => {
+            const [debugMode, setDebugMode] = useState(false);
+            
+            return (
+                <>
+                    <h1>🚀 React Fusion State</h1>
+                    <div className="subtitle">Persistence Demo with Optional Console Logging</div>
+                    
+                    <div className="status-box">
+                        <h3>✅ Status: Persistence Fixed!</h3>
+                        <p><strong>Try this:</strong> Change the values below, then refresh the page. The values should persist!</p>
+                        <p><strong>Debug Mode:</strong> Toggle debug mode to see console logs. When disabled, no logs are shown.</p>
+                    </div>
+
+                    <div className="debug-control">
+                        <h2>🎛️ Debug Control</h2>
+                        <label>
+                            <input 
+                                type="checkbox" 
+                                checked={debugMode}
+                                onChange={(e) => setDebugMode(e.target.checked)}
+                            />
+                            <strong>Debug Mode {debugMode ? '(Check Console! 📝)' : '(Silent 🤫)'}</strong>
+                        </label>
+                        <div className="description">
+                            Toggle debug mode to see the difference in console output. 
+                            When disabled, no internal logs are shown.
+                        </div>
+                    </div>
+                    
+                    <FusionStateProvider 
+                        persistence={true}
+                        debug={debugMode}
+                    >
+                        <PersistentCounter />
+                        <PersistentName />
+                        <DebugInfo />
+                    </FusionStateProvider>
+                </>
+            );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // Initial state display
+        console.log('🚀 React Fusion State application started');
+        console.log('💡 Open developer tools to see persistence logs');
+    </script>
+</body>
+</html>

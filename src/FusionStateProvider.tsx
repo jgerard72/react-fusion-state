@@ -15,7 +15,10 @@ import {
   PersistenceConfig,
   SimplePersistenceConfig,
 } from './types';
-import {createNoopStorageAdapter} from './storage/storageAdapters';
+import {
+  createNoopStorageAdapter,
+  ExtendedStorageAdapter,
+} from './storage/storageAdapters';
 import {detectBestStorageAdapter} from './storage/autoDetect';
 import {debounce, formatErrorMessage, simpleDeepEqual} from './utils';
 
@@ -69,10 +72,11 @@ function normalizePersistenceConfig(
     | SimplePersistenceConfig
     | PersistenceConfig
     | undefined,
+  debug = false,
 ): PersistenceConfig | undefined {
   if (!config) return undefined;
 
-  const defaultAdapter = detectBestStorageAdapter();
+  const defaultAdapter = detectBestStorageAdapter(debug);
 
   // Boolean: default persistence
   if (typeof config === 'boolean') {
@@ -109,7 +113,9 @@ function normalizePersistenceConfig(
     debounceTime: simple.debounce,
     loadOnInit: true,
     saveOnChange: true,
-  };
+    onLoadError: simple.onLoadError,
+    onSaveError: simple.onSaveError,
+  } as PersistenceConfig;
 }
 
 /**
@@ -120,8 +126,8 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
   ({children, initialState = {}, debug = false, persistence}) => {
     // Normalize persistence configuration
     const normalizedPersistence = useMemo(
-      () => normalizePersistenceConfig(persistence),
-      [persistence],
+      () => normalizePersistenceConfig(persistence, debug),
+      [persistence, debug],
     );
 
     // Initialize storage - use NoopStorage if not configured
@@ -136,13 +142,69 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true; // Default: save
     const debounceTime = persistenceRef.current?.debounceTime ?? 0;
 
-    // State management
-    const [state, setStateRaw] = useState<GlobalState>(initialState);
+    // State management with synchronous loading
+    const syncLoadErrorRef = useRef<Error | null>(null);
+    const [state, setStateRaw] = useState<GlobalState>(() => {
+      // Try to load synchronously if possible (for localStorage)
+      if (shouldLoadOnInit && storageAdapter && typeof window !== 'undefined') {
+        try {
+          // Check if this is an extended storage adapter with sync support
+          const extendedAdapter = storageAdapter as ExtendedStorageAdapter;
+          if (extendedAdapter.getItemSync) {
+            const item = extendedAdapter.getItemSync(`${keyPrefix}_all`);
+            if (item) {
+              const storedData = JSON.parse(item) as GlobalState;
+              if (debug) {
+                console.log(
+                  '[FusionState] Loaded state synchronously:',
+                  storedData,
+                );
+              }
+              return {...initialState, ...storedData};
+            }
+          }
+        } catch (error) {
+          const errorObj =
+            error instanceof Error ? error : new Error(String(error));
+          syncLoadErrorRef.current = errorObj;
+          if (debug) {
+            console.warn(
+              '[FusionState] Synchronous load failed, will try async:',
+              error,
+            );
+          }
+        }
+      }
+      return initialState;
+    });
+
     const initializingKeys = useRef<Set<string>>(new Set());
     const isInitialLoadDone = useRef<boolean>(false);
     const prevPersistedState = useRef<GlobalState>({});
 
-    // Load state from storage on initialization
+    // Handle synchronous load errors
+    useEffect(() => {
+      if (syncLoadErrorRef.current) {
+        if (debug) {
+          console.error(
+            formatErrorMessage(
+              FusionStateErrorMessages.PERSISTENCE_READ_ERROR,
+              String(syncLoadErrorRef.current),
+            ),
+          );
+        }
+
+        // Call error callback if provided
+        const config = persistenceRef.current as SimplePersistenceConfig;
+        if (config?.onLoadError) {
+          config.onLoadError(syncLoadErrorRef.current, `${keyPrefix}_all`);
+        }
+
+        syncLoadErrorRef.current = null; // Clear the error after handling
+      }
+    }, []); // Run only once
+
+    // Load state from storage on initialization (async fallback)
     useEffect(() => {
       if (shouldLoadOnInit && !isInitialLoadDone.current && storageAdapter) {
         const loadStateFromStorage = async () => {
@@ -154,11 +216,18 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
             if (storedDataRaw) {
               const storedData = JSON.parse(storedDataRaw) as GlobalState;
 
-              // Merge with initial state - stored data takes precedence
-              setStateRaw(prevState => ({
-                ...prevState,
-                ...storedData,
-              }));
+              // Merge with current state - stored data takes precedence
+              setStateRaw(prevState => {
+                const mergedState = {...prevState, ...storedData};
+                if (debug) {
+                  console.log(
+                    '[FusionState] Loaded state from storage (async):',
+                    storedData,
+                  );
+                  console.log('[FusionState] Merged state:', mergedState);
+                }
+                return mergedState;
+              });
 
               // Store for comparison
               prevPersistedState.current = {...storedData};
@@ -166,31 +235,34 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
 
             isInitialLoadDone.current = true;
 
-            if (debug) {
-              console.log(
-                '[FusionState] Loaded state from storage:',
-                storedDataRaw ? JSON.parse(storedDataRaw) : null,
-              );
+            if (debug && !storedDataRaw) {
+              console.log('[FusionState] No stored data found');
             }
           } catch (error) {
             const errorObj =
               error instanceof Error ? error : new Error(String(error));
-            console.error(
-              formatErrorMessage(
-                FusionStateErrorMessages.PERSISTENCE_READ_ERROR,
-                String(error),
-              ),
-            );
+            if (debug) {
+              console.error(
+                formatErrorMessage(
+                  FusionStateErrorMessages.PERSISTENCE_READ_ERROR,
+                  String(error),
+                ),
+              );
+            }
 
             // Appeler le callback d'erreur si fourni
             const config = persistenceRef.current as SimplePersistenceConfig;
             if (config?.onLoadError) {
               config.onLoadError(errorObj, `${keyPrefix}_all`);
             }
+
+            isInitialLoadDone.current = true;
           }
         };
 
         loadStateFromStorage();
+      } else {
+        isInitialLoadDone.current = true;
       }
     }, [storageAdapter, keyPrefix, shouldLoadOnInit, debug]);
 
@@ -285,12 +357,15 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
         } catch (error) {
           const errorObj =
             error instanceof Error ? error : new Error(String(error));
-          console.error(
-            formatErrorMessage(
-              FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR,
-              String(error),
-            ),
-          );
+
+          if (debug) {
+            console.error(
+              formatErrorMessage(
+                FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR,
+                String(error),
+              ),
+            );
+          }
 
           // Appeler le callback d'erreur si fourni
           const config = persistenceRef.current as SimplePersistenceConfig;

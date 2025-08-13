@@ -4,179 +4,214 @@
 
 ![React Fusion State](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/images/react-fusion-state.png)
 
-**Simple Redux replacement for React, React Native & Expo**
+**The simplest global state management for React**  
+*Zero boilerplate • Built-in persistence • Multi-platform*
 
 [![npm version](https://img.shields.io/npm/v/react-fusion-state.svg?style=flat-square)](https://www.npmjs.com/package/react-fusion-state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/react-fusion-state?style=flat-square&color=brightgreen)](https://bundlephobia.com/package/react-fusion-state)
 
 </div>
 
-## 🆚 Redux vs React Fusion State
+## 🎯 **Why Choose React Fusion State?**
 
-| Feature | Redux | React Fusion State |
-|---------|-------|-------------------|
-| **Bundle Size** | ~50KB+ | ~7KB |
-| **Learning Curve** | Hours/Days | 5 minutes |
-| **Boilerplate** | Actions, Reducers, Store | None |
-| **Global State** | `useSelector(state => state.count)` | `useFusionState('count', 0)` |
-| **Persistence** | External plugin | Built-in |
-| **React Native/Expo** | Extra setup | Works out of the box |
+### **⚡ Zero Setup Required**
+```jsx
+// That's it. No reducers, actions, or store configuration.
+const [count, setCount] = useFusionState('count', 0);
+```
 
-## 📦 Installation
+### **💾 Persistence Built-In**
+```jsx
+// State automatically survives page refreshes
+<FusionStateProvider persistence>
+```
 
+### **🌍 Works Everywhere**
+```jsx
+✅ React.js    ✅ React Native    ✅ Expo    ✅ Next.js    ✅ SSR
+```
+
+---
+
+## 🆚 **vs Popular Libraries**
+
+| | **Redux** | **Zustand** | **Jotai** | **React Fusion State** |
+|---|:---:|:---:|:---:|:---:|
+| **Setup** | 🔴 Complex | 🟡 Manual | 🟡 Manual | 🟢 **Zero** |
+| **Size** | 🔴 47KB | 🟡 8KB | 🟢 5KB | 🟢 **7KB** |
+| **Persistence** | 🔴 Plugin | 🔴 Plugin | 🟡 External | 🟢 **Built-in** |
+| **Learning** | 🔴 Days | 🟡 Hours | 🟡 Hours | 🟢 **5 min** |
+| **React Native** | 🔴 Complex | 🟡 Manual | 🟡 Manual | 🟢 **Ready** |
+
+---
+
+## 🚀 **Quick Start**
+
+### Install & Setup
 ```bash
 npm install react-fusion-state
 ```
 
-## 🚀 Quick Start
-
-### 1. Wrap your app
-
 ```jsx
-import { FusionStateProvider } from 'react-fusion-state';
+import { FusionStateProvider, useFusionState } from 'react-fusion-state';
 
+// 1. Wrap your app
 function App() {
   return (
-    <FusionStateProvider>
-      <YourApp />
+    <FusionStateProvider persistence>
+      <Counter />
     </FusionStateProvider>
   );
 }
-```
 
-### 2. Use global state anywhere
-
-```jsx
-import { useFusionState } from 'react-fusion-state';
-
+// 2. Use anywhere - it's global and persistent!
 function Counter() {
-  const [count, setCount] = useFusionState('counter', 0);
-
+  const [count, setCount] = useFusionState('count', 0);
+  
   return (
     <div>
-      <h2>Count: {count}</h2>
+      <p>Count: {count}</p>
       <button onClick={() => setCount(count + 1)}>+</button>
     </div>
   );
 }
-
-function Display() {
-  const [count] = useFusionState('counter', 0); // Same state!
-  return <p>Current count: {count}</p>;
-}
 ```
 
-**That's it!** 🎉 Both components share the same state automatically.
+**Done!** Your state is now global and survives page refreshes. 🎉
 
-## 🌍 Universal Compatibility
+---
 
-**Same code works everywhere:**
+## 💡 **Key Features**
 
-```jsx
-// ✅ ReactJS
-const [theme, setTheme] = useFusionState('theme', 'light');
+### **🎛️ Familiar API**
+Uses the same API as `useState` - no learning curve!
 
-// ✅ React Native
-const [theme, setTheme] = useFusionState('theme', 'light');
+### **💾 Smart Persistence**
+- Automatic state restoration
+- Platform-specific storage (localStorage, AsyncStorage)
+- Selective persistence (choose what to save)
 
-// ✅ Expo
-const [theme, setTheme] = useFusionState('theme', 'light');
-```
+### **🔧 Production Ready**
+- TypeScript first with full type safety
+- Silent by default, debug mode available
+- Zero dependencies, tiny bundle size
 
-## 💾 Automatic Persistence
+### **🌐 Universal**
+Same code works on web, mobile, and server.
 
-State automatically persists between sessions:
+---
 
+## 📱 **Platform Examples**
+
+### React.js / Next.js
 ```jsx
 <FusionStateProvider persistence>
   <App />
 </FusionStateProvider>
 ```
 
-- ✅ **ReactJS**: Uses localStorage automatically
-- ✅ **React Native**: Uses AsyncStorage automatically  
-- ✅ **Expo**: Uses AsyncStorage automatically
-- ✅ **SSR**: Uses memory on server, localStorage on client
-
-## ⚡ Why Switch from Redux?
-
-- 🚀 **7x smaller** - Your users will thank you
-- 🔄 **No boilerplate** - Write less, do more
-- 🧠 **Easy to learn** - If you know `useState`, you know this
-- 💾 **Persistence included** - Built-in, no plugins needed
-- 🌍 **Universal** - Same API everywhere
-- ⚡ **Just works** - Zero configuration
-
-## 📱 React Native & Expo
-
-Works perfectly with React Native and Expo out of the box:
-
+### React Native / Expo
 ```jsx
-import { View, Text, Button } from 'react-native';
-import { useFusionState } from 'react-fusion-state';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncStorageAdapter } from 'react-fusion-state';
 
-function MyComponent() {
-  const [user, setUser] = useFusionState('user', null);
-  
-  return (
-    <View>
-      <Text>User: {user?.name || 'Not logged in'}</Text>
-      <Button title="Login" onPress={() => setUser({name: 'John'})} />
-    </View>
-  );
-}
-```
-
-## 🖥️ Server-Side Rendering (SSR)
-
-Perfect for Next.js, Nuxt, and other SSR frameworks:
-
-```jsx
-import { FusionStateProvider } from 'react-fusion-state';
-
-function App() {
-  return (
-    <FusionStateProvider persistence>
-      <YourApp />
-    </FusionStateProvider>
-  );
-}
-```
-
-**How it works:**
-- 🖥️ **Server**: Automatically uses memory-only mode (no crashes)
-- 🌐 **Client**: Automatically uses localStorage after hydration
-- 🔄 **Hydration**: State persists seamlessly between server and client
-
-- ✅ **Next.js**: Zero configuration needed
-- ✅ **Nuxt**: Works out of the box  
-- ✅ **Gatsby**: SSG compatible
-- ✅ **All SSR frameworks**: Universal compatibility
-
-## 🔧 API Reference
-
-### `useFusionState(key, defaultValue)`
-
-```jsx
-const [state, setState] = useFusionState('myKey', defaultValue);
-```
-
-- **key**: Unique identifier for the state
-- **defaultValue**: Initial value if no stored value exists
-- Returns: `[state, setState]` - Same as `useState`
-
-### `FusionStateProvider`
-
-```jsx
 <FusionStateProvider 
-  persistence={true}           // Enable persistence
-  initialState={{key: value}}  // Set initial state
+  persistence={{ adapter: createAsyncStorageAdapter(AsyncStorage) }}
 >
   <App />
 </FusionStateProvider>
 ```
 
-## 📄 License
+---
+
+## 🎨 **Real Example**
+
+```jsx
+// Login state that persists across app restarts
+function useAuth() {
+  const [user, setUser] = useFusionState('user', null);
+  
+  const login = async (credentials) => {
+    const userData = await api.login(credentials);
+    setUser(userData); // Automatically saved!
+  };
+  
+  const logout = () => setUser(null);
+  
+  return { user, login, logout };
+}
+
+// Use anywhere in your app
+function Header() {
+  const { user, logout } = useAuth();
+  return user ? <UserMenu onLogout={logout} /> : <LoginButton />;
+}
+```
+
+---
+
+## 🌟 **What Makes It Special**
+
+- **🚀 Zero boilerplate** - Works immediately after install
+- **🔄 Automatic persistence** - State survives refreshes/restarts  
+- **⚡ Instant loading** - 0ms delay on state restoration
+- **🎯 TypeScript native** - Full type safety included
+- **🌍 Universal** - One API for all platforms
+- **📦 Tiny** - Only ~7KB, won't bloat your app
+
+---
+
+## 🔄 **Backward Compatibility**
+
+**✅ 100% Compatible** - This library maintains perfect backward compatibility.
+
+- **No breaking changes** - Your existing code works unchanged
+- **Optional new features** - All improvements are opt-in with sensible defaults
+- **Zero migration required** - Update safely without code changes
+
+```jsx
+// Your existing code continues to work exactly the same
+<FusionStateProvider persistence>
+  <App />
+</FusionStateProvider>
+
+// New optional features (when you want them)
+<FusionStateProvider debug persistence>
+  <App />
+</FusionStateProvider>
+```
+
+## 📚 **Resources**
+
+- [**🚀 Getting Started**](https://github.com/jgerard72/react-fusion-state/blob/master/GETTING_STARTED.md) - Quick setup for new users & contributors
+- [**📖 Complete Documentation**](https://github.com/jgerard72/react-fusion-state/blob/master/DOCUMENTATION.md) - Full guide with examples
+- [**🧪 Interactive Demo**](https://github.com/jgerard72/react-fusion-state/blob/master/demo/) - Try it in your browser
+- [**🤝 Contributing Guide**](https://github.com/jgerard72/react-fusion-state/blob/master/CONTRIBUTING.md) - How to contribute
+- [**🔧 API Reference**](https://github.com/jgerard72/react-fusion-state#api)
+- [**💡 Examples**](https://github.com/jgerard72/react-fusion-state/tree/master/src/examples)
+- [**🌐 Platform Guide**](https://github.com/jgerard72/react-fusion-state/blob/master/src/PLATFORM_COMPATIBILITY.md)
+
+---
+
+## 📄 **License**
 
 MIT © [Jacques GERARD](https://github.com/jgerard72)
+
+---
+
+## 👨‍💻 **Author**
+
+**Jacques GERARD**  
+🔗 [LinkedIn](https://www.linkedin.com/in/jgerard/) • [GitHub](https://github.com/jgerard72)
+
+---
+
+<div align="center">
+
+**⭐ Star us on GitHub if you like React Fusion State! ⭐**
+
+[**🚀 Get Started**](https://www.npmjs.com/package/react-fusion-state) • [**📖 Docs**](https://github.com/jgerard72/react-fusion-state) • [**💬 Issues**](https://github.com/jgerard72/react-fusion-state/issues)
+
+</div>

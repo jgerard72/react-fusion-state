@@ -23,18 +23,23 @@ exports.isSSREnvironment = isSSREnvironment;
  * Automatically detects the most appropriate storage adapter
  * based on the runtime environment.
  *
+ * @param debug - Whether to enable debug logging
  * @returns The best available storage adapter
  */
-function detectBestStorageAdapter() {
+function detectBestStorageAdapter(debug = false) {
     // 🔥 SSR Detection first (prevents server crashes)
     if (isSSREnvironment()) {
-        console.info('[FusionState] SSR environment detected, using memory-only mode.');
+        if (debug) {
+            console.info('[FusionState] SSR environment detected, using memory-only mode.');
+        }
         return (0, storageAdapters_1.createNoopStorageAdapter)();
     }
     // Detect React Native second (more reliable)
     if (isReactNativeEnvironment()) {
-        console.info('[FusionState] React Native environment detected. ' +
-            'Use a custom AsyncStorage adapter for persistence.');
+        if (debug) {
+            console.info('[FusionState] React Native environment detected. ' +
+                'Use a custom AsyncStorage adapter for persistence.');
+        }
         return (0, storageAdapters_1.createNoopStorageAdapter)();
     }
     // Check if localStorage is available (browser environment)
@@ -43,14 +48,18 @@ function detectBestStorageAdapter() {
             // Test if localStorage is actually available (can be disabled)
             window.localStorage.setItem('fusion_test', 'test');
             window.localStorage.removeItem('fusion_test');
-            return (0, storageAdapters_1.createLocalStorageAdapter)();
+            return (0, storageAdapters_1.createLocalStorageAdapter)(debug);
         }
         catch (e) {
-            console.warn('[FusionState] localStorage detected but not available:', e);
+            if (debug) {
+                console.warn('[FusionState] localStorage detected but not available:', e);
+            }
         }
     }
     // Fallback: use a no-op adapter
-    console.info('[FusionState] No storage detected, using memory-only mode.');
+    if (debug) {
+        console.info('[FusionState] No storage detected, using memory-only mode.');
+    }
     return (0, storageAdapters_1.createNoopStorageAdapter)();
 }
 exports.detectBestStorageAdapter = detectBestStorageAdapter;
