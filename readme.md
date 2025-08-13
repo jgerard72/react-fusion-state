@@ -41,6 +41,8 @@ const [count, setCount] = useFusionState('count', 0);
 |---|:---:|:---:|:---:|:---:|
 | **Setup** | 🔴 Complex | 🟡 Manual | 🟡 Manual | 🟢 **Zero** |
 | **Size** | 🔴 47KB | 🟡 8KB | 🟢 5KB | 🟢 **7KB** |
+| **Performance** | 🟡 Manual tuning | 🟢 Good | 🟢 Good | 🟢 **Optimized** |
+| **Re-renders** | 🟡 Selector-dependent | 🟢 Optimized | 🟢 Atomic | 🟢 **Auto-optimized** |
 | **Persistence** | 🔴 Plugin | 🔴 Plugin | 🟡 External | 🟢 **Built-in** |
 | **Learning** | 🔴 Days | 🟡 Hours | 🟡 Hours | 🟢 **5 min** |
 | **React Native** | 🔴 Complex | 🟡 Manual | 🟡 Manual | 🟢 **Ready** |
@@ -87,6 +89,12 @@ function Counter() {
 
 ### **🎛️ Familiar API**
 Uses the same API as `useState` - no learning curve!
+
+### **⚡ Performance Optimized**
+- **Auto-optimized re-renders** - Only updates when values actually change
+- **Smaller bundle** - 7KB vs 47KB for Redux (6.7x smaller)
+- **Memory efficient** - Single global state with local sync
+- **Zero config needed** - Optimized by default, no manual tuning
 
 ### **💾 Smart Persistence**
 - Automatic state restoration
@@ -156,10 +164,10 @@ function Header() {
 
 - **🚀 Zero boilerplate** - Works immediately after install
 - **🔄 Automatic persistence** - State survives refreshes/restarts  
-- **⚡ Instant loading** - 0ms delay on state restoration
+- **⚡ Superior performance** - Faster than Redux/Zustand with auto-optimized re-renders
 - **🎯 TypeScript native** - Full type safety included
 - **🌍 Universal** - One API for all platforms
-- **📦 Tiny** - Only ~7KB, won't bloat your app
+- **📦 Tiny & fast** - 7KB bundle, 0ms state restoration
 
 ---
 
@@ -187,6 +195,7 @@ function Header() {
 
 - [**🚀 Getting Started**](https://github.com/jgerard72/react-fusion-state/blob/master/GETTING_STARTED.md) - Quick setup for new users & contributors
 - [**📖 Complete Documentation**](https://github.com/jgerard72/react-fusion-state/blob/master/DOCUMENTATION.md) - Full guide with examples
+- [**⚡ Performance Analysis**](https://github.com/jgerard72/react-fusion-state/blob/master/PERFORMANCE_ANALYSIS.md) - Detailed benchmarks vs Redux/Zustand
 - [**🧪 Interactive Demo**](https://github.com/jgerard72/react-fusion-state/blob/master/demo/) - Try it in your browser
 - [**🤝 Contributing Guide**](https://github.com/jgerard72/react-fusion-state/blob/master/CONTRIBUTING.md) - How to contribute
 - [**🔧 API Reference**](https://github.com/jgerard72/react-fusion-state#api)
