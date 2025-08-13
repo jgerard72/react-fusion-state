@@ -32,6 +32,7 @@ export {
 export {
   detectBestStorageAdapter,
   createMemoryStorageAdapter,
+  isSSREnvironment,
 } from './storage/autoDetect';
 export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
 export type {StorageAdapter} from './storage/storageAdapters';

@@ -5,13 +5,29 @@ import {
 } from './storageAdapters';
 
 /**
+ * Detects if we are in a Server-Side Rendering environment
+ * @returns true if running on server (Node.js), false if running in browser
+ */
+export function isSSREnvironment(): boolean {
+  return typeof window === 'undefined';
+}
+
+/**
  * Automatically detects the most appropriate storage adapter
  * based on the runtime environment.
  *
  * @returns The best available storage adapter
  */
 export function detectBestStorageAdapter(): StorageAdapter {
-  // Detect React Native first (more reliable)
+  // 🔥 SSR Detection first (prevents server crashes)
+  if (isSSREnvironment()) {
+    console.info(
+      '[FusionState] SSR environment detected, using memory-only mode.',
+    );
+    return createNoopStorageAdapter();
+  }
+
+  // Detect React Native second (more reliable)
   if (isReactNativeEnvironment()) {
     console.info(
       '[FusionState] React Native environment detected. ' +
@@ -67,9 +83,15 @@ function isReactNativeEnvironment(): boolean {
  * Detects if we are in a web environment
  */
 function isWebEnvironment(): boolean {
-  return (
-    typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
-  );
+  try {
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.localStorage !== 'undefined'
+    );
+  } catch {
+    // localStorage can be disabled in some browsers
+    return false;
+  }
 }
 
 /**

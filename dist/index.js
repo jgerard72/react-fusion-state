@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAsyncStorageAdapter = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.useFusionStateLog = exports.useGlobalState = exports.FusionStateProvider = exports.useFusionState = void 0;
+exports.createAsyncStorageAdapter = exports.isSSREnvironment = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.useFusionStateLog = exports.useGlobalState = exports.FusionStateProvider = exports.useFusionState = void 0;
 // Core hooks
 var useFusionState_1 = require("./useFusionState");
 Object.defineProperty(exports, "useFusionState", { enumerable: true, get: function () { return useFusionState_1.useFusionState; } });
@@ -27,6 +27,7 @@ Object.defineProperty(exports, "NoopStorageAdapter", { enumerable: true, get: fu
 var autoDetect_1 = require("./storage/autoDetect");
 Object.defineProperty(exports, "detectBestStorageAdapter", { enumerable: true, get: function () { return autoDetect_1.detectBestStorageAdapter; } });
 Object.defineProperty(exports, "createMemoryStorageAdapter", { enumerable: true, get: function () { return autoDetect_1.createMemoryStorageAdapter; } });
+Object.defineProperty(exports, "isSSREnvironment", { enumerable: true, get: function () { return autoDetect_1.isSSREnvironment; } });
 var asyncStorageAdapter_1 = require("./storage/asyncStorageAdapter");
 Object.defineProperty(exports, "createAsyncStorageAdapter", { enumerable: true, get: function () { return asyncStorageAdapter_1.createAsyncStorageAdapter; } });
 //# sourceMappingURL=index.js.map

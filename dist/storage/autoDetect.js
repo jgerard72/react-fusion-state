@@ -9,8 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = void 0;
+exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.isSSREnvironment = void 0;
 const storageAdapters_1 = require("./storageAdapters");
+/**
+ * Detects if we are in a Server-Side Rendering environment
+ * @returns true if running on server (Node.js), false if running in browser
+ */
+function isSSREnvironment() {
+    return typeof window === 'undefined';
+}
+exports.isSSREnvironment = isSSREnvironment;
 /**
  * Automatically detects the most appropriate storage adapter
  * based on the runtime environment.
@@ -18,7 +26,12 @@ const storageAdapters_1 = require("./storageAdapters");
  * @returns The best available storage adapter
  */
 function detectBestStorageAdapter() {
-    // Detect React Native first (more reliable)
+    // 🔥 SSR Detection first (prevents server crashes)
+    if (isSSREnvironment()) {
+        console.info('[FusionState] SSR environment detected, using memory-only mode.');
+        return (0, storageAdapters_1.createNoopStorageAdapter)();
+    }
+    // Detect React Native second (more reliable)
     if (isReactNativeEnvironment()) {
         console.info('[FusionState] React Native environment detected. ' +
             'Use a custom AsyncStorage adapter for persistence.');
@@ -65,7 +78,14 @@ function isReactNativeEnvironment() {
  * Detects if we are in a web environment
  */
 function isWebEnvironment() {
-    return (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined');
+    try {
+        return (typeof window !== 'undefined' &&
+            typeof window.localStorage !== 'undefined');
+    }
+    catch (_a) {
+        // localStorage can be disabled in some browsers
+        return false;
+    }
 }
 /**
  * Creates an in-memory storage adapter for tests or when

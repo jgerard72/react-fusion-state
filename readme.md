@@ -89,7 +89,7 @@ const [theme, setTheme] = useFusionState('theme', 'light');
 State automatically persists between sessions:
 
 ```jsx
-<FusionStateProvider persistence={true}>
+<FusionStateProvider persistence>
   <App />
 </FusionStateProvider>
 ```
@@ -97,6 +97,7 @@ State automatically persists between sessions:
 - ✅ **ReactJS**: Uses localStorage automatically
 - ✅ **React Native**: Uses AsyncStorage automatically  
 - ✅ **Expo**: Uses AsyncStorage automatically
+- ✅ **SSR**: Uses memory on server, localStorage on client
 
 ## ⚡ Why Switch from Redux?
 
@@ -126,6 +127,32 @@ function MyComponent() {
   );
 }
 ```
+
+## 🖥️ Server-Side Rendering (SSR)
+
+Perfect for Next.js, Nuxt, and other SSR frameworks:
+
+```jsx
+import { FusionStateProvider } from 'react-fusion-state';
+
+function App() {
+  return (
+    <FusionStateProvider persistence>
+      <YourApp />
+    </FusionStateProvider>
+  );
+}
+```
+
+**How it works:**
+- 🖥️ **Server**: Automatically uses memory-only mode (no crashes)
+- 🌐 **Client**: Automatically uses localStorage after hydration
+- 🔄 **Hydration**: State persists seamlessly between server and client
+
+- ✅ **Next.js**: Zero configuration needed
+- ✅ **Nuxt**: Works out of the box  
+- ✅ **Gatsby**: SSG compatible
+- ✅ **All SSR frameworks**: Universal compatibility
 
 ## 🔧 API Reference
 

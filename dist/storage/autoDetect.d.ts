@@ -1,5 +1,10 @@
 import { StorageAdapter } from './storageAdapters';
 /**
+ * Detects if we are in a Server-Side Rendering environment
+ * @returns true if running on server (Node.js), false if running in browser
+ */
+export declare function isSSREnvironment(): boolean;
+/**
  * Automatically detects the most appropriate storage adapter
  * based on the runtime environment.
  *

@@ -5,6 +5,6 @@ export type { GlobalState, SetStateAction, StateUpdater, GlobalFusionStateContex
 export { FusionStateErrorMessages, FusionStateError, PersistenceError, } from './types';
 export { formatErrorMessage, debounce, simpleDeepEqual } from './utils';
 export { createNoopStorageAdapter, createLocalStorageAdapter, NoopStorageAdapter, } from './storage/storageAdapters';
-export { detectBestStorageAdapter, createMemoryStorageAdapter, } from './storage/autoDetect';
+export { detectBestStorageAdapter, createMemoryStorageAdapter, isSSREnvironment, } from './storage/autoDetect';
 export { createAsyncStorageAdapter } from './storage/asyncStorageAdapter';
 export type { StorageAdapter } from './storage/storageAdapters';
