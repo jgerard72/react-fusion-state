@@ -4,8 +4,10 @@
 
 ![React Fusion State](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/images/react-fusion-state.png)
 
-**The simplest global state management for React**  
-*Zero boilerplate • Built-in persistence • Multi-platform*
+**Universal state management for React, Vue.js & Angular**  
+*Zero boilerplate • Built-in persistence • Multi-framework • Multi-platform*
+
+🚀 **Now supports React, Vue.js, and Angular with the same powerful API!**
 
 [![npm version](https://img.shields.io/npm/v/react-fusion-state.svg?style=flat-square)](https://www.npmjs.com/package/react-fusion-state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -30,7 +32,7 @@ const [count, setCount] = useFusionState('count', 0);
 
 ### **🌍 Works Everywhere**
 ```jsx
-✅ React.js    ✅ React Native    ✅ Expo    ✅ Next.js    ✅ SSR
+✅ React.js    ✅ Vue.js 3    ✅ Angular    ✅ React Native    ✅ Expo    ✅ Next.js    ✅ SSR
 ```
 
 ---
@@ -83,6 +85,48 @@ function Counter() {
 
 **Done!** Your state is now global and survives page refreshes. 🎉
 
+### 🟢 **Vue.js Quick Start**
+```vue
+<script setup>
+import { useFusionState } from 'react-fusion-state/adapters/vue';
+
+// Same simple API, Vue-native reactivity!
+const [count, setCount] = useFusionState('count', 0);
+const increment = () => setCount(c => c + 1);
+</script>
+
+<template>
+  <div>
+    <p>Count: {{ count }}</p>
+    <button @click="increment">+</button>
+  </div>
+</template>
+```
+
+### 🅰️ **Angular Quick Start**
+```typescript
+import { FusionStateService } from 'react-fusion-state/adapters/angular';
+
+@Component({
+  template: `
+    <div>
+      <p>Count: {{ count$ | async }}</p>
+      <button (click)="increment()">+</button>
+    </div>
+  `
+})
+export class CounterComponent {
+  count$ = this.fusionState.select('count', 0);
+  
+  constructor(private fusionState: FusionStateService) {}
+  
+  increment() {
+    const current = this.fusionState.getValue('count') || 0;
+    this.fusionState.setValue('count', current + 1);
+  }
+}
+```
+
 ---
 
 ## 💡 **Key Features**
@@ -106,8 +150,11 @@ Uses the same API as `useState` - no learning curve!
 - Silent by default, debug mode available
 - Zero dependencies, tiny bundle size
 
-### **🌐 Universal**
-Same code works on web, mobile, and server.
+### **🌐 Universal & Multi-Framework**
+- **Same powerful logic** across React, Vue.js, and Angular
+- **Framework-native APIs** - feels natural in each ecosystem
+- **Universal storage** - works on web, mobile, and server
+- **Shared state** - even between different framework components!
 
 ---
 
@@ -193,13 +240,19 @@ function Header() {
 
 ## 📚 **Resources**
 
+### **Multi-Framework Documentation**
+- [**🌐 Multi-Framework Guide**](https://github.com/jgerard72/react-fusion-state/blob/master/MULTI_FRAMEWORK_GUIDE.md) - Complete guide for React, Vue.js & Angular
+- [**🏗️ Implementation Summary**](https://github.com/jgerard72/react-fusion-state/blob/master/IMPLEMENTATION_SUMMARY.md) - Technical architecture details
+
+### **React Documentation**
 - [**🚀 Getting Started**](https://github.com/jgerard72/react-fusion-state/blob/master/GETTING_STARTED.md) - Quick setup for new users & contributors
 - [**📖 Complete Documentation**](https://github.com/jgerard72/react-fusion-state/blob/master/DOCUMENTATION.md) - Full guide with examples
 - [**⚡ Performance Analysis**](https://github.com/jgerard72/react-fusion-state/blob/master/PERFORMANCE_ANALYSIS.md) - Detailed benchmarks vs Redux/Zustand
+
+### **General Resources**
 - [**🧪 Interactive Demo**](https://github.com/jgerard72/react-fusion-state/blob/master/demo/) - Try it in your browser
 - [**🤝 Contributing Guide**](https://github.com/jgerard72/react-fusion-state/blob/master/CONTRIBUTING.md) - How to contribute
-- [**🔧 API Reference**](https://github.com/jgerard72/react-fusion-state#api)
-- [**💡 Examples**](https://github.com/jgerard72/react-fusion-state/tree/master/src/examples)
+- [**💡 Examples**](https://github.com/jgerard72/react-fusion-state/tree/master/src/examples) - Working examples for all frameworks
 - [**🌐 Platform Guide**](https://github.com/jgerard72/react-fusion-state/blob/master/src/PLATFORM_COMPATIBILITY.md)
 
 ---
