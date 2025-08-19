@@ -14,6 +14,8 @@ module.exports = {
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
     '!src/examples/**',
+    '!src/adapters/vue/**',
+    '!src/adapters/angular/**',
   ],
   coverageThreshold: {
     global: {
@@ -28,4 +30,11 @@ module.exports = {
       tsconfig: 'tsconfig.json',
     }],
   },
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/src/adapters/vue/',
+    '/src/adapters/angular/',
+    '/src/examples/VueExample',
+    '/src/examples/AngularExample',
+  ],
 }; 
