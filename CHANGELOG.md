@@ -5,7 +5,14 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.8] - 2024-12-19 - Automatic Performance Optimizations
+## [0.3.0] - 2024-12-19 - Per-Key Persistence + Performance Optimizations
+
+### 🔑 **NEW: Per-Key Persistence**
+- **Granular Persistence Control**: Choose exactly which keys to persist with `{ persist: true }`
+- **Custom Persistence Options**: Configure `debounceTime`, `debug`, `keyPrefix`, and `adapter` per key
+- **Independent of Provider**: Works without global persistence configuration
+- **Smart Debouncing**: Prevents excessive storage writes with configurable delays
+- **Automatic Loading**: Restored from storage on component mount
 
 ### 🚀 **MAJOR PERFORMANCE IMPROVEMENTS**
 - **Automatic Re-render Prevention**: Intelligent comparison prevents unnecessary re-renders when setting identical values
@@ -34,9 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build and distribution** fully tested
 
 ### 📚 **DOCUMENTATION**
-- **Updated**: Main README with performance optimization section
-- **Added**: `SIMPLE_OPTIMIZATIONS.md` comprehensive guide
-- **Updated**: All code examples and demos
+- **Updated**: Main README with per-key persistence and performance sections
+- **Added**: `DEBOUNCE_STRATEGIES.md` - comprehensive debounce guide
+- **Updated**: All code examples and demos with new persistence API
+- **Added**: New demo `demo-key-persistence.html` showcasing granular persistence
+- **Updated**: Complete API documentation with new options
 - **Translated**: All documentation and comments to English
 
 ### 🔄 **BACKWARD COMPATIBILITY**
@@ -44,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Same API surface** - all hooks, providers, and types unchanged
 - **All aliases maintained** - `useSharedState`, `useAppState`, etc. still available
 - **Performance gains automatic** - users benefit without code changes
+- **New per-key persistence optional** - use when needed, ignore when not
 
 ---
 

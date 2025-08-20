@@ -1,11 +1,20 @@
-# 🧪 React Fusion State - Interactive Demo
+# 🧪 React Fusion State - Interactive Demos
 
 This directory contains interactive demonstrations of React Fusion State features.
 
-## 📁 Files
+## 📁 Available Demos
 
-- **`demo-persistence.html`** - Complete interactive demo with persistence
-- **`styles.css`** - Modern CSS styling for the demo
+### **demo-persistence.html**
+- **Global persistence** via FusionStateProvider
+- **Multiple components** sharing state
+- **Real-time state synchronization**
+- **Error handling** and fallbacks
+
+### **demo-key-persistence.html** ⭐ **NEW**
+- **Per-key persistence** - Choose exactly which data to save
+- **Different persistence strategies** (immediate, debounced, none)
+- **Custom storage options** (keyPrefix, debug, debounceTime)
+- **Mixed persistence approaches** in one app
 
 ## 🚀 How to Run
 
@@ -13,6 +22,7 @@ This directory contains interactive demonstrations of React Fusion State feature
 ```bash
 # Open directly in your browser
 open demo-persistence.html
+open demo-key-persistence.html
 ```
 
 ### Option 2: Local Server (Recommended)
@@ -21,47 +31,59 @@ open demo-persistence.html
 python -m http.server 8000
 # Then visit: http://localhost:8000/demo/
 
-# Using Node.js (if installed)
+# Using Node.js (if installed)  
 npx serve .
 # Then visit the provided URL + /demo/
 ```
 
 ## ✨ Demo Features
 
-### 🔢 Persistent Counter
-- Increment/decrement counter
-- Values persist across page refreshes
-- Real-time localStorage inspection
+### 🔄 Global Persistence Demo (`demo-persistence.html`)
+- **Persistent Counter** - Values survive page refreshes
+- **Persistent Name Input** - Text persists globally
+- **Debug Mode Toggle** - See state changes in console
+- **Debug Information Panel** - Inspect state and localStorage
 
-### 👤 Persistent Name Input
-- Text input with global state
-- Automatic persistence
-- Greeting display
+### 🔑 Per-Key Persistence Demo (`demo-key-persistence.html`) ⭐ **NEW**
+- **User Profile** - Immediate persistence with debug logs
+- **App Settings** - Debounced persistence (2s delay)
+- **Session Data** - No persistence (temporary)
+- **Visual indicators** for different persistence types
 
-### 🎛️ Debug Mode Toggle
-- **Silent Mode** 🤫 - No console logs (production mode)
-- **Debug Mode** 📝 - Detailed console output (development mode)
-- Real-time toggle between modes
+## 🎯 What Each Demo Shows
 
-### 🔍 Debug Information Panel
-- Current state values
-- localStorage content inspection  
-- Clear storage functionality
-- Real-time updates
+### Key Persistence Features Demonstrated
 
-## 🎨 Styling
+#### **Granular Control**
+```jsx
+// Immediate persistence
+const [user, setUser] = useFusionState('user', {}, { 
+  persist: true, 
+  debounceTime: 0,
+  debug: true 
+});
 
-The demo uses modern CSS with:
-- **Responsive design** - Works on mobile and desktop
-- **Gradient backgrounds** - Modern visual appeal
-- **Smooth animations** - Hover effects and transitions
-- **Professional typography** - Clean, readable fonts
-- **Component-based styles** - Reusable CSS classes
+// Debounced persistence  
+const [settings, setSettings] = useFusionState('settings', {}, { 
+  persist: true, 
+  debounceTime: 2000 
+});
 
-## 🧪 Testing the Demo
+// No persistence
+const [temp, setTemp] = useFusionState('temp', '');
+```
+
+#### **Custom Options**
+- **debounceTime**: Control save frequency (0ms to 2000ms)
+- **debug**: Enable/disable console logging
+- **keyPrefix**: Namespace your storage (`user_data`, `app_config`)
+- **adapter**: Custom storage backends (auto-detected)
+
+## 🧪 Testing the Demos
 
 ### Manual Test Scenarios
 
+#### Global Persistence Demo
 1. **Basic Functionality**
    - [ ] Counter increments/decrements
    - [ ] Name input updates greeting
@@ -72,49 +94,78 @@ The demo uses modern CSS with:
    - [ ] Enter name, refresh page → name should persist
    - [ ] Clear localStorage → values reset to defaults
 
-3. **Debug Mode Testing**
-   - [ ] Debug OFF → no console logs
-   - [ ] Debug ON → console shows state changes
-   - [ ] Toggle works in real-time
+#### Key Persistence Demo ⭐ **NEW**
+1. **Immediate Persistence (User Profile)**
+   - [ ] Enter name/email → see instant debug logs
+   - [ ] Change theme → saved immediately
+   - [ ] Refresh page → all data restored
 
-4. **Error Handling**
-   - [ ] Works with localStorage disabled
-   - [ ] Handles storage quota exceeded
-   - [ ] Graceful degradation
+2. **Debounced Persistence (App Settings)**
+   - [ ] Toggle settings → wait 2 seconds
+   - [ ] See console log after delay
+   - [ ] Refresh during delay → changes lost
+   - [ ] Refresh after delay → changes saved
+
+3. **No Persistence (Session Data)**
+   - [ ] Change page views/current page
+   - [ ] Refresh page → data resets to defaults
+   - [ ] No localStorage entries created
+
+## 🔍 Advanced Testing
+
+### Browser DevTools Integration
+1. **Open DevTools** → Application → Local Storage
+2. **Watch storage keys** get created/updated:
+   - `user_data_userProfile` (immediate)
+   - `app_config_appSettings` (debounced)
+   - No keys for session data
+3. **See different prefixes** for different components
+
+### Console Logging
+- **User Profile**: Debug logs enabled - see every save
+- **App Settings**: Debug logs disabled - silent operation
+- **Session Data**: No persistence logs
+
+## 🎨 Styling
+
+The demos use modern CSS with:
+- **Color-coded sections** - Green (persistent), Blue (debounced), Orange (temporary)
+- **Status indicators** - Visual persistence state
+- **Responsive design** - Works on mobile and desktop
+- **Professional typography** - Clean, readable fonts
 
 ## 🔧 Customization
 
-You can modify the demo by:
-
 ### Adding New Components
 ```jsx
-function MyNewComponent() {
-  const [myState, setMyState] = useFusionState('myKey', 'default');
+function MyComponent() {
+  const [data, setData] = useFusionState('myData', {}, {
+    persist: true,
+    debounceTime: 500,
+    debug: true,
+    keyPrefix: 'my_app'
+  });
   return <div>{/* Your component */}</div>;
 }
-
-// Add to the App component
-<MyNewComponent />
 ```
 
 ### Changing Persistence Settings
 ```jsx
-<FusionStateProvider 
-  persistence={{
-    persistKeys: ['counter', 'name', 'myNewKey'], // Add your keys
-    keyPrefix: 'my_demo',                        // Custom prefix
-    debounceTime: 1000,                          // Delay saves
-  }}
-  debug={debugMode}
->
-```
+// Global persistence (demo-persistence.html)
+<FusionStateProvider persistence={{
+  persistKeys: ['counter', 'name'],
+  keyPrefix: 'my_demo',
+  debounceTime: 1000,
+}}>
 
-### Styling Modifications
-Edit `styles.css` to customize:
-- Colors and themes
-- Layout and spacing
-- Animations and transitions
-- Responsive breakpoints
+// Per-key persistence (demo-key-persistence.html)
+const [state, setState] = useFusionState('key', defaultValue, {
+  persist: true,
+  debounceTime: 300,
+  debug: false,
+  keyPrefix: 'custom'
+});
+```
 
 ## 🐛 Troubleshooting
 
@@ -124,26 +175,37 @@ Edit `styles.css` to customize:
 3. **Try a local server** instead of file:// protocol
 4. **Clear localStorage** if behavior seems stuck
 
-### Styling Issues?
-1. **Hard refresh** (Ctrl+F5 or Cmd+Shift+R)
-2. **Check CSS file path** in HTML
-3. **Inspect element** to debug styles
-
 ### Persistence Not Working?
 1. **Check localStorage support** in browser
 2. **Verify debug mode** for console logs
 3. **Try incognito/private mode**
+4. **Check storage quotas** (rare)
 
-## 📚 Learning from the Demo
+### Key Persistence Specific Issues
+1. **Debug logs not showing**: Check `debug: true` option
+2. **Debounced saves not working**: Wait for debounce delay
+3. **Wrong storage keys**: Verify `keyPrefix` setting
+4. **Data not loading**: Check browser's localStorage in DevTools
 
-This demo demonstrates:
-- **Global state management** with `useFusionState`
-- **Automatic persistence** with localStorage
-- **Debug mode** for development
+## 📚 Learning from the Demos
+
+These demos demonstrate:
+- **Global vs per-key persistence** strategies
+- **Immediate vs debounced** saving patterns
+- **Debug logging** for development
+- **Custom storage configuration**
 - **Error handling** and graceful degradation
 - **Modern React patterns** with hooks
 
-Use this as a reference for implementing React Fusion State in your own projects!
+Use these as references for implementing React Fusion State in your own projects!
+
+## 🚀 Next Steps
+
+After exploring the demos:
+1. **Try the npm package** in your project
+2. **Read the documentation** for advanced features
+3. **Check out the examples** in the `/src/examples` directory
+4. **Run the benchmarks** to see performance benefits
 
 ---
 

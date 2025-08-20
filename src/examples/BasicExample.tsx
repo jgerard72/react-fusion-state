@@ -25,11 +25,15 @@ function Counter() {
 
 // Todo Component using Fusion State
 function TodoList() {
-  // Complex state with initial value
-  const [todos, setTodos] = useFusionState<Todo[]>('todos', [
-    {id: 1, text: 'Learn React', completed: true},
-    {id: 2, text: 'Try React Fusion State', completed: false},
-  ]);
+  // Complex state with persistence - todos will survive page refreshes
+  const [todos, setTodos] = useFusionState<Todo[]>(
+    'todos',
+    [
+      {id: 1, text: 'Learn React', completed: true},
+      {id: 2, text: 'Try React Fusion State', completed: false},
+    ],
+    { persist: true } // ✅ Todos will be saved to localStorage
+  );
 
   // Form state
   const [newTodo, setNewTodo] = useFusionState<string>('newTodoText', '');
@@ -125,7 +129,15 @@ export default function App() {
 
 // Theme toggler component
 function ThemeToggle() {
-  const [theme, setTheme] = useFusionState<string>('theme', 'light');
+  // Theme preference with persistence - user's choice will be remembered
+  const [theme, setTheme] = useFusionState<string>(
+    'theme',
+    'light',
+    { 
+      persist: true,
+      debug: true // ✅ Log theme changes to console
+    }
+  );
 
   return (
     <div className="theme-toggle">
@@ -133,6 +145,7 @@ function ThemeToggle() {
         Switch to {theme === 'light' ? 'Dark' : 'Light'} Theme
       </button>
       <p>Current theme: {theme}</p>
+      <p><small>💡 Theme preference is automatically saved!</small></p>
     </div>
   );
 }

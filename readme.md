@@ -27,8 +27,11 @@ const [count, setCount] = useFusionState('count', 0);
 
 ### **💾 Persistence Built-In**
 ```jsx
-// State automatically survives page refreshes
+// Global persistence (via provider)
 <FusionStateProvider persistence>
+
+// OR per-key persistence (independent)
+const [user, setUser] = useFusionState('user', {}, { persist: true });
 ```
 
 ### **🌍 Works Everywhere**
@@ -85,29 +88,35 @@ See our comprehensive [Performance Benchmark](./PERFORMANCE_BENCHMARK.md) compar
 
 ---
 
-## ⚡ **NEW: Automatic Performance Optimizations** 
+## 🔑 **NEW: Per-Key Persistence**
 
-React Fusion State now includes **automatic performance optimizations** with zero configuration needed:
+Choose exactly which state to persist - no more, no less:
 
-### **🎯 Smart Re-render Prevention**
+### **🎯 Granular Persistence Control**
 ```jsx
-const [user, setUser] = useFusionState('user', {name: 'John', age: 30});
+// ✅ This user data will survive page refreshes
+const [user, setUser] = useFusionState('user', {name: 'John'}, { persist: true });
 
-// ✅ No re-render if content is identical
-setUser({...user, name: 'John'}); // Automatically ignored!
+// ✅ Settings with custom options
+const [settings, setSettings] = useFusionState('settings', {}, {
+  persist: true,
+  debounceTime: 1000,  // Save after 1s of inactivity
+  debug: true          // Enable persistence logs
+});
 
-// ✅ Only re-renders when data actually changes
-setUser({...user, name: 'Jane'}); // Updates normally
+// ❌ This temporary data won't be persisted
+const [temp, setTemp] = useFusionState('search', ''); // No persist option
 ```
 
-### **🚀 Performance Benefits**
-- **100% fewer unnecessary re-renders** for identical values
-- **Intelligent object comparison** - compares content, not references
-- **Stable provider context** - eliminates cascading re-renders
-- **Zero configuration** - optimizations work automatically
+### **🚀 Persistence Benefits**
+- **Granular control** - persist only what you need
+- **Independent of provider** - works without global configuration
+- **Smart debouncing** - prevents excessive storage writes
+- **Automatic loading** - restored on component mount
+- **Error handling** - graceful fallbacks on storage failures
 
 ### **🔄 100% Backward Compatible**
-All existing code works exactly the same, but now runs faster automatically!
+All existing code works exactly the same, new persistence is completely optional!
 
 ### **📊 Benchmark Results**
 See our comprehensive [Performance Benchmark](./PERFORMANCE_BENCHMARK.md) comparing React Fusion State against Redux Toolkit, Zustand, and Recoil:
@@ -208,22 +217,27 @@ import { createAsyncStorageAdapter } from 'react-fusion-state';
 ```jsx
 // Login state that persists across app restarts
 function useAuth() {
-  const [user, setUser] = useFusionState('user', null);
+  const [user, setUser] = useFusionState('user', null, { persist: true });
   
   const login = async (credentials) => {
     const userData = await api.login(credentials);
-    setUser(userData); // Automatically saved!
+    setUser(userData); // Automatically saved to storage!
   };
   
-  const logout = () => setUser(null);
+  const logout = () => setUser(null); // Automatically removed from storage!
   
   return { user, login, logout };
 }
 
-// Use anywhere in your app
-function Header() {
-  const { user, logout } = useAuth();
-  return user ? <UserMenu onLogout={logout} /> : <LoginButton />;
+// Theme settings with custom persistence options
+function useTheme() {
+  const [theme, setTheme] = useFusionState('theme', 'light', {
+    persist: true,
+    debounceTime: 500,    // Wait 500ms before saving
+    debug: true          // Log persistence operations
+  });
+  
+  return { theme, setTheme };
 }
 ```
 
@@ -232,7 +246,7 @@ function Header() {
 ## 🌟 **What Makes It Special**
 
 - **🚀 Zero boilerplate** - Works immediately after install
-- **🔄 Automatic persistence** - State survives refreshes/restarts  
+- **🔑 Granular persistence** - Choose exactly which keys to persist
 - **⚡ Superior performance** - Faster than Redux/Zustand with auto-optimized re-renders
 - **🎯 TypeScript native** - Full type safety included
 - **🌍 Universal** - One API for all platforms
@@ -259,6 +273,69 @@ function Header() {
   <App />
 </FusionStateProvider>
 ```
+
+---
+
+## 🔧 **Complete API Reference**
+
+### **`useFusionState(key, initialValue, options?)`**
+
+```tsx
+const [value, setValue] = useFusionState(key, initialValue, options);
+```
+
+**Parameters:**
+- `key: string` - Unique identifier for the state
+- `initialValue: T` - Initial value if not found in storage/state
+- `options?: UseFusionStateOptions` - Optional configuration
+
+**Options:**
+```tsx
+interface UseFusionStateOptions {
+  // Persistence options
+  persist?: boolean;           // Enable persistence for this key
+  adapter?: StorageAdapter;    // Custom storage adapter (auto-detected if not provided)
+  keyPrefix?: string;          // Storage key prefix (default: 'fusion_persistent')
+  debounceTime?: number;       // Debounce time for saves in ms (default: 300)
+  debug?: boolean;            // Enable debug logging (default: false)
+}
+```
+
+**Examples:**
+```tsx
+// Basic usage
+const [count, setCount] = useFusionState('counter', 0);
+
+// With persistence
+const [user, setUser] = useFusionState('user', {}, { persist: true });
+
+// With custom options
+const [settings, setSettings] = useFusionState('settings', {}, {
+  persist: true,
+  debounceTime: 1000,
+  debug: true,
+  keyPrefix: 'myapp'
+});
+```
+
+### **`FusionStateProvider`**
+
+```tsx
+<FusionStateProvider 
+  persistence={config}
+  initialState={state}
+  debug={boolean}
+>
+  <App />
+</FusionStateProvider>
+```
+
+**Props:**
+- `persistence?: boolean | string[] | PersistenceConfig` - Global persistence config
+- `initialState?: GlobalState` - Initial state values
+- `debug?: boolean` - Enable debug logging
+
+---
 
 ## 📚 **Resources**
 

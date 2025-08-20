@@ -120,4 +120,14 @@ export interface UseFusionStateOptions {
     skipLocalState?: boolean;
     /** @deprecated No longer used - automatic optimizations */
     compare?: (a: unknown, b: unknown) => boolean;
+    /** Enable persistence for this specific key */
+    persist?: boolean;
+    /** Storage adapter to use (auto-detected if not provided) */
+    adapter?: StorageAdapter;
+    /** Storage key prefix (default: 'fusion_persistent') */
+    keyPrefix?: string;
+    /** Debounce time for saving in ms (default: 300) */
+    debounceTime?: number;
+    /** Enable debug logging for persistence */
+    debug?: boolean;
 }

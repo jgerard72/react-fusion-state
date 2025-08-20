@@ -24,6 +24,7 @@ export type {
   SimplePersistenceConfig,
   UseFusionStateOptions,
 } from './types';
+
 export {
   FusionStateErrorMessages,
   FusionStateError,

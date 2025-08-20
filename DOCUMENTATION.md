@@ -1,6 +1,6 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 0.2.7  
+**Version:** 0.3.0  
 **Author:** Jacques GERARD  
 **License:** MIT
 
@@ -11,12 +11,13 @@
 1. [🚀 Quick Start](#-quick-start)
 2. [🎛️ Core API](#️-core-api)
 3. [💾 Persistence](#-persistence)
-4. [🌐 Platform Support](#-platform-support)
-5. [🔧 Advanced Configuration](#-advanced-configuration)
-6. [🛠️ Development Setup](#️-development-setup)
-7. [🧪 Testing & Demo](#-testing--demo)
-8. [🔄 Migration & Compatibility](#-migration--compatibility)
-9. [❓ FAQ & Troubleshooting](#-faq--troubleshooting)
+4. [🔑 Per-Key Persistence](#-per-key-persistence) ⭐ **NEW**
+5. [🌐 Platform Support](#-platform-support)
+6. [🔧 Advanced Configuration](#-advanced-configuration)
+7. [🛠️ Development Setup](#️-development-setup)
+8. [🧪 Testing & Demo](#-testing--demo)
+9. [🔄 Migration & Compatibility](#-migration--compatibility)
+10. [❓ FAQ & Troubleshooting](#-faq--troubleshooting)
 
 ---
 
