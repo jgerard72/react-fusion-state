@@ -32,7 +32,7 @@ function TodoList() {
       {id: 1, text: 'Learn React', completed: true},
       {id: 2, text: 'Try React Fusion State', completed: false},
     ],
-    { persist: true } // ✅ Todos will be saved to localStorage
+    {persist: true}, // ✅ Todos will be saved to localStorage
   );
 
   // Form state
@@ -130,14 +130,10 @@ export default function App() {
 // Theme toggler component
 function ThemeToggle() {
   // Theme preference with persistence - user's choice will be remembered
-  const [theme, setTheme] = useFusionState<string>(
-    'theme',
-    'light',
-    { 
-      persist: true,
-      debug: true // ✅ Log theme changes to console
-    }
-  );
+  const [theme, setTheme] = useFusionState<string>('theme', 'light', {
+    persist: true,
+    debug: true, // ✅ Log theme changes to console
+  });
 
   return (
     <div className="theme-toggle">
@@ -145,7 +141,9 @@ function ThemeToggle() {
         Switch to {theme === 'light' ? 'Dark' : 'Light'} Theme
       </button>
       <p>Current theme: {theme}</p>
-      <p><small>💡 Theme preference is automatically saved!</small></p>
+      <p>
+        <small>💡 Theme preference is automatically saved!</small>
+      </p>
     </div>
   );
 }
