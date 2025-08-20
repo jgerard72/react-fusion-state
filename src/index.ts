@@ -3,7 +3,10 @@ export {useFusionState} from './useFusionState';
 export {FusionStateProvider, useGlobalState} from './FusionStateProvider';
 export {useFusionStateLog} from './useFusionStateLog';
 
-// Convenient aliases for common imports
+// ✅ AUTOMATIC OPTIMIZATIONS: Built into useFusionState
+// No need for separate hooks, everything is optimized automatically!
+
+// Convenient aliases for different use cases
 export {useFusionState as useSharedState} from './useFusionState';
 export {useFusionState as usePersistentState} from './useFusionState';
 export {useFusionState as useAppState} from './useFusionState';
@@ -11,7 +14,7 @@ export {FusionStateProvider as GlobalStateProvider} from './FusionStateProvider'
 export {FusionStateProvider as StateProvider} from './FusionStateProvider';
 export {FusionStateProvider as AppStateProvider} from './FusionStateProvider';
 
-// Types principaux
+// Main types
 export type {
   GlobalState,
   SetStateAction,
@@ -30,6 +33,8 @@ export {
 // Utilities
 export {formatErrorMessage, debounce, simpleDeepEqual} from './utils';
 
+// ✅ SIMPLE: No complex middleware
+
 // Persistence exports
 export {
   createNoopStorageAdapter,
@@ -44,7 +49,7 @@ export {
 } from './storage/autoDetect';
 export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
 
-// Storage adapter aliases
+// Storage adapter aliases for convenience
 export {createLocalStorageAdapter as createWebStorageAdapter} from './storage/storageAdapters';
 export {createAsyncStorageAdapter as createRNStorageAdapter} from './storage/asyncStorageAdapter';
 export {createAsyncStorageAdapter as createMobileStorageAdapter} from './storage/asyncStorageAdapter';

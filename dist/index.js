@@ -9,7 +9,9 @@ Object.defineProperty(exports, "FusionStateProvider", { enumerable: true, get: f
 Object.defineProperty(exports, "useGlobalState", { enumerable: true, get: function () { return FusionStateProvider_1.useGlobalState; } });
 var useFusionStateLog_1 = require("./useFusionStateLog");
 Object.defineProperty(exports, "useFusionStateLog", { enumerable: true, get: function () { return useFusionStateLog_1.useFusionStateLog; } });
-// Convenient aliases for common imports
+// ✅ AUTOMATIC OPTIMIZATIONS: Built into useFusionState
+// No need for separate hooks, everything is optimized automatically!
+// Convenient aliases for different use cases
 var useFusionState_2 = require("./useFusionState");
 Object.defineProperty(exports, "useSharedState", { enumerable: true, get: function () { return useFusionState_2.useFusionState; } });
 var useFusionState_3 = require("./useFusionState");
@@ -31,6 +33,7 @@ var utils_1 = require("./utils");
 Object.defineProperty(exports, "formatErrorMessage", { enumerable: true, get: function () { return utils_1.formatErrorMessage; } });
 Object.defineProperty(exports, "debounce", { enumerable: true, get: function () { return utils_1.debounce; } });
 Object.defineProperty(exports, "simpleDeepEqual", { enumerable: true, get: function () { return utils_1.simpleDeepEqual; } });
+// ✅ SIMPLE: No complex middleware
 // Persistence exports
 var storageAdapters_1 = require("./storage/storageAdapters");
 Object.defineProperty(exports, "createNoopStorageAdapter", { enumerable: true, get: function () { return storageAdapters_1.createNoopStorageAdapter; } });
@@ -43,7 +46,7 @@ Object.defineProperty(exports, "createMemoryStorageAdapter", { enumerable: true,
 Object.defineProperty(exports, "isSSREnvironment", { enumerable: true, get: function () { return autoDetect_1.isSSREnvironment; } });
 var asyncStorageAdapter_1 = require("./storage/asyncStorageAdapter");
 Object.defineProperty(exports, "createAsyncStorageAdapter", { enumerable: true, get: function () { return asyncStorageAdapter_1.createAsyncStorageAdapter; } });
-// Storage adapter aliases
+// Storage adapter aliases for convenience
 var storageAdapters_2 = require("./storage/storageAdapters");
 Object.defineProperty(exports, "createWebStorageAdapter", { enumerable: true, get: function () { return storageAdapters_2.createLocalStorageAdapter; } });
 var asyncStorageAdapter_2 = require("./storage/asyncStorageAdapter");

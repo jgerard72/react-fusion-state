@@ -28,6 +28,11 @@ interface User {
 function UserForm() {
   const [user, setUser] = useFusionState<User>('user', {name: '', email: ''});
 
+  // ✅ Protection against undefined during initialization
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <input
@@ -116,9 +121,7 @@ describe('Integration Tests', () => {
         <div data-testid="counter">
           <Counter />
         </div>
-        <div data-testid="logger">
-          <StateLogger />
-        </div>
+        <StateLogger />
       </FusionStateProvider>,
     );
 

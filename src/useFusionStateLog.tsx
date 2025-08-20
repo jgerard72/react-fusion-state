@@ -46,7 +46,26 @@ export const useFusionStateLog = (
   options: FusionStateLogOptions = {},
 ): SelectedState => {
   const {state} = useGlobalState();
-  const [selectedState, setSelectedState] = useState<SelectedState>({});
+
+  // Filter state based on keys - optimized with deep comparison
+  const filteredState = useMemo(() => {
+    // If no keys, return all state
+    if (!keys || keys.length === 0) {
+      return state;
+    }
+
+    // Filter only requested keys
+    const result: SelectedState = {};
+    for (const key of keys) {
+      if (key in state) {
+        result[key] = state[key];
+      }
+    }
+    return result;
+  }, [state, keys?.join(',')]); // ✅ Stabiliser la dépendance keys
+
+  const [selectedState, setSelectedState] =
+    useState<SelectedState>(filteredState);
 
   // Track previous state for change detection
   const previousState = useRef<SelectedState>({});
@@ -73,23 +92,6 @@ export const useFusionStateLog = (
     },
     [changeDetection],
   );
-
-  // Filter state based on keys - optimized
-  const filteredState = useMemo(() => {
-    // If no keys, return all state
-    if (!keys || keys.length === 0) {
-      return state;
-    }
-
-    // Filter only requested keys
-    const result: SelectedState = {};
-    for (const key of keys) {
-      if (key in state) {
-        result[key] = state[key];
-      }
-    }
-    return result;
-  }, [state, keys]);
 
   useEffect(() => {
     // Calculate changes if requested
@@ -128,5 +130,5 @@ export const useFusionStateLog = (
     }
   }, [filteredState, trackChanges, consoleLog, formatter, compareValues]);
 
-  return selectedState;
+  return filteredState;
 };

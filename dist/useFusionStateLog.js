@@ -17,7 +17,22 @@ const utils_1 = require("./utils");
  */
 const useFusionStateLog = (keys, options = {}) => {
     const { state } = (0, FusionStateProvider_1.useGlobalState)();
-    const [selectedState, setSelectedState] = (0, react_1.useState)({});
+    // Filter state based on keys - optimized with deep comparison
+    const filteredState = (0, react_1.useMemo)(() => {
+        // If no keys, return all state
+        if (!keys || keys.length === 0) {
+            return state;
+        }
+        // Filter only requested keys
+        const result = {};
+        for (const key of keys) {
+            if (key in state) {
+                result[key] = state[key];
+            }
+        }
+        return result;
+    }, [state, keys === null || keys === void 0 ? void 0 : keys.join(',')]); // ✅ Stabiliser la dépendance keys
+    const [selectedState, setSelectedState] = (0, react_1.useState)(filteredState);
     // Track previous state for change detection
     const previousState = (0, react_1.useRef)({});
     const previousKeys = (0, react_1.useRef)(undefined);
@@ -35,21 +50,6 @@ const useFusionStateLog = (keys, options = {}) => {
             return (0, utils_1.simpleDeepEqual)(a, b);
         }
     }, [changeDetection]);
-    // Filter state based on keys - optimized
-    const filteredState = (0, react_1.useMemo)(() => {
-        // If no keys, return all state
-        if (!keys || keys.length === 0) {
-            return state;
-        }
-        // Filter only requested keys
-        const result = {};
-        for (const key of keys) {
-            if (key in state) {
-                result[key] = state[key];
-            }
-        }
-        return result;
-    }, [state, keys]);
     (0, react_1.useEffect)(() => {
         // Calculate changes if requested
         let changes;
@@ -81,7 +81,7 @@ const useFusionStateLog = (keys, options = {}) => {
             console.log('[FusionState Log]', logData);
         }
     }, [filteredState, trackChanges, consoleLog, formatter, compareValues]);
-    return selectedState;
+    return filteredState;
 };
 exports.useFusionStateLog = useFusionStateLog;
 //# sourceMappingURL=useFusionStateLog.js.map

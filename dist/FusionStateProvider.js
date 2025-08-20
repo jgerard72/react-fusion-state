@@ -235,11 +235,15 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
             // Filter keys if persistence.persistKeys is defined
             const stateToSave = filterPersistKeys(newState);
             try {
-                // Check if anything changed from previously saved state
+                // ✅ Optimization: check if data has actually changed
                 const hasChanged = !(0, utils_1.simpleDeepEqual)(stateToSave, prevPersistedState.current);
                 // Only save if there are changes
-                if (!hasChanged)
+                if (!hasChanged) {
+                    if (debug) {
+                        console.log('[FusionState] No changes detected, skipping save');
+                    }
                     return;
+                }
                 // Check if customSaveCallback is provided in the persistence config
                 // SimplePersistenceConfig peut avoir customSaveCallback, mais pas PersistenceConfig
                 const persistenceConfig = persistenceRef.current;
@@ -289,33 +293,30 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
         debounceTime,
         filterPersistKeys,
     ]);
-    // Wrap setState to add debugging and persistence
-    const setState = (0, react_1.useMemo)(() => {
-        const setStateWithPersistence = (updater) => {
-            setStateRaw(prevState => {
-                const nextState = typeof updater === 'function' ? updater(prevState) : updater;
-                // Trigger persistence if needed
-                if (shouldSaveOnChange) {
-                    saveStateToStorage(nextState);
-                }
-                // Debug logging
-                if (debug) {
-                    console.log('[FusionState] State updated:', {
-                        previous: prevState,
-                        next: nextState,
-                        diff: Object.fromEntries(Object.entries(nextState).filter(([key, value]) => prevState[key] !== value)),
-                    });
-                }
-                return nextState;
-            });
-        };
-        return setStateWithPersistence;
-    }, [debug, setStateRaw, shouldSaveOnChange, saveStateToStorage]);
+    // ✅ SIMPLE: stable setState with useCallback
+    const setState = (0, react_1.useCallback)((updater) => {
+        setStateRaw(prevState => {
+            const nextState = typeof updater === 'function' ? updater(prevState) : updater;
+            // Trigger persistence if needed
+            if (shouldSaveOnChange) {
+                saveStateToStorage(nextState);
+            }
+            // Debug logging
+            if (debug) {
+                console.log('[FusionState] State updated:', {
+                    previous: prevState,
+                    next: nextState,
+                    diff: Object.fromEntries(Object.entries(nextState).filter(([key, value]) => prevState[key] !== value)),
+                });
+            }
+            return nextState;
+        });
+    }, [debug, shouldSaveOnChange, saveStateToStorage]);
     const value = (0, react_1.useMemo)(() => ({
         state,
         setState,
         initializingKeys: initializingKeys.current,
-    }), [state, setState]);
+    }), [state]);
     return (react_1.default.createElement(GlobalStateContext.Provider, { value: value }, children));
 });
 //# sourceMappingURL=FusionStateProvider.js.map

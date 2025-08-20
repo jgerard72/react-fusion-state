@@ -11,52 +11,63 @@ const utils_1 = require("./utils");
  * @template T - The type of the state value.
  * @param {string} key - The key for the state value in the global state.
  * @param {T} [initialValue] - The initial value for the state if it is not already set.
- * @param {UseFusionStateOptions} [options] - Additional options for the hook.
  * @returns {[T, StateUpdater<T>]} - Returns the current state value and a function to update it.
  * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
  */
-function useFusionState(key, initialValue, options) {
-    var _a;
+function useFusionState(key, initialValue) {
     const { state, setState, initializingKeys } = (0, FusionStateProvider_1.useGlobalState)();
-    const skipLocalState = (_a = options === null || options === void 0 ? void 0 : options.skipLocalState) !== null && _a !== void 0 ? _a : false;
-    // Simplified initialization
+    // ✅ Optimized initialization with race condition handling
     (0, react_1.useEffect)(() => {
         if (initialValue !== undefined && !(key in state)) {
             if (initializingKeys.has(key)) {
                 throw new Error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.KEY_ALREADY_INITIALIZING, key));
             }
-            setState(prev => (Object.assign(Object.assign({}, prev), { [key]: initialValue })));
+            // Mark as initializing
+            initializingKeys.add(key);
+            setState(prev => {
+                // Double-check to avoid race conditions
+                if (key in prev) {
+                    initializingKeys.delete(key);
+                    return prev;
+                }
+                const newState = Object.assign(Object.assign({}, prev), { [key]: initialValue });
+                initializingKeys.delete(key);
+                return newState;
+            });
         }
         else if (!(key in state) && initialValue === undefined) {
             throw new Error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.KEY_MISSING_NO_INITIAL, key));
         }
-    }, [key, initialValue, state, setState, initializingKeys]);
-    // Use local state only if not skipping it (performance optimization)
-    const [localValue, setLocalValue] = (0, react_1.useState)(() => state[key]);
-    (0, react_1.useEffect)(() => {
-        if (!skipLocalState) {
-            const newValue = state[key];
-            if (newValue !== localValue) {
-                setLocalValue(newValue);
-            }
-        }
-    }, [state, key, localValue, skipLocalState]);
-    // State update function with performance optimization
+    }, [key, initialValue]); // ✅ Reduce dependencies to avoid loops
+    // ✅ SIMPLE: Current state value
+    const currentValue = state[key];
+    // ✅ AUTOMATIC OPTIMIZATION: setValue with intelligent comparison
     const setValue = (0, react_1.useCallback)(newValue => {
         setState(prevState => {
             const currentValue = prevState[key];
             const nextValue = typeof newValue === 'function'
                 ? newValue(currentValue)
                 : newValue;
-            // Only update if the value has changed
+            // ✅ OPTIMIZATION: Automatic intelligent comparison
+            // - Reference first (faster)
+            // - Deep equality for objects if needed
             if (nextValue === currentValue) {
-                return prevState;
+                return prevState; // Same reference = no change
+            }
+            // If it's an object, check content
+            if (typeof nextValue === 'object' &&
+                nextValue !== null &&
+                typeof currentValue === 'object' &&
+                currentValue !== null) {
+                if ((0, utils_1.simpleDeepEqual)(nextValue, currentValue)) {
+                    return prevState; // Same content = no change
+                }
             }
             return Object.assign(Object.assign({}, prevState), { [key]: nextValue });
         });
     }, [key, setState]);
-    // Return either global state directly (if skipping local) or synchronized local state
-    return [skipLocalState ? state[key] : localValue, setValue];
+    // ✅ SIMPLE: Return current value and setter
+    return [currentValue, setValue];
 }
 exports.useFusionState = useFusionState;
 //# sourceMappingURL=useFusionState.js.map

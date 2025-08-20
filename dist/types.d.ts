@@ -112,13 +112,12 @@ export declare class PersistenceError extends FusionStateError {
     constructor(message: string, operation: 'read' | 'write', storageKey?: string | undefined, context?: Record<string, unknown>);
 }
 /**
- * Options for fusion state consumption
+ * ✅ REMOVED: No more options needed, everything is optimized automatically!
+ * Interface kept for backward compatibility but no longer used.
  */
 export interface UseFusionStateOptions {
-    /**
-     * Skip local state synchronization for performance optimization
-     * When true, the hook will read directly from global state, which may improve performance
-     * but can cause more re-renders in some cases.
-     */
+    /** @deprecated No longer used - automatic optimizations */
     skipLocalState?: boolean;
+    /** @deprecated No longer used - automatic optimizations */
+    compare?: (a: unknown, b: unknown) => boolean;
 }

@@ -7,7 +7,7 @@ import {
   FusionStateErrorMessages,
   UseFusionStateOptions,
 } from './types';
-import {formatErrorMessage} from './utils';
+import {formatErrorMessage, simpleDeepEqual} from './utils';
 
 /**
  * Custom hook to manage a piece of state within the global fusion state.
@@ -15,19 +15,16 @@ import {formatErrorMessage} from './utils';
  * @template T - The type of the state value.
  * @param {string} key - The key for the state value in the global state.
  * @param {T} [initialValue] - The initial value for the state if it is not already set.
- * @param {UseFusionStateOptions} [options] - Additional options for the hook.
  * @returns {[T, StateUpdater<T>]} - Returns the current state value and a function to update it.
  * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
  */
 export function useFusionState<T = unknown>(
   key: string,
   initialValue?: T,
-  options?: UseFusionStateOptions,
 ): [T, StateUpdater<T>] {
   const {state, setState, initializingKeys} = useGlobalState();
-  const skipLocalState = options?.skipLocalState ?? false;
 
-  // Simplified initialization
+  // ✅ Optimized initialization with race condition handling
   useEffect(() => {
     if (initialValue !== undefined && !(key in state)) {
       if (initializingKeys.has(key)) {
@@ -38,7 +35,21 @@ export function useFusionState<T = unknown>(
           ),
         );
       }
-      setState(prev => ({...prev, [key]: initialValue}));
+
+      // Mark as initializing
+      initializingKeys.add(key);
+
+      setState(prev => {
+        // Double-check to avoid race conditions
+        if (key in prev) {
+          initializingKeys.delete(key);
+          return prev;
+        }
+
+        const newState = {...prev, [key]: initialValue};
+        initializingKeys.delete(key);
+        return newState;
+      });
     } else if (!(key in state) && initialValue === undefined) {
       throw new Error(
         formatErrorMessage(
@@ -47,21 +58,12 @@ export function useFusionState<T = unknown>(
         ),
       );
     }
-  }, [key, initialValue, state, setState, initializingKeys]);
+  }, [key, initialValue]); // ✅ Reduce dependencies to avoid loops
 
-  // Use local state only if not skipping it (performance optimization)
-  const [localValue, setLocalValue] = useState<T>(() => state[key] as T);
+  // ✅ SIMPLE: Current state value
+  const currentValue = state[key] as T;
 
-  useEffect(() => {
-    if (!skipLocalState) {
-      const newValue = state[key] as T;
-      if (newValue !== localValue) {
-        setLocalValue(newValue);
-      }
-    }
-  }, [state, key, localValue, skipLocalState]);
-
-  // State update function with performance optimization
+  // ✅ AUTOMATIC OPTIMIZATION: setValue with intelligent comparison
   const setValue = useCallback<StateUpdater<T>>(
     newValue => {
       setState(prevState => {
@@ -71,9 +73,23 @@ export function useFusionState<T = unknown>(
             ? (newValue as (prev: T) => T)(currentValue)
             : newValue;
 
-        // Only update if the value has changed
+        // ✅ OPTIMIZATION: Automatic intelligent comparison
+        // - Reference first (faster)
+        // - Deep equality for objects if needed
         if (nextValue === currentValue) {
-          return prevState;
+          return prevState; // Same reference = no change
+        }
+
+        // If it's an object, check content
+        if (
+          typeof nextValue === 'object' &&
+          nextValue !== null &&
+          typeof currentValue === 'object' &&
+          currentValue !== null
+        ) {
+          if (simpleDeepEqual(nextValue, currentValue)) {
+            return prevState; // Same content = no change
+          }
         }
 
         return {...prevState, [key]: nextValue};
@@ -82,6 +98,6 @@ export function useFusionState<T = unknown>(
     [key, setState],
   );
 
-  // Return either global state directly (if skipping local) or synchronized local state
-  return [skipLocalState ? (state[key] as T) : localValue, setValue];
+  // ✅ SIMPLE: Return current value and setter
+  return [currentValue, setValue];
 }

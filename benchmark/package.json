@@ -1,0 +1,17 @@
+{
+  "name": "react-fusion-state-benchmarks",
+  "version": "1.0.0",
+  "description": "Performance benchmarks for React Fusion State",
+  "main": "real-world-benchmark.js",
+  "scripts": {
+    "benchmark": "node real-world-benchmark.js",
+    "benchmark-mock": "node benchmark-suite.js"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.0.1",
+    "zustand": "^4.4.7",
+    "recoil": "^0.7.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

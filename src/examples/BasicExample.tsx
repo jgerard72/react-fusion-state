@@ -125,7 +125,7 @@ export default function App() {
 
 // Theme toggler component
 function ThemeToggle() {
-  const [theme, setTheme] = useFusionState<string>('theme');
+  const [theme, setTheme] = useFusionState<string>('theme', 'light');
 
   return (
     <div className="theme-toggle">
