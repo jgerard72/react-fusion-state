@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Fusion State DevTools Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #1976d2;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.disconnected {
+            background: #f44336;
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .toolbar {
+            background: white;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .toolbar button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        
+        .toolbar button:hover {
+            background: #1565c0;
+        }
+        
+        .toolbar button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .toolbar .secondary {
+            background: #757575;
+        }
+        
+        .toolbar .secondary:hover {
+            background: #616161;
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+        
+        .main-panel {
+            flex: 1;
+            background: #fafafa;
+            overflow-y: auto;
+        }
+        
+        .state-list {
+            list-style: none;
+        }
+        
+        .state-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .state-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .state-item.active {
+            background: #e3f2fd;
+            border-left: 3px solid #1976d2;
+        }
+        
+        .state-key {
+            font-weight: 500;
+            color: #1976d2;
+            margin-bottom: 4px;
+        }
+        
+        .state-type {
+            font-size: 12px;
+            color: #757575;
+            margin-bottom: 4px;
+        }
+        
+        .state-preview {
+            font-size: 12px;
+            color: #424242;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .no-states {
+            padding: 40px 20px;
+            text-align: center;
+            color: #757575;
+        }
+        
+        .no-states .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .state-viewer {
+            padding: 20px;
+        }
+        
+        .state-viewer h2 {
+            color: #1976d2;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+        
+        .json-viewer {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .actions button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .actions .danger {
+            background: #d32f2f;
+        }
+        
+        .actions .secondary {
+            background: #757575;
+        }
+        
+        .welcome {
+            padding: 40px;
+            text-align: center;
+            color: #757575;
+        }
+        
+        .welcome .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .stats {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 React Fusion State DevTools</h1>
+        <div class="status">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <span id="statusText" class="stats">Connecting...</span>
+        </div>
+    </div>
+    
+    <div class="toolbar">
+        <button id="refreshBtn">🔄 Refresh</button>
+        <button id="clearBtn" class="secondary">🗑️ Clear</button>
+        <button id="exportBtn">📥 Export</button>
+        <button id="importBtn">📤 Import</button>
+        <span style="margin-left: auto; font-size: 12px; color: #757575;" id="stateCount">0 states</span>
+    </div>
+    
+    <div class="content">
+        <div class="sidebar">
+            <ul class="state-list" id="stateList">
+                <li class="no-states">
+                    <div class="icon">🔍</div>
+                    <div>No states detected</div>
+                    <div style="font-size: 12px; margin-top: 8px;">
+                        Make sure your app uses React Fusion State
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="main-panel">
+            <div class="welcome" id="welcomePanel">
+                <div class="icon">🛠️</div>
+                <h2>Welcome to React Fusion State DevTools</h2>
+                <p>This panel will show your application's state when React Fusion State is detected.</p>
+                <br>
+                <p><strong>Getting started:</strong></p>
+                <ol style="text-align: left; display: inline-block; margin-top: 10px;">
+                    <li>Make sure your app uses <code>useFusionState</code> hooks</li>
+                    <li>Interact with your application</li>
+                    <li>State changes will appear in the sidebar</li>
+                    <li>Click on any state to inspect and modify it</li>
+                </ol>
+            </div>
+            
+            <div class="state-viewer" id="stateViewer" style="display: none;">
+                <h2 id="viewerTitle">State Key</h2>
+                <div class="json-viewer" id="jsonViewer"></div>
+                <div class="actions">
+                    <button id="editBtn">✏️ Edit</button>
+                    <button id="resetBtn" class="danger">🔄 Reset</button>
+                    <button id="copyBtn" class="secondary">📋 Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="panel.js"></script>
+</body>
+</html>

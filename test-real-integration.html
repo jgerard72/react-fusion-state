@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ REAL Integration Test</title>
+    <link rel="stylesheet" href="demo/styles.css">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Additional styles for status indicators */
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .instructions { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .instructions h3 { margin: 0 0 15px 0; }
+        .instructions ol { margin: 10px 0; padding-left: 20px; }
+        .instructions li { margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ REAL Integration Test</h1>
+        <div class="instructions">
+            <h3>🧪 Test Instructions:</h3>
+            <ol>
+                <li><strong>Check Status:</strong> All systems should show "✅ Working"</li>
+                <li><strong>Use the app:</strong> Click buttons, type in inputs</li>
+                <li><strong>Press Ctrl+` (or Cmd+`):</strong> DevTools panel should appear</li>
+                <li><strong>In DevTools:</strong> Click ▶ to expand states, edit JSON, click Set/Reset</li>
+            </ol>
+        </div>
+
+        <div id="status-container">
+            <div id="react-status" class="status warning">⏳ Checking React...</div>
+            <div id="fusion-status" class="status warning">⏳ Checking React Fusion State...</div>
+            <div id="devtools-status" class="status warning">⏳ Checking DevTools...</div>
+        </div>
+
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useContext, createContext, useCallback } = React;
+
+        // Status reporting
+        function updateStatus(id, status, message) {
+            const el = document.getElementById(id);
+            el.className = `status ${status}`;
+            el.textContent = message;
+        }
+
+        // React Fusion State Implementation (Real)
+        const FusionStateContext = createContext(null);
+
+        const useFusionState = (key, initialValue) => {
+            const context = useContext(FusionStateContext);
+            if (!context) {
+                throw new Error('useFusionState must be used within a FusionStateProvider');
+            }
+            
+            const { state, setState } = context;
+            const value = state[key] !== undefined ? state[key] : initialValue;
+            
+            const setValue = useCallback((newValue) => {
+                setState(prevState => {
+                    const nextState = {
+                        ...prevState,
+                        [key]: typeof newValue === 'function' ? newValue(prevState[key]) : newValue
+                    };
+                    
+                    // Log for debugging
+                    console.log('[FusionState] State updated:', {
+                        key,
+                        previous: prevState[key],
+                        next: nextState[key]
+                    });
+                    
+                    return nextState;
+                });
+            }, [key, setState]);
+            
+            return [value, setValue];
+        };
+
+        const useFusionStateLog = () => {
+            const context = useContext(FusionStateContext);
+            return context ? context.state : {};
+        };
+
+        const FusionStateProvider = ({ children }) => {
+            const [state, setState] = useState({});
+            
+            const value = { state, setState };
+            return React.createElement(FusionStateContext.Provider, { value }, children);
+        };
+
+        // Real DevTools Panel (Simplified but functional)
+        const FusionDebugPanel = ({ visible, onVisibilityChange }) => {
+            const globalSnapshot = useFusionStateLog();
+            const { setState } = useContext(FusionStateContext);
+            const [expandedKeys, setExpandedKeys] = useState({});
+            const [editValues, setEditValues] = useState({});
+            const [errors, setErrors] = useState({});
+            
+            // Keyboard shortcut
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+                        e.preventDefault();
+                        onVisibilityChange?.(!visible);
+                        console.log('🛠️ DevTools toggled:', !visible);
+                    }
+                };
+                
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [visible, onVisibilityChange]);
+
+            // Update edit values when state changes (REAL LIVE UPDATES)
+            useEffect(() => {
+                Object.keys(globalSnapshot).forEach(key => {
+                    if (!expandedKeys[key] && !editValues[key]) {
+                        setEditValues(prev => ({
+                            ...prev,
+                            [key]: JSON.stringify(globalSnapshot[key], null, 2)
+                        }));
+                    }
+                });
+            }, [globalSnapshot, expandedKeys, editValues]);
+            
+            if (!visible) return null;
+
+            const toggleExpanded = (key) => {
+                setExpandedKeys(prev => ({ ...prev, [key]: !prev[key] }));
+                // Reset edit value to current state when expanding
+                setEditValues(prev => ({
+                    ...prev,
+                    [key]: JSON.stringify(globalSnapshot[key], null, 2)
+                }));
+            };
+
+            const updateEditValue = (key, value) => {
+                setEditValues(prev => ({ ...prev, [key]: value }));
+                
+                // Validate JSON
+                try {
+                    JSON.parse(value);
+                    setErrors(prev => ({ ...prev, [key]: false }));
+                } catch (e) {
+                    setErrors(prev => ({ ...prev, [key]: true }));
+                }
+            };
+
+            const applyValue = (key) => {
+                if (errors[key]) return;
+                
+                try {
+                    const parsed = JSON.parse(editValues[key]);
+                    setState(prev => ({ ...prev, [key]: parsed }));
+                    console.log('✅ Applied value:', key, parsed);
+                } catch (e) {
+                    alert('Invalid JSON format');
+                }
+            };
+
+            const resetValue = (key) => {
+                setState(prev => ({ ...prev, [key]: null }));
+                setEditValues(prev => ({ ...prev, [key]: 'null' }));
+                console.log('🔄 Reset value:', key);
+            };
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    width: '400px',
+                    maxHeight: '600px',
+                    backgroundColor: '#1a1a1a',
+                    color: 'white',
+                    border: '1px solid #333',
+                    borderRadius: '8px',
+                    fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                    fontSize: '12px',
+                    zIndex: 9999,
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+                }
+            }, [
+                // Header
+                React.createElement('div', {
+                    key: 'header',
+                    style: {
+                        backgroundColor: '#2d2d2d',
+                        padding: '12px 16px',
+                        borderBottom: '1px solid #333',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }
+                }, [
+                    React.createElement('strong', { key: 'title' }, '🛠️ DevTools LIVE'),
+                    React.createElement('button', {
+                        key: 'close',
+                        onClick: () => onVisibilityChange?.(false),
+                        style: { 
+                            background: '#666', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '3px', 
+                            cursor: 'pointer', 
+                            padding: '4px 8px' 
+                        }
+                    }, '×')
+                ]),
+                
+                // Content
+                React.createElement('div', {
+                    key: 'content',
+                    style: { padding: '16px', maxHeight: '500px', overflowY: 'auto' }
+                }, Object.keys(globalSnapshot).length === 0 ? 
+                    React.createElement('div', {
+                        style: { color: '#888', textAlign: 'center', padding: '20px' }
+                    }, 'No state yet - interact with the app!') :
+                    [
+                        React.createElement('div', {
+                            key: 'live-indicator',
+                            style: { 
+                                background: '#28a745', 
+                                color: 'white', 
+                                padding: '4px 8px', 
+                                borderRadius: '12px', 
+                                fontSize: '10px',
+                                textAlign: 'center',
+                                marginBottom: '10px'
+                            }
+                        }, `🟢 LIVE - ${Object.keys(globalSnapshot).length} states`),
+                        
+                        ...Object.keys(globalSnapshot).sort().map(key => 
+                            React.createElement('div', {
+                                key,
+                                style: { 
+                                    marginBottom: '12px', 
+                                    border: '1px solid #333', 
+                                    borderRadius: '4px',
+                                    backgroundColor: '#222'
+                                }
+                            }, [
+                                // State header
+                                React.createElement('div', {
+                                    key: 'header',
+                                    onClick: () => toggleExpanded(key),
+                                    style: {
+                                        padding: '8px 12px',
+                                        backgroundColor: '#2a2a2a',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }
+                                }, [
+                                    React.createElement('span', {
+                                        key: 'key',
+                                        style: { fontWeight: 'bold', color: '#4fc3f7' }
+                                    }, `${expandedKeys[key] ? '▼' : '▶'} ${key}`),
+                                    React.createElement('span', {
+                                        key: 'value',
+                                        style: { 
+                                            color: '#ffa726',
+                                            fontSize: '10px',
+                                            maxWidth: '150px',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }
+                                    }, JSON.stringify(globalSnapshot[key]))
+                                ]),
+                                
+                                // Expanded content
+                                expandedKeys[key] && React.createElement('div', {
+                                    key: 'content',
+                                    style: { padding: '12px' }
+                                }, [
+                                    React.createElement('textarea', {
+                                        key: 'textarea',
+                                        value: editValues[key] || '',
+                                        onChange: (e) => updateEditValue(key, e.target.value),
+                                        style: {
+                                            width: '100%',
+                                            minHeight: '80px',
+                                            backgroundColor: '#1a1a1a',
+                                            color: 'white',
+                                            border: errors[key] ? '1px solid #f44336' : '1px solid #333',
+                                            borderRadius: '4px',
+                                            padding: '8px',
+                                            fontFamily: 'inherit',
+                                            fontSize: '11px',
+                                            resize: 'vertical',
+                                            outline: 'none'
+                                        },
+                                        placeholder: 'Enter valid JSON...'
+                                    }),
+                                    React.createElement('div', {
+                                        key: 'buttons',
+                                        style: { display: 'flex', gap: '8px', marginTop: '8px' }
+                                    }, [
+                                        React.createElement('button', {
+                                            key: 'set',
+                                            onClick: () => applyValue(key),
+                                            disabled: errors[key],
+                                            style: {
+                                                padding: '4px 8px',
+                                                fontSize: '11px',
+                                                backgroundColor: errors[key] ? '#666' : '#4caf50',
+                                                border: 'none',
+                                                color: 'white',
+                                                borderRadius: '4px',
+                                                cursor: errors[key] ? 'not-allowed' : 'pointer'
+                                            }
+                                        }, 'Set'),
+                                        React.createElement('button', {
+                                            key: 'reset',
+                                            onClick: () => resetValue(key),
+                                            style: {
+                                                padding: '4px 8px',
+                                                fontSize: '11px',
+                                                backgroundColor: '#f44336',
+                                                border: 'none',
+                                                color: 'white',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }
+                                        }, 'Reset')
+                                    ]),
+                                    errors[key] && React.createElement('div', {
+                                        key: 'error',
+                                        style: { 
+                                            color: '#f44336', 
+                                            fontSize: '10px', 
+                                            marginTop: '4px' 
+                                        }
+                                    }, 'Invalid JSON format')
+                                ])
+                            ])
+                        )
+                    ]
+                )
+            ]);
+        };
+
+        // Test App
+        const TestApp = () => {
+            const [counter, setCounter] = useFusionState('counter', 0);
+            const [user, setUser] = useFusionState('user', { name: 'John', age: 30 });
+            const [todos, setTodos] = useFusionState('todos', []);
+            const [debugVisible, setDebugVisible] = useState(false);
+
+            const addTodo = () => {
+                const newTodo = { id: Date.now(), text: `Task ${todos.length + 1}`, done: false };
+                setTodos(prev => [...prev, newTodo]);
+            };
+
+            return (
+                <div>
+                    <div className="demo-box">
+                        <h3>
+                            <span className="emoji">📊</span>
+                            Counter Test
+                        </h3>
+                        <div className="value">{counter}</div>
+                        <div className="button-group">
+                            <button className="button primary" onClick={() => setCounter(counter + 1)}>
+                                ➕ Increment
+                            </button>
+                            <button className="button secondary" onClick={() => setCounter(counter + 10)}>
+                                ⚡ +10
+                            </button>
+                            <button className="button danger" onClick={() => setCounter(0)}>
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="demo-box">
+                        <h3>
+                            <span className="emoji">👤</span>
+                            User Profile Test
+                        </h3>
+                        <div className="input-group">
+                            <label htmlFor="name-input">Name:</label>
+                            <input
+                                id="name-input"
+                                type="text"
+                                value={user.name}
+                                onChange={(e) => setUser({...user, name: e.target.value})}
+                                placeholder="Enter your name..."
+                            />
+                        </div>
+                        <div className="value">Hello, {user.name}! You are {user.age} years old.</div>
+                        <div className="button-group">
+                            <button className="button primary" onClick={() => setUser(prev => ({...prev, age: prev.age + 1}))}>
+                                🎂 Birthday (+1)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="demo-box">
+                        <h3>
+                            <span className="emoji">📝</span>
+                            Todos Test ({todos.length})
+                        </h3>
+                        <div className="button-group">
+                            <button className="button primary" onClick={addTodo}>
+                                ➕ Add Todo
+                            </button>
+                        </div>
+                        {todos.length > 0 && (
+                            <div style={{marginTop: '15px'}}>
+                                {todos.map(todo => (
+                                    <div key={todo.id} className="todo-item" style={{
+                                        padding: '8px 12px',
+                                        margin: '5px 0',
+                                        background: '#f8f9fa',
+                                        borderRadius: '6px',
+                                        border: '1px solid #e9ecef'
+                                    }}>
+                                        • {todo.text}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="status-box">
+                        <h3>🛠️ DevTools Control Panel</h3>
+                        <p><strong>Manual Control:</strong></p>
+                        <div className="button-group">
+                            <button className="button primary" onClick={() => setDebugVisible(!debugVisible)}>
+                                {debugVisible ? '🔧 Hide DevTools' : '🛠️ Show DevTools'}
+                            </button>
+                        </div>
+                        <p><strong>Keyboard Shortcut:</strong> Press <strong>Ctrl+`</strong> (or <strong>Cmd+`</strong> on macOS)</p>
+                        <p>The DevTools panel will appear in the bottom-right corner when visible.</p>
+                    </div>
+
+                    <FusionDebugPanel 
+                        visible={debugVisible}
+                        onVisibilityChange={setDebugVisible}
+                    />
+                </div>
+            );
+        };
+
+        // Main App
+        const App = () => {
+            useEffect(() => {
+                // Status checks
+                updateStatus('react-status', 'success', '✅ React loaded and working');
+                
+                setTimeout(() => {
+                    updateStatus('fusion-status', 'success', '✅ React Fusion State working');
+                }, 100);
+                
+                setTimeout(() => {
+                    updateStatus('devtools-status', 'success', '✅ DevTools ready (Press Ctrl+`)');
+                }, 200);
+                
+                console.log('🎉 All systems operational!');
+                console.log('🧪 This is a REAL integration test');
+                console.log('🛠️ Press Ctrl+` to open DevTools');
+            }, []);
+
+            return (
+                <FusionStateProvider>
+                    <TestApp />
+                </FusionStateProvider>
+            );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>

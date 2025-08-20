@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple DevTools Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .box { padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; }
+        button { padding: 10px 15px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .primary { background: #007bff; color: white; }
+        .secondary { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Simple DevTools Test</h1>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Open browser console (F12)</li>
+            <li>Press <kbd>Ctrl+`</kbd> (or <kbd>Cmd+`</kbd> on macOS) to toggle debug panel</li>
+            <li>Click buttons to change state</li>
+            <li>Check if debug panel appears in bottom-right corner</li>
+        </ol>
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useContext, createContext } = React;
+
+        // Simple state context
+        const StateContext = createContext();
+
+        const StateProvider = ({ children }) => {
+            const [state, setState] = useState({ count: 0, name: 'Test' });
+            return React.createElement(StateContext.Provider, { value: { state, setState } }, children);
+        };
+
+        const useSimpleState = (key, defaultValue) => {
+            const { state, setState } = useContext(StateContext);
+            const value = state[key] !== undefined ? state[key] : defaultValue;
+            
+            const setValue = (newValue) => {
+                setState(prev => ({ ...prev, [key]: newValue }));
+            };
+            
+            return [value, setValue];
+        };
+
+        // Simple debug panel
+        const DebugPanel = ({ visible, onToggle }) => {
+            const { state, setState } = useContext(StateContext);
+            
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === '`') {
+                        e.preventDefault();
+                        onToggle();
+                        console.log('Debug panel toggled:', !visible);
+                    }
+                };
+                
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [visible, onToggle]);
+            
+            if (!visible) return null;
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    width: '300px',
+                    backgroundColor: '#1a1a1a',
+                    color: 'white',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    border: '1px solid #333',
+                    fontSize: '12px',
+                    fontFamily: 'monospace',
+                    zIndex: 9999,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+                }
+            }, [
+                React.createElement('div', {
+                    key: 'header',
+                    style: { 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: '10px',
+                        paddingBottom: '10px',
+                        borderBottom: '1px solid #333'
+                    }
+                }, [
+                    React.createElement('strong', { key: 'title' }, 'Debug Panel'),
+                    React.createElement('button', {
+                        key: 'close',
+                        onClick: onToggle,
+                        style: {
+                            background: '#666',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '3px',
+                            cursor: 'pointer',
+                            padding: '2px 6px'
+                        }
+                    }, '×')
+                ]),
+                React.createElement('div', { key: 'content' }, [
+                    React.createElement('div', { key: 'state', style: { marginBottom: '10px' } }, [
+                        React.createElement('strong', { key: 'label' }, 'Current State:'),
+                        React.createElement('pre', { 
+                            key: 'json',
+                            style: { 
+                                background: '#2a2a2a', 
+                                padding: '8px', 
+                                borderRadius: '4px',
+                                margin: '5px 0',
+                                fontSize: '11px',
+                                whiteSpace: 'pre-wrap'
+                            }
+                        }, JSON.stringify(state, null, 2))
+                    ]),
+                    React.createElement('div', { key: 'actions' }, [
+                        React.createElement('button', {
+                            key: 'reset',
+                            onClick: () => setState({ count: 0, name: 'Test' }),
+                            style: {
+                                background: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                                padding: '4px 8px',
+                                marginRight: '5px',
+                                fontSize: '11px'
+                            }
+                        }, 'Reset State'),
+                        React.createElement('button', {
+                            key: 'random',
+                            onClick: () => setState({ count: Math.floor(Math.random() * 100), name: 'Random' }),
+                            style: {
+                                background: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                                padding: '4px 8px',
+                                fontSize: '11px'
+                            }
+                        }, 'Random')
+                    ])
+                ])
+            ]);
+        };
+
+        // Test components
+        const Counter = () => {
+            const [count, setCount] = useSimpleState('count', 0);
+            
+            return React.createElement('div', { className: 'box' }, [
+                React.createElement('h3', { key: 'title' }, `Counter: ${count}`),
+                React.createElement('button', {
+                    key: 'inc',
+                    className: 'primary',
+                    onClick: () => setCount(count + 1)
+                }, 'Increment'),
+                React.createElement('button', {
+                    key: 'dec',
+                    className: 'secondary',
+                    onClick: () => setCount(count - 1)
+                }, 'Decrement')
+            ]);
+        };
+
+        const NameInput = () => {
+            const [name, setName] = useSimpleState('name', 'Test');
+            
+            return React.createElement('div', { className: 'box' }, [
+                React.createElement('h3', { key: 'title' }, `Name: ${name}`),
+                React.createElement('input', {
+                    key: 'input',
+                    type: 'text',
+                    value: name,
+                    onChange: (e) => setName(e.target.value),
+                    style: { padding: '8px', marginRight: '10px' }
+                }),
+                React.createElement('button', {
+                    key: 'clear',
+                    className: 'secondary',
+                    onClick: () => setName('')
+                }, 'Clear')
+            ]);
+        };
+
+        // Main app
+        const App = () => {
+            const [debugVisible, setDebugVisible] = useState(false);
+            
+            return React.createElement(StateProvider, null, [
+                React.createElement('div', { key: 'controls', className: 'box' }, [
+                    React.createElement('h3', { key: 'title' }, 'Controls'),
+                    React.createElement('button', {
+                        key: 'toggle',
+                        className: 'primary',
+                        onClick: () => setDebugVisible(!debugVisible)
+                    }, debugVisible ? 'Hide Debug Panel' : 'Show Debug Panel'),
+                    React.createElement('p', { key: 'hint', style: { margin: '10px 0 0 0', fontSize: '14px' } }, 
+                        'Or press Ctrl+` (Cmd+` on macOS)')
+                ]),
+                React.createElement(Counter, { key: 'counter' }),
+                React.createElement(NameInput, { key: 'name' }),
+                React.createElement(DebugPanel, {
+                    key: 'debug',
+                    visible: debugVisible,
+                    onToggle: () => setDebugVisible(!debugVisible)
+                })
+            ]);
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+        
+        console.log('✅ Simple DevTools Test loaded');
+        console.log('🎯 Press Ctrl+` (or Cmd+` on macOS) to toggle debug panel');
+    </script>
+</body>
+</html>

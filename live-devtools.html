@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 LIVE - React Fusion State Monitor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+            background: #0a0a0a;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            background: #1a1a1a;
+            padding: 15px 20px;
+            border-bottom: 2px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            background: #ff4444;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        .main {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        .sidebar {
+            width: 300px;
+            background: #111;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+        }
+        .content {
+            flex: 1;
+            background: #0f0f0f;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .state-list {
+            padding: 0;
+        }
+        .state-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #222;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .state-item:hover {
+            background: #1a1a1a;
+        }
+        .state-item.active {
+            background: #2d4a87;
+            border-left: 3px solid #4fc3f7;
+        }
+        .state-key {
+            font-weight: bold;
+            color: #4fc3f7;
+            font-size: 14px;
+        }
+        .state-type {
+            color: #888;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        .state-preview {
+            color: #ffa726;
+            font-size: 11px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .viewer {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .viewer-title {
+            font-size: 18px;
+            color: #4fc3f7;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+        .json-viewer {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .no-selection {
+            text-align: center;
+            color: #666;
+            padding: 50px 20px;
+        }
+        .changes-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            animation: flash 0.3s ease;
+        }
+        @keyframes flash {
+            0% { background: #28a745; }
+            50% { background: #ffc107; }
+            100% { background: #28a745; }
+        }
+        .connection-status {
+            padding: 10px 15px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            font-size: 12px;
+        }
+        .connected { color: #28a745; }
+        .disconnected { color: #dc3545; }
+        .waiting { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            <h1>🔴 LIVE State Monitor</h1>
+        </div>
+        <div class="stats">
+            <span id="stateCount">0 states</span>
+            <span id="updateCount">0 updates</span>
+            <span id="connectionStatus">Waiting...</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="sidebar">
+            <div class="connection-status">
+                <div id="statusText" class="waiting">⏳ Waiting for React Fusion State...</div>
+                <div style="font-size: 10px; margin-top: 5px; color: #666;">
+                    Open your app and interact with it
+                </div>
+            </div>
+            <div class="state-list" id="stateList">
+                <!-- States will appear here -->
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="viewer" id="viewer">
+                <div class="no-selection">
+                    <h2>👋 Welcome to Live State Monitor</h2>
+                    <p>This tool monitors React Fusion State changes in real-time.</p>
+                    <br>
+                    <p><strong>How to use:</strong></p>
+                    <ol style="text-align: left; display: inline-block; margin-top: 10px;">
+                        <li>Open your React app in another tab</li>
+                        <li>Make sure it uses React Fusion State</li>
+                        <li>Interact with your app (click buttons, type in inputs, etc.)</li>
+                        <li>Watch the states appear here in real-time! 🎉</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class LiveStateMonitor {
+            constructor() {
+                this.states = {};
+                this.selectedState = null;
+                this.updateCount = 0;
+                this.isConnected = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupBroadcastChannel();
+                this.setupUI();
+                this.startHeartbeat();
+            }
+
+            setupBroadcastChannel() {
+                // Listen for state updates from other tabs
+                this.channel = new BroadcastChannel('fusion-state-devtools');
+                
+                this.channel.onmessage = (event) => {
+                    const { type, data } = event.data;
+                    
+                    switch (type) {
+                        case 'STATE_UPDATE':
+                            this.handleStateUpdate(data);
+                            break;
+                        case 'HEARTBEAT':
+                            this.handleHeartbeat();
+                            break;
+                    }
+                };
+
+                // Request current state from any connected apps
+                this.requestCurrentState();
+            }
+
+            requestCurrentState() {
+                this.channel.postMessage({
+                    type: 'REQUEST_STATE',
+                    timestamp: Date.now()
+                });
+            }
+
+            handleStateUpdate(data) {
+                this.isConnected = true;
+                this.updateConnectionStatus('connected');
+                
+                // Update states
+                Object.keys(data).forEach(key => {
+                    const hasChanged = JSON.stringify(this.states[key]) !== JSON.stringify(data[key]);
+                    
+                    this.states[key] = {
+                        value: data[key],
+                        lastUpdate: Date.now(),
+                        changed: hasChanged
+                    };
+                    
+                    if (hasChanged) {
+                        this.updateCount++;
+                    }
+                });
+
+                this.updateUI();
+                this.showChangeIndicator();
+            }
+
+            handleHeartbeat() {
+                this.isConnected = true;
+                this.updateConnectionStatus('connected');
+            }
+
+            startHeartbeat() {
+                // Check connection status every 2 seconds
+                setInterval(() => {
+                    if (this.isConnected) {
+                        // Reset connection flag - will be set by next heartbeat
+                        this.isConnected = false;
+                        setTimeout(() => {
+                            if (!this.isConnected) {
+                                this.updateConnectionStatus('disconnected');
+                            }
+                        }, 3000);
+                    }
+                }, 2000);
+            }
+
+            updateConnectionStatus(status) {
+                const statusText = document.getElementById('statusText');
+                const connectionStatus = document.getElementById('connectionStatus');
+                
+                switch (status) {
+                    case 'connected':
+                        statusText.textContent = '🟢 Connected - Monitoring live state';
+                        statusText.className = 'connected';
+                        connectionStatus.textContent = 'Connected';
+                        break;
+                    case 'disconnected':
+                        statusText.textContent = '🔴 Disconnected - App closed?';
+                        statusText.className = 'disconnected';
+                        connectionStatus.textContent = 'Disconnected';
+                        break;
+                    default:
+                        statusText.textContent = '⏳ Waiting for React Fusion State...';
+                        statusText.className = 'waiting';
+                        connectionStatus.textContent = 'Waiting';
+                }
+            }
+
+            updateUI() {
+                this.updateStateList();
+                this.updateStats();
+                if (this.selectedState && this.states[this.selectedState]) {
+                    this.showStateDetails(this.selectedState);
+                }
+            }
+
+            updateStateList() {
+                const stateList = document.getElementById('stateList');
+                const stateKeys = Object.keys(this.states).sort();
+                
+                stateList.innerHTML = stateKeys.map(key => {
+                    const state = this.states[key];
+                    const isActive = this.selectedState === key;
+                    const changeClass = state.changed ? 'changes-indicator' : '';
+                    
+                    return `
+                        <div class="state-item ${isActive ? 'active' : ''}" onclick="monitor.selectState('${key}')">
+                            ${state.changed ? '<div class="changes-indicator">NEW</div>' : ''}
+                            <div class="state-key">${key}</div>
+                            <div class="state-type">${typeof state.value}${state.value === null ? ' (null)' : ''}</div>
+                            <div class="state-preview">${this.formatPreview(state.value)}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStats() {
+                document.getElementById('stateCount').textContent = `${Object.keys(this.states).length} states`;
+                document.getElementById('updateCount').textContent = `${this.updateCount} updates`;
+            }
+
+            formatPreview(value) {
+                if (value === null) return 'null';
+                if (typeof value === 'string') return `"${value.substring(0, 30)}${value.length > 30 ? '...' : ''}"`;
+                if (typeof value === 'object') return JSON.stringify(value).substring(0, 50) + '...';
+                return String(value);
+            }
+
+            selectState(key) {
+                this.selectedState = key;
+                this.updateStateList();
+                this.showStateDetails(key);
+            }
+
+            showStateDetails(key) {
+                const state = this.states[key];
+                const viewer = document.getElementById('viewer');
+                
+                viewer.innerHTML = `
+                    <div class="viewer-header">
+                        <div class="viewer-title">${key}</div>
+                        <div class="timestamp">Last update: ${new Date(state.lastUpdate).toLocaleTimeString()}</div>
+                    </div>
+                    <div class="json-viewer">${JSON.stringify(state.value, null, 2)}</div>
+                `;
+            }
+
+            showChangeIndicator() {
+                // Visual feedback for updates
+                document.body.style.borderTop = '3px solid #28a745';
+                setTimeout(() => {
+                    document.body.style.borderTop = 'none';
+                }, 300);
+            }
+
+            setupUI() {
+                // Auto-select first state when available
+                const observer = new MutationObserver(() => {
+                    if (Object.keys(this.states).length > 0 && !this.selectedState) {
+                        this.selectState(Object.keys(this.states)[0]);
+                    }
+                });
+                
+                observer.observe(document.getElementById('stateList'), { childList: true });
+            }
+        }
+
+        // Initialize monitor
+        const monitor = new LiveStateMonitor();
+
+        // Global access for debugging
+        window.monitor = monitor;
+
+        console.log('🔴 Live State Monitor ready!');
+        console.log('👀 Open your React app and interact with it to see live state changes');
+    </script>
+</body>
+</html>

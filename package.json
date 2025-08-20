@@ -1,6 +1,6 @@
 {
   "name": "react-fusion-state",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,8 @@
     "test:coverage": "jest --coverage",
     "prepare": "npm run build",
     "dev": "tsc -w -p tsconfig-build.json",
-    "benchmark": "node benchmark/benchmark-suite.js",
+    "benchmark": "node benchmark/final-performance-report.js",
+    "benchmark:detailed": "node benchmark/performance-comparison.js",
     "benchmark:bundle": "node benchmark/bundle-size-analysis.js",
     "publish:performance": "npm publish && echo '🏆 Published with benchmark-proven performance!'"
   },
@@ -26,7 +27,8 @@
     "dist",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE.md"
+    "LICENSE.md",
+    "PERFORMANCE_BENCHMARK_RESULTS.md"
   ],
   "description": "The simplest AND most performant React state management library. 99.9% fewer re-renders, 2.8KB bundle, zero setup. Built-in persistence for React & React Native.",
   "keywords": [
