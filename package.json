@@ -10,6 +10,10 @@
     "type": "git",
     "url": "git+https://github.com/jgerard72/react-fusion-state.git"
   },
+  "bugs": {
+    "url": "https://github.com/jgerard72/react-fusion-state/issues"
+  },
+  "readme": "README.md",
   "scripts": {
     "build": "rm -rf dist/* && tsc -p tsconfig-build.json",
     "format": "prettier --write .",
@@ -30,7 +34,7 @@
     "LICENSE.md",
     "PERFORMANCE_BENCHMARK_RESULTS.md"
   ],
-  "description": "The simplest AND most performant React state management library. 99.9% fewer re-renders, 2.8KB bundle, zero setup. Built-in persistence for React & React Native.",
+  "description": "🚀 The simplest AND most performant React state management library. 99.9% fewer re-renders, 2.8KB bundle, zero setup. Built-in persistence for React & React Native. Grade A+ performance vs Redux/Zustand/Recoil.",
   "keywords": [
     "react",
     "state-management",
