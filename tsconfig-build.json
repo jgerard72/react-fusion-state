@@ -7,5 +7,5 @@
     "noEmit": false
   },
   "include": ["src"],
-  "exclude": ["src/__tests__", "src/examples", "src/setupTests.ts", "node_modules", "dist"]
+  "exclude": ["src/__tests__", "src/examples", "src/devtools", "src/setupTests.ts", "node_modules", "dist"]
 } 
