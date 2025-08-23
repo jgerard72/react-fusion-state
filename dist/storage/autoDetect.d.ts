@@ -1,7 +1,7 @@
 import { StorageAdapter } from './storageAdapters';
 /**
  * Detects if we are in a Server-Side Rendering environment
- * @returns true if running on server (Node.js), false if running in browser
+ * @returns true if running on server (Node.js), false if running in browser or React Native
  */
 export declare function isSSREnvironment(): boolean;
 /**

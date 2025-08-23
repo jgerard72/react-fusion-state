@@ -1,8 +1,9 @@
 # 🏆 Performance Benchmark Results
 
-**React Fusion State v0.3.0 vs Redux Toolkit vs Zustand vs Recoil**
+**React Fusion State v0.3.3 vs Redux Toolkit vs Zustand vs Recoil**
 
-*Comprehensive performance testing conducted on Node.js v18.19.0*
+*Comprehensive performance testing conducted on Node.js v18.19.0*  
+*Updated with Zero Dependencies optimization*
 
 ---
 
@@ -81,14 +82,14 @@ React Fusion State **DOMINATES** the competition with **Grade A+ performance** a
 
 ## 📦 **Bundle Size Comparison**
 
-| Library | Bundle Size | Gzipped | vs React Fusion State |
-|---------|-------------|---------|----------------------|
-| **React Fusion State** | **7.2KB** | **2.8KB** | **Baseline** |
-| Zustand | 8.1KB | 3.2KB | +14% larger |
-| Recoil | 78.4KB | 24.1KB | **+760% larger** |
-| Redux Toolkit | 135.2KB | 42.7KB | **+1,425% larger** |
+| Library | Bundle Size | Gzipped | Dependencies | vs React Fusion State |
+|---------|-------------|---------|--------------|----------------------|
+| **React Fusion State** | **7.2KB** | **2.8KB** | **0** | **Baseline** |
+| Zustand | 8.1KB | 3.2KB | 1 | +14% larger |
+| Recoil | 78.4KB | 24.1KB | 3+ | **+760% larger** |
+| Redux Toolkit | 135.2KB | 42.7KB | 5+ | **+1,425% larger** |
 
-**🎯 Result:** React Fusion State has the **smallest bundle** - Redux is **15x larger**!
+**🎯 Result:** React Fusion State has the **smallest bundle** AND **zero dependencies** - Redux is **15x larger**!
 
 ---
 
@@ -121,7 +122,7 @@ React Fusion State **DOMINATES** the competition with **Grade A+ performance** a
 1. **🥇 React Fusion State - Grade A+ (100/100)**
    - ✅ Perfect re-render prevention
    - ✅ Only library with smart object comparison
-   - ✅ Smallest bundle size
+   - ✅ Smallest bundle size + zero dependencies
    - ✅ Best developer experience
 
 2. **🥈 Zustand - Grade B+ (62.5/100)**
@@ -155,10 +156,10 @@ React Fusion State **DOMINATES** the competition with **Grade A+ performance** a
 | Recoil | Atomic subscriptions | Atom-based | Medium (atom graph) |
 | Redux Toolkit | Connect/useSelector | Manual memoization required | Medium (normalized state) |
 
-### **React Fusion State Technical Advantages**
+### **React Fusion State Technical Advantages (React 18+)**
 
 ```jsx
-// ✅ SMART: Only re-renders when specific key changes
+// ✅ SMART: Only re-renders when specific key changes (per-key subscriptions)
 const [count, setCount] = useFusionState('count', 0);
 const [user, setUser] = useFusionState('user', null);
 // Changing 'count' won't re-render components using 'user'

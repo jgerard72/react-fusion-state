@@ -312,11 +312,49 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
             return nextState;
         });
     }, [debug, shouldSaveOnChange, saveStateToStorage]);
+    // Per-key subscription registry
+    const keyListenersRef = (0, react_1.useRef)(new Map());
+    const subscribeKey = (0, react_1.useCallback)((key, listener) => {
+        let set = keyListenersRef.current.get(key);
+        if (!set) {
+            set = new Set();
+            keyListenersRef.current.set(key, set);
+        }
+        set.add(listener);
+        return () => {
+            set.delete(listener);
+            if (set.size === 0) {
+                keyListenersRef.current.delete(key);
+            }
+        };
+    }, []);
+    const notifyKey = (0, react_1.useCallback)((key) => {
+        const listeners = keyListenersRef.current.get(key);
+        if (listeners) {
+            listeners.forEach(l => l());
+        }
+    }, []);
+    const getKeySnapshot = (0, react_1.useCallback)((key) => state[key], [state]);
+    // Wrap setState to notify only affected keys
+    const setStateAndNotify = (0, react_1.useCallback)((updater) => {
+        setState(prev => {
+            const next = typeof updater === 'function' ? updater(prev) : updater;
+            // Determine changed keys and notify
+            Object.keys(next).forEach(k => {
+                if (prev[k] !== next[k])
+                    notifyKey(k);
+            });
+            return next;
+        });
+    }, [setState, notifyKey]);
     const value = (0, react_1.useMemo)(() => ({
         state,
-        setState,
+        setState: setStateAndNotify,
         initializingKeys: initializingKeys.current,
-    }), [state]);
+        subscribeKey,
+        getKeySnapshot,
+        getServerSnapshot: undefined,
+    }), [state, setStateAndNotify, subscribeKey, getKeySnapshot]);
     return (react_1.default.createElement(GlobalStateContext.Provider, { value: value }, children));
 });
 //# sourceMappingURL=FusionStateProvider.js.map

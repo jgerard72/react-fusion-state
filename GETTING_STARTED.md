@@ -2,6 +2,8 @@
 
 **New to the project?** This guide will get you up and running in 5 minutes!
 
+**🎯 React Fusion State:** Zero dependencies, maximum performance state management for React.
+
 ---
 
 ## 👨‍💻 **For New Contributors**
@@ -29,7 +31,7 @@ open demo/demo-persistence.html
 
 ## 📚 **For New Users**
 
-### Installation
+### Installation (React 18+)
 ```bash
 npm install react-fusion-state
 ```
@@ -58,7 +60,7 @@ function Counter() {
 }
 ```
 
-**Done!** Your state is now global and persistent. 🚀
+**Done!** Your state is now global and persistent. (React 18+)
 
 ---
 

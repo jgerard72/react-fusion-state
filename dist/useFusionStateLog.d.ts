@@ -11,7 +11,7 @@ interface FusionStateLogOptions {
     trackChanges?: boolean;
     /**
      * How to track changes. Default is 'reference' which is faster
-     * but might miss deeply nested changes. 'deep' uses lodash.isEqual
+     * but might miss deeply nested changes. 'deep' uses custom deep equality
      * for deep equality checks.
      */
     changeDetection?: 'reference' | 'deep' | 'simple';

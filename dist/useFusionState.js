@@ -26,7 +26,7 @@ const autoDetect_1 = require("./storage/autoDetect");
  * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
  */
 function useFusionState(key, initialValue, options) {
-    const { state, setState, initializingKeys } = (0, FusionStateProvider_1.useGlobalState)();
+    const { state, setState, initializingKeys, subscribeKey, getKeySnapshot } = (0, FusionStateProvider_1.useGlobalState)();
     // ✅ Persistence configuration
     const { persist = false, adapter = (0, autoDetect_1.detectBestStorageAdapter)(options === null || options === void 0 ? void 0 : options.debug), keyPrefix = 'fusion_persistent', debounceTime = 300, debug = false, } = options || {};
     const storageKey = `${keyPrefix}_${key}`;
@@ -143,8 +143,8 @@ function useFusionState(key, initialValue, options) {
             throw new Error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.KEY_MISSING_NO_INITIAL, key));
         }
     }, [key, initialValue, persist, state, initializingKeys, setState]);
-    // ✅ SIMPLE: Current state value
-    const currentValue = state[key];
+    // ✅ useSyncExternalStore to subscribe only to this key
+    const currentValue = (0, react_1.useSyncExternalStore)(listener => subscribeKey(key, listener), () => getKeySnapshot(key), () => undefined);
     // ✅ AUTOMATIC OPTIMIZATION: setValue with intelligent comparison
     const setValue = (0, react_1.useCallback)(newValue => {
         setState(prevState => {

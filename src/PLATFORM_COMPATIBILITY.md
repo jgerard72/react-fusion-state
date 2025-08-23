@@ -1,12 +1,12 @@
 # 🚀 Platform Compatibility Guide
 
-React Fusion State is designed to work seamlessly across **React.js**, **React Native**, and **Expo** applications with full persistence support.
+React Fusion State targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **zero dependencies** and full persistence support.
 
 ## ✅ Platform Support Matrix
 
 | Platform | Status | Storage | Sync Loading | Error Callbacks |
 |----------|--------|---------|--------------|-----------------|
-| **React.js (Web)** | ✅ Full | localStorage | ✅ Yes | ✅ Yes |
+| **React.js (Web)** | ✅ Full (React 18+) | localStorage | ✅ Yes | ✅ Yes |
 | **React Native** | ✅ Full | AsyncStorage | ❌ Async only | ✅ Yes |
 | **Expo** | ✅ Full | AsyncStorage | ❌ Async only | ✅ Yes |
 | **Next.js (SSR)** | ✅ Full | Memory/localStorage | ✅ Yes | ✅ Yes |
@@ -132,7 +132,7 @@ export default function App() {
 
 ---
 
-## 🔧 Auto-Detection Logic
+## 🔧 Auto-Detection & Concurrency (React 18+)
 
 React Fusion State automatically detects the platform and suggests the appropriate storage:
 
@@ -145,6 +145,8 @@ const adapter = detectBestStorageAdapter();
 // Web → localStorage
 // React Native/Expo → NoopAdapter (with console warning to use AsyncStorage)
 // SSR → NoopAdapter (memory-only)
+
+Internally, subscriptions are per key using `useSyncExternalStore` (React 18), which isolates re-renders and avoids tearing.
 ```
 
 ---

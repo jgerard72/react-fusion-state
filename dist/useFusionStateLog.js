@@ -1,12 +1,8 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useFusionStateLog = void 0;
 const FusionStateProvider_1 = require("./FusionStateProvider");
 const react_1 = require("react");
-const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
 const utils_1 = require("./utils");
 /**
  * Hook to observe and track changes in the global fusion state
@@ -44,7 +40,7 @@ const useFusionStateLog = (keys, options = {}) => {
             return a === b;
         }
         else if (changeDetection === 'deep') {
-            return (0, lodash_isequal_1.default)(a, b);
+            return (0, utils_1.customIsEqual)(a, b);
         }
         else {
             return (0, utils_1.simpleDeepEqual)(a, b);

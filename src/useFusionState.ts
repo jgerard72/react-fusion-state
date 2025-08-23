@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useSyncExternalStore} from 'react';
 import {useGlobalState} from './FusionStateProvider';
 import {
   GlobalState,
@@ -26,7 +26,8 @@ export function useFusionState<T = unknown>(
   initialValue?: T,
   options?: UseFusionStateOptions,
 ): [T, StateUpdater<T>] {
-  const {state, setState, initializingKeys} = useGlobalState();
+  const {state, setState, initializingKeys, subscribeKey, getKeySnapshot} =
+    useGlobalState();
 
   // ✅ Persistence configuration
   const {
@@ -188,8 +189,12 @@ export function useFusionState<T = unknown>(
     }
   }, [key, initialValue, persist, state, initializingKeys, setState]);
 
-  // ✅ SIMPLE: Current state value
-  const currentValue = state[key] as T;
+  // ✅ useSyncExternalStore to subscribe only to this key
+  const currentValue = useSyncExternalStore(
+    listener => subscribeKey(key, listener),
+    () => getKeySnapshot(key) as T,
+    () => undefined as unknown as T,
+  ) as T;
 
   // ✅ AUTOMATIC OPTIMIZATION: setValue with intelligent comparison
   const setValue = useCallback<StateUpdater<T>>(

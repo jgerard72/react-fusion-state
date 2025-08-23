@@ -14,6 +14,12 @@ export interface GlobalFusionStateContextType {
     state: GlobalState;
     setState: React.Dispatch<React.SetStateAction<GlobalState>>;
     initializingKeys: Set<string>;
+    /** Subscribe to updates for a specific key. Returns an unsubscribe function. */
+    subscribeKey: (key: string, listener: () => void) => () => void;
+    /** Get the current snapshot (value) for a specific key. */
+    getKeySnapshot: (key: string) => unknown;
+    /** Optional: server snapshot getter for SSR environments. */
+    getServerSnapshot?: (key: string) => unknown;
 }
 /** Simplified type for persistence keys */
 export type PersistenceKeys = boolean | string[] | ((key: string, value: unknown) => boolean);

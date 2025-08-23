@@ -1,20 +1,16 @@
 # 🧪 React Fusion State - Interactive Demos
 
-This directory contains interactive demonstrations of React Fusion State features.
+This directory contains interactive demonstrations of React Fusion State features. **Zero dependencies, maximum performance.**
 
 ## 📁 Available Demos
 
-### **demo-persistence.html**
-- **Global persistence** via FusionStateProvider
+### **demo-persistence.html** (React 18+)
+- **Complete feature showcase** - All React Fusion State capabilities
+- **Global and per-key persistence** examples
 - **Multiple components** sharing state
 - **Real-time state synchronization**
+- **Console logging and debugging**
 - **Error handling** and fallbacks
-
-### **demo-key-persistence.html** ⭐ **NEW**
-- **Per-key persistence** - Choose exactly which data to save
-- **Different persistence strategies** (immediate, debounced, none)
-- **Custom storage options** (keyPrefix, debug, debounceTime)
-- **Mixed persistence approaches** in one app
 
 ## 🚀 How to Run
 
@@ -22,7 +18,6 @@ This directory contains interactive demonstrations of React Fusion State feature
 ```bash
 # Open directly in your browser
 open demo-persistence.html
-open demo-key-persistence.html
 ```
 
 ### Option 2: Local Server (Recommended)

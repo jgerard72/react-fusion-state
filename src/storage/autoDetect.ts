@@ -3,12 +3,17 @@ import {
   createNoopStorageAdapter,
   createLocalStorageAdapter,
 } from './storageAdapters';
+import {createAsyncStorageAdapter} from './asyncStorageAdapter';
 
 /**
  * Detects if we are in a Server-Side Rendering environment
- * @returns true if running on server (Node.js), false if running in browser
+ * @returns true if running on server (Node.js), false if running in browser or React Native
  */
 export function isSSREnvironment(): boolean {
+  // React Native also has no window, but has navigator.product === 'ReactNative'
+  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+    return false;
+  }
   return typeof window === 'undefined';
 }
 
@@ -32,11 +37,36 @@ export function detectBestStorageAdapter(debug = false): StorageAdapter {
 
   // Detect React Native second (more reliable)
   if (isReactNativeEnvironment()) {
-    if (debug) {
-      console.info(
-        '[FusionState] React Native environment detected. ' +
-          'Use a custom AsyncStorage adapter for persistence.',
-      );
+    // Try to auto-load AsyncStorage if available
+    try {
+      // Avoid static resolution by bundlers; resolve only at runtime in RN
+      const req = Function(
+        'try { return typeof require !== "undefined" && require; } catch(_) { return undefined; }',
+      )() as unknown as undefined | ((m: string) => any);
+      const modName = '@react-native-async-storage/async-storage';
+      const AsyncStorage = req ? req(modName) : undefined;
+      if (AsyncStorage) {
+        if (debug) {
+          console.info(
+            '[FusionState] Using AsyncStorage adapter (auto-detected).',
+          );
+        }
+        const asImpl = (AsyncStorage.default || AsyncStorage) as {
+          getItem: (k: string) => Promise<string | null>;
+          setItem: (k: string, v: string) => Promise<void>;
+          removeItem: (k: string) => Promise<void>;
+        };
+        return createAsyncStorageAdapter(asImpl, debug);
+      }
+      if (debug) {
+        console.info(
+          '[FusionState] React Native detected but AsyncStorage not found. Falling back to memory adapter. ',
+        );
+      }
+    } catch (e) {
+      if (debug) {
+        console.warn('[FusionState] Failed to load AsyncStorage adapter:', e);
+      }
     }
     return createNoopStorageAdapter();
   }

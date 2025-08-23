@@ -1,7 +1,6 @@
 import {useGlobalState} from './FusionStateProvider';
 import {useEffect, useState, useRef, useMemo, useCallback} from 'react';
-import isEqual from 'lodash.isequal';
-import {simpleDeepEqual} from './utils';
+import {customIsEqual, simpleDeepEqual} from './utils';
 
 type StateKey = string;
 type SelectedState = Record<string, unknown>;
@@ -18,7 +17,7 @@ interface FusionStateLogOptions {
 
   /**
    * How to track changes. Default is 'reference' which is faster
-   * but might miss deeply nested changes. 'deep' uses lodash.isEqual
+   * but might miss deeply nested changes. 'deep' uses custom deep equality
    * for deep equality checks.
    */
   changeDetection?: 'reference' | 'deep' | 'simple';
@@ -85,7 +84,7 @@ export const useFusionStateLog = (
       if (changeDetection === 'reference') {
         return a === b;
       } else if (changeDetection === 'deep') {
-        return isEqual(a, b);
+        return customIsEqual(a, b);
       } else {
         return simpleDeepEqual(a, b);
       }

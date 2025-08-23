@@ -423,13 +423,59 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       [debug, shouldSaveOnChange, saveStateToStorage],
     );
 
+    // Per-key subscription registry
+    const keyListenersRef = useRef<Map<string, Set<() => void>>>(new Map());
+
+    const subscribeKey = useCallback((key: string, listener: () => void) => {
+      let set = keyListenersRef.current.get(key);
+      if (!set) {
+        set = new Set();
+        keyListenersRef.current.set(key, set);
+      }
+      set.add(listener);
+      return () => {
+        set!.delete(listener);
+        if (set!.size === 0) {
+          keyListenersRef.current.delete(key);
+        }
+      };
+    }, []);
+
+    const notifyKey = useCallback((key: string) => {
+      const listeners = keyListenersRef.current.get(key);
+      if (listeners) {
+        listeners.forEach(l => l());
+      }
+    }, []);
+
+    const getKeySnapshot = useCallback((key: string) => state[key], [state]);
+
+    // Wrap setState to notify only affected keys
+    const setStateAndNotify = useCallback(
+      (updater: React.SetStateAction<GlobalState>) => {
+        setState(prev => {
+          const next =
+            typeof updater === 'function' ? (updater as any)(prev) : updater;
+          // Determine changed keys and notify
+          Object.keys(next).forEach(k => {
+            if (prev[k] !== next[k]) notifyKey(k);
+          });
+          return next;
+        });
+      },
+      [setState, notifyKey],
+    );
+
     const value = useMemo(
       () => ({
         state,
-        setState,
+        setState: setStateAndNotify,
         initializingKeys: initializingKeys.current,
+        subscribeKey,
+        getKeySnapshot,
+        getServerSnapshot: undefined,
       }),
-      [state], // ✅ setState is now stable
+      [state, setStateAndNotify, subscribeKey, getKeySnapshot],
     );
 
     return (

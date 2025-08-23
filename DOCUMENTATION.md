@@ -1,6 +1,6 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 0.3.1  
+**Version:** 0.3.3  
 **Author:** Jacques GERARD  
 **License:** MIT
 
@@ -29,6 +29,8 @@ npm install react-fusion-state
 # or
 yarn add react-fusion-state
 ```
+
+**🎯 Zero Dependencies:** React Fusion State is completely self-contained with no external dependencies!
 
 ### Basic Usage
 ```jsx
@@ -191,7 +193,7 @@ import { createLocalStorageAdapter } from 'react-fusion-state';
 
 ## 🌐 **Platform Support**
 
-### React.js (Web)
+### React.js (Web) — React 18+
 
 ```jsx
 import { FusionStateProvider } from 'react-fusion-state';
@@ -237,6 +239,10 @@ Same as React Native - works out of the box with Expo's AsyncStorage.
   <App />
 </FusionStateProvider>
 ```
+
+### Concurrency Safety (React 18+)
+- Internally uses `useSyncExternalStore` with per-key subscriptions to avoid tearing and isolate re-renders.
+- Public API unchanged.
 
 ---
 
