@@ -365,7 +365,7 @@ Any other context or screenshots about the feature request.
 - **🐛 GitHub Issues** - Bug reports and feature requests
 - **💬 GitHub Discussions** - Questions and community
 - **📧 Email** - [jgrd93@gmail.com](mailto:jgrd93@gmail.com)
-- **💼 LinkedIn** - [Jacques GERARD](https://www.linkedin.com/in/jgerard/)
+- **💼 LinkedIn** - [Jacques GERARD](https://www.linkedin.com/in/jgerard)
 
 ### Getting Started Help
 - **Read DOCUMENTATION.md** - Complete API reference

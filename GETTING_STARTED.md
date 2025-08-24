@@ -85,7 +85,7 @@ function Counter() {
 - **🐛 Bug?** → [Create an issue](https://github.com/jgerard72/react-fusion-state/issues/new?template=bug_report.md)
 - **💡 Feature idea?** → [Request a feature](https://github.com/jgerard72/react-fusion-state/issues/new?template=feature_request.md)
 - **❓ Question?** → [GitHub Discussions](https://github.com/jgerard72/react-fusion-state/discussions)
-- **📧 Direct contact?** → [LinkedIn](https://www.linkedin.com/in/jgerard/)
+- **📧 Direct contact?** → [LinkedIn](https://www.linkedin.com/in/jgerard)
 
 ---
 

@@ -5,6 +5,24 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2024-12-24 - Documentation & Links Update
+
+### 📝 **Documentation**
+- **Added**: Comprehensive main README.md with complete project overview
+- **Added**: Quick start guide, feature showcase, and performance comparison table
+- **Added**: Links to all documentation, demos, and examples
+- **Added**: Professional badges and project presentation
+
+### 🔗 **Links & Contact**
+- **Fixed**: LinkedIn profile URL corrected across all documentation files
+- **Updated**: Contact information in CONTRIBUTING.md, DOCUMENTATION.md, and GETTING_STARTED.md
+- **Improved**: Consistent external and internal link structure
+
+### 🧹 **Maintenance**
+- **Removed**: Duplicate readme.md file (cleaned git status)
+- **Verified**: All tests passing (46/46), build working, no regressions
+- **Confirmed**: Library functionality 100% intact
+
 ## [0.3.3] - 2024-12-23 - Enterprise Ready: Performance + Auto-Detection + Quality
 
 ### 🚀 **MAJOR: Performance Isolation**

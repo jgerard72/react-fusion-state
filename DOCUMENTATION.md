@@ -613,7 +613,7 @@ persistence={{
 
 - **🐛 Issues:** [GitHub Issues](https://github.com/jgerard72/react-fusion-state/issues)
 - **💡 Feature Requests:** [GitHub Discussions](https://github.com/jgerard72/react-fusion-state/discussions)
-- **📧 Contact:** [LinkedIn](https://www.linkedin.com/in/jgerard/)
+- **📧 Contact:** [LinkedIn](https://www.linkedin.com/in/jgerard)
 
 ---
 
