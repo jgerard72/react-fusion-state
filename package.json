@@ -1,6 +1,6 @@
 {
   "name": "react-fusion-state",
-  "version": "0.3.4",
+  "version": "0.3.41",
   "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
