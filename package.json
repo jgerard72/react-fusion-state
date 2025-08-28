@@ -1,6 +1,7 @@
 {
   "name": "react-fusion-state",
   "version": "0.4.0",
+  "description": "🚀 The simplest AND most performant React state management library. Zero dependencies, 99.9% fewer re-renders, 2.8KB bundle, built-in persistence, TypeScript magic, DevTools ready.",
   "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -84,5 +85,28 @@
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typescript": "^4.0.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "keywords": [
+    "react",
+    "state",
+    "state-management",
+    "global-state",
+    "react-state",
+    "useState",
+    "redux",
+    "zustand",
+    "recoil",
+    "context",
+    "hooks",
+    "typescript",
+    "performance",
+    "zero-dependencies",
+    "persistence",
+    "devtools",
+    "react-hooks",
+    "state-manager",
+    "lightweight",
+    "simple",
+    "fast"
+  ]
 }
