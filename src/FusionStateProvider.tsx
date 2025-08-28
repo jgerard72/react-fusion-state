@@ -22,6 +22,7 @@ import {
 } from './storage/storageAdapters';
 import {detectBestStorageAdapter} from './storage/autoDetect';
 import {debounce, formatErrorMessage, simpleDeepEqual} from './utils';
+import {createDevTools, DevToolsActions, DevToolsConfig} from './devtools';
 
 const GlobalStateContext = createContext<
   GlobalFusionStateContextType | undefined
@@ -61,6 +62,8 @@ interface FusionStateProviderProps {
     | string[]
     | SimplePersistenceConfig
     | PersistenceConfig;
+  /** DevTools configuration (v0.4.0+) */
+  devTools?: boolean | DevToolsConfig;
 }
 
 /**
@@ -124,12 +127,27 @@ function normalizePersistenceConfig(
  * Manages the global state and provides access to all child components
  */
 export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
-  ({children, initialState = {}, debug = false, persistence}) => {
+  ({
+    children,
+    initialState = {},
+    debug = false,
+    persistence,
+    devTools = false,
+  }) => {
     // Normalize persistence configuration
     const normalizedPersistence = useMemo(
       () => normalizePersistenceConfig(persistence, debug),
       [persistence, debug],
     );
+
+    const devToolsInstance = useMemo(() => {
+      if (!devTools) return null;
+      const config =
+        typeof devTools === 'boolean'
+          ? {name: 'FusionState', devOnly: true}
+          : {...devTools, devOnly: devTools.devOnly ?? true};
+      return createDevTools(config);
+    }, [devTools]);
 
     // Initialize storage - use NoopStorage if not configured
     const persistenceRef = useRef(normalizedPersistence);
@@ -178,6 +196,15 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       }
       return initialState;
     });
+
+    useEffect(() => {
+      if (devToolsInstance?.enabled) {
+        devToolsInstance.init(state);
+        devToolsInstance.send(DevToolsActions.INIT, state, undefined, {
+          initialState,
+        });
+      }
+    }, [devToolsInstance]);
 
     const initializingKeys = useRef<Set<string>>(new Set());
     const isInitialLoadDone = useRef<boolean>(false);
@@ -417,10 +444,32 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
             });
           }
 
+          if (devToolsInstance?.enabled) {
+            const changedKeys = Object.keys(nextState).filter(
+              key => prevState[key] !== nextState[key],
+            );
+            if (changedKeys.length > 0) {
+              devToolsInstance.send(
+                DevToolsActions.SET_STATE,
+                nextState,
+                changedKeys.join(', '),
+                {
+                  changed: changedKeys,
+                  diff: Object.fromEntries(
+                    changedKeys.map(key => [
+                      key,
+                      {from: prevState[key], to: nextState[key]},
+                    ]),
+                  ),
+                },
+              );
+            }
+          }
+
           return nextState;
         });
       },
-      [debug, shouldSaveOnChange, saveStateToStorage],
+      [debug, shouldSaveOnChange, saveStateToStorage, devToolsInstance],
     );
 
     // Per-key subscription registry
@@ -448,7 +497,12 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       }
     }, []);
 
-    const getKeySnapshot = useCallback((key: string) => state[key], [state]);
+    const getKeySnapshot = useCallback(
+      (key: string) => {
+        return key in state ? state[key] : undefined;
+      },
+      [state],
+    );
 
     // Wrap setState to notify only affected keys
     const setStateAndNotify = useCallback(

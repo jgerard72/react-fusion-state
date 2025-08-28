@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { GlobalState, GlobalFusionStateContextType, PersistenceConfig, SimplePersistenceConfig } from './types';
+import { DevToolsConfig } from './devtools';
 /**
  * Hook to access the global state context
  * @returns The global state context
@@ -21,6 +22,8 @@ interface FusionStateProviderProps {
      * - complete PersistenceConfig object: advanced configuration (backward compatibility)
      */
     persistence?: boolean | string[] | SimplePersistenceConfig | PersistenceConfig;
+    /** DevTools configuration (v0.4.0+) */
+    devTools?: boolean | DevToolsConfig;
 }
 /**
  * Provider component for React Fusion State

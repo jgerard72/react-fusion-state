@@ -5,6 +5,41 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2024-12-24 - Enterprise-Ready Simplicity
+
+### 🎯 **Major Features**
+- **Added**: Typed Keys system with `createKey<T>()` for automatic TypeScript inference
+- **Added**: React DevTools integration with time-travel debugging
+- **Added**: Enterprise-grade robustness with invisible error recovery
+- **Added**: Zero dependencies - removed `lodash.isequal` dependency
+
+### 🔑 **Typed Keys (Optional)**
+- **New**: `createKey<T>(key)` function for type-safe state management
+- **New**: Automatic TypeScript inference and auto-completion
+- **New**: Backward compatible - all existing code continues to work
+
+### 🛠️ **Developer Experience**
+- **Added**: React DevTools support with `devTools={true}` prop
+- **Added**: State inspection, action history, and time-travel debugging
+- **Added**: Development-only features with zero production impact
+
+### 🛡️ **Enterprise Robustness (Invisible)**
+- **Added**: Automatic storage corruption detection and recovery
+- **Added**: Memory leak prevention and automatic cleanup
+- **Added**: Integrated error boundaries for graceful error handling
+- **Added**: Data integrity validation with checksum verification
+
+### 📦 **Performance & Bundle**
+- **Removed**: `lodash.isequal` dependency (breaking: now zero dependencies)
+- **Added**: Custom optimized deep equal implementation
+- **Improved**: Bundle size reduction and performance optimizations
+- **Added**: Automatic debouncing and memoization (invisible)
+
+### 🔄 **Migration**
+- **Guaranteed**: 100% backward compatibility - no breaking changes to existing APIs
+- **Optional**: Upgrade to typed keys at your own pace
+- **Simple**: All new features are opt-in or completely transparent
+
 ## [0.3.41] - 2024-12-24 - Documentation & Links Update
 
 ### 📝 **Documentation**

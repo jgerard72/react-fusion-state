@@ -3,6 +3,26 @@ export {useFusionState} from './useFusionState';
 export {FusionStateProvider, useGlobalState} from './FusionStateProvider';
 export {useFusionStateLog} from './useFusionStateLog';
 
+// 🚀 NOUVEAUTÉ v0.4.0: Clés typées pour une meilleure DX TypeScript
+export {
+  createKey,
+  createNamespacedKey,
+  isTypedKey,
+  extractKeyName,
+  AppKeys, // Exemples de clés prédéfinies
+  UserKeys,
+} from './createKey';
+export type {TypedKey, ExtractKeyType} from './createKey';
+
+// 🛠️ NOUVEAUTÉ v0.4.0: Support des React DevTools
+export {
+  createDevTools,
+  getDevTools,
+  useDevTools,
+  DevToolsActions,
+} from './devtools';
+export type {DevToolsConfig} from './devtools';
+
 // ✅ AUTOMATIC OPTIMIZATIONS: Built into useFusionState
 // No need for separate hooks, everything is optimized automatically!
 

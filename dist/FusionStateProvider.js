@@ -38,6 +38,7 @@ const types_1 = require("./types");
 const storageAdapters_1 = require("./storage/storageAdapters");
 const autoDetect_1 = require("./storage/autoDetect");
 const utils_1 = require("./utils");
+const devtools_1 = require("./devtools");
 const GlobalStateContext = (0, react_1.createContext)(undefined);
 /**
  * Hook to access the global state context
@@ -98,10 +99,19 @@ function normalizePersistenceConfig(config, debug = false) {
  * Provider component for React Fusion State
  * Manages the global state and provides access to all child components
  */
-exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence }) => {
+exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence, devTools = false, }) => {
     var _a, _b, _c, _d, _e, _f, _g;
     // Normalize persistence configuration
     const normalizedPersistence = (0, react_1.useMemo)(() => normalizePersistenceConfig(persistence, debug), [persistence, debug]);
+    const devToolsInstance = (0, react_1.useMemo)(() => {
+        var _a;
+        if (!devTools)
+            return null;
+        const config = typeof devTools === 'boolean'
+            ? { name: 'FusionState', devOnly: true }
+            : Object.assign(Object.assign({}, devTools), { devOnly: (_a = devTools.devOnly) !== null && _a !== void 0 ? _a : true });
+        return (0, devtools_1.createDevTools)(config);
+    }, [devTools]);
     // Initialize storage - use NoopStorage if not configured
     const persistenceRef = (0, react_1.useRef)(normalizedPersistence);
     const storageAdapter = (0, react_1.useMemo)(() => { var _a; return ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)(); }, []);
@@ -138,6 +148,14 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
         }
         return initialState;
     });
+    (0, react_1.useEffect)(() => {
+        if (devToolsInstance === null || devToolsInstance === void 0 ? void 0 : devToolsInstance.enabled) {
+            devToolsInstance.init(state);
+            devToolsInstance.send(devtools_1.DevToolsActions.INIT, state, undefined, {
+                initialState,
+            });
+        }
+    }, [devToolsInstance]);
     const initializingKeys = (0, react_1.useRef)(new Set());
     const isInitialLoadDone = (0, react_1.useRef)(false);
     const prevPersistedState = (0, react_1.useRef)({});
@@ -309,9 +327,21 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                     diff: Object.fromEntries(Object.entries(nextState).filter(([key, value]) => prevState[key] !== value)),
                 });
             }
+            if (devToolsInstance === null || devToolsInstance === void 0 ? void 0 : devToolsInstance.enabled) {
+                const changedKeys = Object.keys(nextState).filter(key => prevState[key] !== nextState[key]);
+                if (changedKeys.length > 0) {
+                    devToolsInstance.send(devtools_1.DevToolsActions.SET_STATE, nextState, changedKeys.join(', '), {
+                        changed: changedKeys,
+                        diff: Object.fromEntries(changedKeys.map(key => [
+                            key,
+                            { from: prevState[key], to: nextState[key] },
+                        ])),
+                    });
+                }
+            }
             return nextState;
         });
-    }, [debug, shouldSaveOnChange, saveStateToStorage]);
+    }, [debug, shouldSaveOnChange, saveStateToStorage, devToolsInstance]);
     // Per-key subscription registry
     const keyListenersRef = (0, react_1.useRef)(new Map());
     const subscribeKey = (0, react_1.useCallback)((key, listener) => {
@@ -334,7 +364,9 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
             listeners.forEach(l => l());
         }
     }, []);
-    const getKeySnapshot = (0, react_1.useCallback)((key) => state[key], [state]);
+    const getKeySnapshot = (0, react_1.useCallback)((key) => {
+        return key in state ? state[key] : undefined;
+    }, [state]);
     // Wrap setState to notify only affected keys
     const setStateAndNotify = (0, react_1.useCallback)((updater) => {
         setState(prev => {
