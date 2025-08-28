@@ -1,0 +1,23 @@
+# Include README.md explicitly
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+!PERFORMANCE_BENCHMARK_RESULTS.md
+
+# Exclude development files
+src/
+*.test.*
+*.spec.*
+.github/
+.vscode/
+.idea/
+coverage/
+node_modules/
+.env*
+.DS_Store
+tsconfig*.json
+jest.config.js
+.prettierrc*
+.eslintrc*
+benchmark/
+demo/

@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/jgerard72/react-fusion-state/issues"
   },
-  "readme": "README.md",
+
   "scripts": {
     "build": "rm -rf dist/* && tsc -p tsconfig-build.json",
     "format": "prettier --write .",
