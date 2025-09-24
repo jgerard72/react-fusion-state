@@ -19,7 +19,7 @@ const createKey_1 = require("./createKey");
 function useFusionState(keyInput, initialValue, options) {
     const key = (0, createKey_1.extractKeyName)(keyInput);
     const { state, setState, initializingKeys, subscribeKey, getKeySnapshot } = (0, FusionStateProvider_1.useGlobalState)();
-    const { persist = false, adapter = (0, autoDetect_1.detectBestStorageAdapter)(options === null || options === void 0 ? void 0 : options.debug), keyPrefix = 'fusion_persistent', debounceTime = 300, debug = false, } = options || {};
+    const { persist = false, adapter = (0, autoDetect_1.detectBestStorageAdapter)(options === null || options === void 0 ? void 0 : options.debug), keyPrefix = 'fusion_persistent', debounceTime = 300, debug = false, shallow = false, } = options || {};
     const storageKey = `${keyPrefix}_${key}`;
     const isInitialized = (0, react_1.useRef)(false);
     const saveTimeoutRef = (0, react_1.useRef)(null);
@@ -125,7 +125,7 @@ function useFusionState(keyInput, initialValue, options) {
             throw new Error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.KEY_MISSING_NO_INITIAL, key));
         }
     }, [key, initialValue, persist, state, initializingKeys, setState]);
-    const currentValue = (0, react_1.useSyncExternalStore)(listener => subscribeKey(key, listener), () => getKeySnapshot(key), () => undefined);
+    const currentValue = (0, react_1.useSyncExternalStore)(listener => subscribeKey(key, listener), () => getKeySnapshot(key), () => initialValue);
     const setValue = (0, react_1.useCallback)(newValue => {
         setState(prevState => {
             const currentValue = prevState[key];
@@ -139,7 +139,10 @@ function useFusionState(keyInput, initialValue, options) {
                 nextValue !== null &&
                 typeof currentValue === 'object' &&
                 currentValue !== null) {
-                if ((0, utils_1.simpleDeepEqual)(nextValue, currentValue)) {
+                const isEqual = shallow
+                    ? (0, utils_1.shallowEqual)(nextValue, currentValue)
+                    : (0, utils_1.simpleDeepEqual)(nextValue, currentValue);
+                if (isEqual) {
                     return prevState;
                 }
             }

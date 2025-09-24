@@ -7,7 +7,7 @@ import {
   FusionStateErrorMessages,
   UseFusionStateOptions,
 } from './types';
-import {formatErrorMessage, simpleDeepEqual} from './utils';
+import {formatErrorMessage, simpleDeepEqual, shallowEqual} from './utils';
 import {detectBestStorageAdapter} from './storage/autoDetect';
 import {StorageAdapter} from './storage/storageAdapters';
 import {TypedKey, extractKeyName, isTypedKey} from './createKey';
@@ -41,6 +41,7 @@ export function useFusionState<T = unknown>(
     keyPrefix = 'fusion_persistent',
     debounceTime = 300,
     debug = false,
+    shallow = false,
   } = options || {};
 
   const storageKey = `${keyPrefix}_${key}`;
@@ -177,7 +178,7 @@ export function useFusionState<T = unknown>(
   const currentValue = useSyncExternalStore(
     listener => subscribeKey(key, listener),
     () => getKeySnapshot(key) as T,
-    () => undefined as unknown as T,
+    () => initialValue as T,
   ) as T;
   const setValue = useCallback<StateUpdater<T>>(
     newValue => {
@@ -197,7 +198,10 @@ export function useFusionState<T = unknown>(
           typeof currentValue === 'object' &&
           currentValue !== null
         ) {
-          if (simpleDeepEqual(nextValue, currentValue)) {
+          const isEqual = shallow
+            ? shallowEqual(nextValue, currentValue)
+            : simpleDeepEqual(nextValue, currentValue);
+          if (isEqual) {
             return prevState;
           }
         }

@@ -5,6 +5,27 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2024-12-24 - SSR & Performance Improvements
+
+### 🔧 **Bug Fixes**
+- **Fixed**: SSR hydration mismatch by returning `initialValue` in `getServerSnapshot`
+- **Fixed**: Improved SSR compatibility for Next.js and Gatsby applications
+
+### ⚡ **Performance Enhancements**
+- **Added**: `shallow` option for optimized comparison of large objects
+- **Added**: Shallow equality check function for better performance on complex state
+
+### 📚 **Documentation**
+- **Added**: Performance options section in README with clear examples
+- **Added**: Usage guidelines for `shallow` option with best practices
+- **Improved**: Better examples and clearer API documentation
+
+### 🛠️ **Developer Experience**
+- **Enhanced**: TypeScript support for new `shallow` option
+- **Added**: Clear guidance on when to use shallow vs deep comparison
+
+---
+
 ## [0.4.0] - 2024-12-24 - Enterprise-Ready Simplicity
 
 ### 🎯 **Major Features**

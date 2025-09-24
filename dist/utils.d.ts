@@ -16,6 +16,10 @@ export declare const deepClone: <T>(obj: T) => T;
  */
 export declare const customIsEqual: (a: unknown, b: unknown) => boolean;
 /**
+ * Shallow comparison for objects and arrays
+ */
+export declare const shallowEqual: (a: unknown, b: unknown) => boolean;
+/**
  * Optimized deep comparison
  */
 export declare const simpleDeepEqual: (a: unknown, b: unknown) => boolean;

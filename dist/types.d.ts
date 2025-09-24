@@ -136,4 +136,6 @@ export interface UseFusionStateOptions {
     debounceTime?: number;
     /** Enable debug logging for persistence */
     debug?: boolean;
+    /** Use shallow comparison instead of deep comparison for objects (default: false) */
+    shallow?: boolean;
 }

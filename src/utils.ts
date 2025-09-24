@@ -74,6 +74,39 @@ export const customIsEqual = (a: unknown, b: unknown): boolean => {
 };
 
 /**
+ * Shallow comparison for objects and arrays
+ */
+export const shallowEqual = (a: unknown, b: unknown): boolean => {
+  if (a === b) return true;
+  if (a == null || b == null) return a === b;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== 'object') return false;
+
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  if (Array.isArray(b)) return false;
+
+  const keysA = Object.keys(a as object);
+  const keysB = Object.keys(b as object);
+
+  if (keysA.length !== keysB.length) return false;
+
+  for (const key of keysA) {
+    if (!keysB.includes(key) || (a as any)[key] !== (b as any)[key]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
  * Optimized deep comparison
  */
 export const simpleDeepEqual = (a: unknown, b: unknown): boolean =>
