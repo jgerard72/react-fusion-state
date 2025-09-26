@@ -1,6 +1,6 @@
 # 🏆 Performance Benchmark Results
 
-**React Fusion State v0.4.22 vs Redux Toolkit vs Zustand vs Recoil**
+**React Fusion State v0.4.23 vs Redux Toolkit vs Zustand vs Recoil**
 
 *Comprehensive performance testing conducted on Node.js v18.19.0*  
 *Updated with Object.is optimization, batching, and SSR improvements*
@@ -229,7 +229,7 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 ## 🎯 **Conclusion**
 
-**React Fusion State v0.4.22 is the CLEAR WINNER** with:
+**React Fusion State v0.4.23 is the CLEAR WINNER** with:
 
 ✅ **Superior Performance** - 100% efficiency vs 15% for Redux  
 ✅ **Object.is Optimization** - Fastest possible equality comparison with intelligent fallbacks  
@@ -275,4 +275,4 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 ---
 
-*Benchmark conducted: September 2025 | Node.js v18.19.0 | React Fusion State v0.4.22*
+*Benchmark conducted: September 2025 | Node.js v18.19.0 | React Fusion State v0.4.23*

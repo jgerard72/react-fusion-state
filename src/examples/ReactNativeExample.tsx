@@ -207,10 +207,24 @@ export default function ReactNativeApp() {
   //       appVersion: '1.0.0',
   //       firstLaunch: true,
   //     }}
+  //     persistence={['user', 'settings.darkMode', 'settings.notifications']} // ✅ Granular persistence (RECOMMENDED)
+  //     debug={__DEV__} // Enable debug only in development
+  //   >
+  //     <AppContent />
+  //   </FusionStateProvider>
+  // );
+  //
+  // // Advanced configuration with custom adapter
+  // return (
+  //   <FusionStateProvider
+  //     initialState={{
+  //       appVersion: '1.0.0',
+  //       firstLaunch: true,
+  //     }}
   //     persistence={{
   //       adapter: asyncStorageAdapter,
-  //       keyPrefix: 'MyReactNativeApp',
   //       persistKeys: ['user', 'settings.darkMode', 'settings.notifications'],
+  //       keyPrefix: 'MyReactNativeApp',
   //       debounce: 500, // Wait 500ms before saving
   //       onSaveError: (error, state) => {
   //         console.error('Save error:', error);

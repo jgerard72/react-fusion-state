@@ -1,12 +1,13 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 0.4.22  
+**Version:** 0.4.23  
 **Author:** Jacques GERARD  
 **License:** MIT
 
-## 🆕 **What's New in v0.4.22**
+## 🆕 **What's New in v0.4.23**
 
 ### 🚀 **Major Performance Upgrade**
+- **Granular Persistence by Default:** Choose exactly which state keys to persist
 - **Object.is() Priority:** Optimal equality comparison for all value types
 - **Batched Updates:** Cross-platform `unstable_batchedUpdates` for better performance
 - **Unified Architecture:** Cleaner persistence logic, single initialization effect
@@ -135,7 +136,7 @@ const [user, setUser] = usePersistentState('user', null);
 const [config, setConfig] = useAppState('config', {});
 ```
 
-### `useFusionHydrated()` ⭐ **NEW in v0.4.22**
+### `useFusionHydrated()` ⭐ **NEW in v0.4.23**
 
 Hook to check if the initial hydration from persistence is complete.
 
@@ -212,14 +213,33 @@ function TodoList() {
 
 ## 💾 **Persistence**
 
+React Fusion State uses **granular persistence by default** for better performance and security.
+
 ### Basic Persistence
 
 ```jsx
-// Automatic persistence with localStorage
-<FusionStateProvider persistence>
+// ✅ RECOMMENDED: Granular persistence - only persist specific keys
+<FusionStateProvider persistence={['user', 'settings']}>
+  <App />
+</FusionStateProvider>
+
+// ⚠️ USE WITH CAUTION: Persist all keys (can impact performance)
+<FusionStateProvider persistence={true}>
+  <App />
+</FusionStateProvider>
+
+// ✅ DEFAULT: No persistence (safest, most performant)
+<FusionStateProvider>
   <App />
 </FusionStateProvider>
 ```
+
+### Why Granular Persistence?
+
+1. **🚀 Better Performance** - Only saves data that needs to persist
+2. **🔒 More Secure** - Doesn't accidentally persist sensitive data
+3. **💾 Smaller Storage** - Reduces localStorage/AsyncStorage usage
+4. **🎯 Explicit Control** - You choose exactly what to persist
 
 ### Advanced Persistence Configuration
 
@@ -601,11 +621,14 @@ const increment = () => setCount(count + 1);
 **A:** Ensure persistence is properly configured:
 
 ```jsx
-// ✅ Correct
-<FusionStateProvider persistence>
+// ✅ Correct - Granular persistence (RECOMMENDED)
+<FusionStateProvider persistence={['user', 'cart']}>
 
-// ❌ Wrong
-<FusionStateProvider> // persistence disabled by default
+// ✅ Also correct - Persist all (use with caution)
+<FusionStateProvider persistence={true}>
+
+// ❌ Wrong - No persistence by default
+<FusionStateProvider>
 ```
 
 ### Q: Console spam in production?
@@ -705,14 +728,17 @@ const [app] = useFusionState('app', { user: null, settings: {} });
 
 ### 3. **Persistence Strategy**
 ```jsx
-// ✅ Selective persistence
+// ✅ Granular persistence (RECOMMENDED)
+persistence={['user', 'settings']} // Only important data
+
+// ✅ Advanced configuration
 persistence={{
-  persistKeys: ['user', 'settings'], // Only important data
-  debounceTime: 500 // Avoid excessive writes
+  persistKeys: ['user', 'settings'],
+  debounce: 500 // Avoid excessive writes
 }}
 
-// ❌ Persist everything (performance impact)
-persistence
+// ⚠️ Persist everything (use with caution)
+persistence={true}
 ```
 
 ### 4. **Error Handling**

@@ -5,6 +5,48 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.23] - 2025-09-26 - Granular Persistence & Enhanced Control
+
+### 🎯 **Major Persistence Improvements**
+- **NEW**: Granular persistence by default - choose exactly which state keys to persist
+- **Enhanced**: `persistence={['user', 'cart']}` syntax for explicit key selection (RECOMMENDED)
+- **Enhanced**: `persistence={true}` persists all keys (use with caution for performance)
+- **Enhanced**: `persistence={false}` or no persistence prop = no persistence (safest default)
+- **Optimized**: Skip storage operations entirely when no keys are configured for persistence
+
+### 🔒 **Security & Performance Benefits**
+- **Security**: Prevents accidental persistence of sensitive data (passwords, tokens, etc.)
+- **Performance**: Reduces localStorage/AsyncStorage usage and write operations
+- **Control**: Explicit declaration of what should persist vs temporary state
+- **Debugging**: Clearer understanding of what data survives page reloads
+
+### 📚 **Documentation Updates**
+- **NEW**: Professional JSDoc added to all core functions and components
+- **Enhanced**: IntelliSense support with detailed parameter descriptions and examples
+- **Updated**: All documentation files with granular persistence examples
+- **Updated**: README.md, DOCUMENTATION.md, GETTING_STARTED.md with new recommended patterns
+- **Updated**: Demo examples showing best practices for persistence configuration
+- **Updated**: Platform compatibility guide with granular persistence examples
+
+### 🧪 **Testing & Compatibility**
+- **Maintained**: 100% backward compatibility - no breaking changes
+- **Tested**: All 75 tests pass including backward compatibility tests
+- **Verified**: Legacy `persistence={true}` continues to work exactly as before
+- **Verified**: Existing codebases require no changes
+
+## [0.4.22] - 2025-09-26 - Documentation & Benchmark Updates
+
+### 📚 **Documentation Enhancements**
+- **Updated**: All documentation files to reflect version 0.4.22
+- **Updated**: PERFORMANCE_BENCHMARK_RESULTS.md with latest benchmark results
+- **Updated**: All example code and version references across documentation
+- **Enhanced**: Performance benchmark scripts with updated version display
+
+### 🧪 **Testing & Quality**
+- **Verified**: All 75 tests continue to pass with 100% backward compatibility
+- **Maintained**: Zero breaking changes from previous versions
+- **Updated**: Benchmark scripts to display correct version numbers
+
 ## [0.4.2] - 2024-12-25 - Major Technical Refactoring & Performance
 
 ### 🏗️ **Major Architecture Improvements**

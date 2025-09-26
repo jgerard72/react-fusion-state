@@ -1,4 +1,4 @@
-# 🤝 Contributing to React Fusion State v0.4.22
+# 🤝 Contributing to React Fusion State v0.4.23
 
 Thank you for your interest in contributing to React Fusion State! This guide will help you get started with our latest performance-optimized version.
 
@@ -313,7 +313,7 @@ What you expected to happen.
 What actually happened.
 
 ## Environment
-- React Fusion State version: [e.g. 0.4.22]
+- React Fusion State version: [e.g. 0.4.23]
 - React version: [e.g. 18.2.0]
 - Platform: [e.g. React.js, React Native, Expo]
 - Browser: [e.g. Chrome 91]

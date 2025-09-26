@@ -1,16 +1,19 @@
 import React from 'react';
 import {FusionStateProvider, useFusionState, useFusionStateLog} from '../index';
 
-// Type for todo items
+/**
+ * Type definition for todo items
+ */
 interface Todo {
   id: number;
   text: string;
   completed: boolean;
 }
 
-// Counter Component using Fusion State
+/**
+ * Counter component demonstrating basic useFusionState usage
+ */
 function Counter() {
-  // Simple state with initial value
   const [count, setCount] = useFusionState<number>('counter', 0);
 
   return (
@@ -23,22 +26,17 @@ function Counter() {
   );
 }
 
-// Todo Component using Fusion State
+/**
+ * TodoList component demonstrating complex state management with persistence
+ */
 function TodoList() {
-  // Complex state with persistence - todos will survive page refreshes
-  const [todos, setTodos] = useFusionState<Todo[]>(
-    'todos',
-    [
-      {id: 1, text: 'Learn React', completed: true},
-      {id: 2, text: 'Try React Fusion State', completed: false},
-    ],
-    {persist: true}, // ✅ Todos will be saved to localStorage
-  );
+  const [todos, setTodos] = useFusionState<Todo[]>('todos', [
+    {id: 1, text: 'Learn React', completed: true},
+    {id: 2, text: 'Try React Fusion State', completed: false},
+  ]);
 
-  // Form state
   const [newTodo, setNewTodo] = useFusionState<string>('newTodoText', '');
 
-  // Add new todo
   const addTodo = () => {
     if (!newTodo.trim()) return;
 
@@ -53,7 +51,6 @@ function TodoList() {
     setNewTodo('');
   };
 
-  // Toggle todo completion
   const toggleTodo = (id: number) => {
     setTodos(
       todos.map((todo: Todo) =>
@@ -93,9 +90,10 @@ function TodoList() {
   );
 }
 
-// StateDebugger using useFusionStateLog
+/**
+ * StateDebugger component demonstrating useFusionStateLog for debugging
+ */
 function StateDebugger() {
-  // Watch all state or specific keys
   const state = useFusionStateLog(['counter', 'todos'], {
     trackChanges: true,
     consoleLog: true,
@@ -110,10 +108,15 @@ function StateDebugger() {
   );
 }
 
-// Main App using FusionStateProvider
+/**
+ * Main App component demonstrating FusionStateProvider setup with granular persistence
+ */
 export default function App() {
   return (
-    <FusionStateProvider initialState={{theme: 'light'}} debug={true}>
+    <FusionStateProvider
+      persistence={['todos', 'theme']}
+      initialState={{theme: 'light'}}
+      debug={true}>
       <div className="app">
         <h1>React Fusion State Example</h1>
 
@@ -127,13 +130,11 @@ export default function App() {
   );
 }
 
-// Theme toggler component
+/**
+ * ThemeToggle component demonstrating persistent user preferences
+ */
 function ThemeToggle() {
-  // Theme preference with persistence - user's choice will be remembered
-  const [theme, setTheme] = useFusionState<string>('theme', 'light', {
-    persist: true,
-    debug: true, // ✅ Log theme changes to console
-  });
+  const [theme, setTheme] = useFusionState<string>('theme', 'light');
 
   return (
     <div className="theme-toggle">

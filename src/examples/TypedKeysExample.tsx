@@ -1,12 +1,13 @@
 /**
- * 🚀 EXAMPLE: New React Fusion State v0.4.0 features
- * 
+ * 🚀 EXAMPLE: React Fusion State v0.4.23 features
+ *
  * ✅ 100% BACKWARD COMPATIBLE - Old API still works
  * ✅ ZERO PERFORMANCE IMPACT - Compile-time optimizations
  * ✅ BETTER DX - IntelliSense and automatic typing
+ * ✅ GRANULAR PERSISTENCE - Choose exactly which keys to persist
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   FusionStateProvider,
   useFusionState,
@@ -48,7 +49,7 @@ const AppKeys = {
 // 🔥 BONUS: Namespaced keys to avoid collisions
 const UserKeys = {
   profile: createNamespacedKey<User>('user', 'profile'),
-  preferences: createNamespacedKey<{ theme: string }>('user', 'preferences'),
+  preferences: createNamespacedKey<{theme: string}>('user', 'preferences'),
 } as const;
 
 // 🛠️ DevTools Configuration (NEW!)
@@ -73,8 +74,7 @@ function App() {
           notifications: true,
         },
         currentPage: 'home',
-      }}
-    >
+      }}>
       <Header />
       <UserProfile />
       <ShoppingCart />
@@ -150,7 +150,9 @@ function ShoppingCart() {
       <h2>Shopping Cart ({cart.length} items)</h2>
       {cart.map(item => (
         <div key={item.id}>
-          <span>{item.name} - ${item.price} x {item.quantity}</span>
+          <span>
+            {item.name} - ${item.price} x {item.quantity}
+          </span>
           <button onClick={() => removeItem(item.id)}>Remove</button>
         </div>
       ))}
@@ -189,18 +191,18 @@ function Settings() {
 
 // 📊 Composant pour afficher les infos DevTools
 function DevToolsInfo() {
-  const { enabled, stats } = useDevTools();
+  const {enabled, stats} = useDevTools();
 
   if (!enabled) {
     return (
-      <div style={{ padding: '10px', backgroundColor: '#f0f0f0' }}>
+      <div style={{padding: '10px', backgroundColor: '#f0f0f0'}}>
         <p>🛠️ DevTools: Disabled (activate with devTools prop)</p>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '10px', backgroundColor: '#e8f5e8' }}>
+    <div style={{padding: '10px', backgroundColor: '#e8f5e8'}}>
       <h3>🛠️ DevTools Active</h3>
       <p>Actions logged: {stats?.actionCount || 0}</p>
       <p>Config: {stats?.config.name}</p>
@@ -215,17 +217,15 @@ function Header() {
   const [currentPage, setCurrentPage] = useFusionState('currentPage', 'home');
 
   return (
-    <nav style={{ padding: '10px', borderBottom: '1px solid #ccc' }}>
+    <nav style={{padding: '10px', borderBottom: '1px solid #ccc'}}>
       <button
         onClick={() => setCurrentPage('home')}
-        style={{ marginRight: '10px' }}
-      >
+        style={{marginRight: '10px'}}>
         Home {currentPage === 'home' && '✓'}
       </button>
       <button
         onClick={() => setCurrentPage('products')}
-        style={{ marginRight: '10px' }}
-      >
+        style={{marginRight: '10px'}}>
         Products {currentPage === 'products' && '✓'}
       </button>
       <button onClick={() => setCurrentPage('profile')}>
@@ -256,13 +256,18 @@ function AdvancedExample() {
 
   // Derived calculations with strict types
   const isLoggedIn = user !== null;
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartTotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const itemCount = cart.length;
 
   return (
     <div>
       <p>Status: {isLoggedIn ? 'Logged In' : 'Guest'}</p>
-      <p>Cart: {itemCount} items (${cartTotal.toFixed(2)})</p>
+      <p>
+        Cart: {itemCount} items (${cartTotal.toFixed(2)})
+      </p>
     </div>
   );
 }
@@ -270,18 +275,20 @@ function AdvancedExample() {
 export default App;
 
 /**
- * 🎉 SUMMARY OF NEW FEATURES v0.4.0
- * 
+ * 🎉 SUMMARY OF NEW FEATURES v0.4.23
+ *
+ * ✅ Granular persistence - Choose exactly which keys to persist
  * ✅ Typed keys with createKey<T>() for IntelliSense
  * ✅ React DevTools for advanced debugging
  * ✅ 100% backward compatible - old code works
  * ✅ Zero performance impact - compile-time optimizations
  * ✅ Key namespacing to avoid collisions
- * ✅ Configuration DevTools flexible
- * 
+ * ✅ Enhanced security - No accidental persistence of sensitive data
+ *
  * 🚀 Migration facile:
  * 1. Create your typed keys with createKey<T>()
- * 2. Progressively replace strings with keys
- * 3. Activer les DevTools avec devTools={true}
- * 4. Profiter de l'IntelliSense automatique!
+ * 2. Configure granular persistence: persistence={['user', 'cart']}
+ * 3. Progressively replace strings with keys
+ * 4. Activer les DevTools avec devTools={true}
+ * 5. Profiter de l'IntelliSense automatique!
  */

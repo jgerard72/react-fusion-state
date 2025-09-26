@@ -440,7 +440,7 @@ function displayPerformanceScore() {
 }
 
 function runFullBenchmarkSuite() {
-  console.log('🏆 REACT FUSION STATE v0.4.22 - COMPREHENSIVE PERFORMANCE REPORT');
+  console.log('🏆 REACT FUSION STATE v0.4.23 - COMPREHENSIVE PERFORMANCE REPORT');
   console.log('═'.repeat(75));
   console.log('Comparing against: Redux Toolkit, Zustand, Recoil');
   console.log(`Environment: Node.js ${process.version} | ${new Date().toISOString()}`);

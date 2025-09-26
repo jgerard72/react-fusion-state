@@ -1,4 +1,4 @@
-# 🧪 React Fusion State v0.4.22 - Interactive Demos
+# 🧪 React Fusion State v0.4.23 - Interactive Demos
 
 This directory contains interactive demonstrations of React Fusion State features. **Zero dependencies, maximum performance with Object.is optimization and batched updates.**
 
@@ -51,21 +51,24 @@ npx serve .
 
 #### **Granular Control**
 ```jsx
-// Immediate persistence
-const [user, setUser] = useFusionState('user', {}, { 
-  persist: true, 
-  debounceTime: 0,
-  debug: true 
-});
+// Configure persistence at Provider level (RECOMMENDED)
+<FusionStateProvider 
+  persistence={['user', 'settings']}
+  debug={true}
+>
+  <App />
+</FusionStateProvider>
 
-// Debounced persistence  
-const [settings, setSettings] = useFusionState('settings', {}, { 
-  persist: true, 
-  debounceTime: 2000 
-});
-
-// No persistence
-const [temp, setTemp] = useFusionState('temp', '');
+function App() {
+  // Persistent state (configured at provider level)
+  const [user, setUser] = useFusionState('user', {});
+  
+  // Also persistent (configured at provider level)
+  const [settings, setSettings] = useFusionState('settings', {});
+  
+  // Not persistent (not in persistence array)
+  const [temp, setTemp] = useFusionState('temp', '');
+}
 ```
 
 #### **Custom Options**
@@ -133,33 +136,40 @@ The demos use modern CSS with:
 
 ### Adding New Components
 ```jsx
+// Configure at provider level (RECOMMENDED)
+<FusionStateProvider 
+  persistence={['myData']} 
+  debug={true}
+>
+  <MyComponent />
+</FusionStateProvider>
+
 function MyComponent() {
-  const [data, setData] = useFusionState('myData', {}, {
-    persist: true,
-    debounceTime: 500,
-    debug: true,
-    keyPrefix: 'my_app'
-  });
+  const [data, setData] = useFusionState('myData', {});
   return <div>{/* Your component */}</div>;
 }
 ```
 
 ### Changing Persistence Settings
 ```jsx
-// Global persistence (demo-persistence.html)
+// Simple granular persistence (RECOMMENDED)
+<FusionStateProvider persistence={['counter', 'name']}>
+  <App />
+</FusionStateProvider>
+
+// Advanced configuration
 <FusionStateProvider persistence={{
   persistKeys: ['counter', 'name'],
   keyPrefix: 'my_demo',
-  debounceTime: 1000,
+  debounce: 1000,
 }}>
+  <App />
+</FusionStateProvider>
 
-// Per-key persistence (demo-key-persistence.html)
-const [state, setState] = useFusionState('key', defaultValue, {
-  persist: true,
-  debounceTime: 300,
-  debug: false,
-  keyPrefix: 'custom'
-});
+function App() {
+  const [state, setState] = useFusionState('counter', 0);
+  // State automatically persisted based on provider config
+}
 ```
 
 ## 🐛 Troubleshooting

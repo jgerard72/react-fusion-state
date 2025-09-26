@@ -44,31 +44,36 @@ export const useGlobalState = () => {
   return context;
 };
 
+/**
+ * Props for the FusionStateProvider component
+ */
 interface FusionStateProviderProps {
   /** Child components that will have access to fusion state */
   children: ReactNode;
-  /** Optional initial state values */
+  /** Initial state values to set when the provider mounts */
   initialState?: GlobalState;
-  /** Enable debug mode which logs state changes to console */
+  /** Enable debug logging to console */
   debug?: boolean;
   /**
-   * Persistence configuration - can be:
-   * - true: enable persistence for all keys with default values
-   * - string array: enable persistence only for specified keys
-   * - object: detailed configuration with keys, prefix, etc.
-   * - complete PersistenceConfig object: advanced configuration (backward compatibility)
+   * Persistence configuration:
+   * - `true`: persist ALL state keys (use with caution)
+   * - `string[]`: persist only specified keys (recommended)
+   * - `object`: detailed configuration
    */
   persistence?:
     | boolean
     | string[]
     | SimplePersistenceConfig
     | PersistenceConfig;
-  /** DevTools configuration (v0.4.0+) */
+  /** DevTools configuration for Redux DevTools integration */
   devTools?: boolean | DevToolsConfig;
 }
 
 /**
- * Normalize persistence configuration - simplified version
+ * Normalizes various persistence configuration formats into a standard PersistenceConfig
+ * @param config - The persistence configuration to normalize
+ * @param debug - Whether debug mode is enabled
+ * @returns Normalized persistence configuration or undefined
  */
 function normalizePersistenceConfig(
   config:
@@ -86,7 +91,7 @@ function normalizePersistenceConfig(
   if (typeof config === 'boolean') {
     return {
       adapter: defaultAdapter,
-      persistKeys: (key: string) => key.startsWith('persist.'),
+      persistKeys: config ? true : false,
       loadOnInit: true,
       saveOnChange: true,
     };
@@ -108,8 +113,7 @@ function normalizePersistenceConfig(
   const simple = config as SimplePersistenceConfig;
   return {
     adapter: simple.adapter || defaultAdapter,
-    persistKeys:
-      simple.persistKeys || ((key: string) => key.startsWith('persist.')),
+    persistKeys: simple.persistKeys || false,
     keyPrefix: simple.keyPrefix,
     debounceTime: simple.debounce,
     loadOnInit: true,
@@ -121,7 +125,16 @@ function normalizePersistenceConfig(
 
 /**
  * Provider component for React Fusion State
- * Manages the global state and provides access to all child components
+ *
+ * Manages global state and provides access to all child components.
+ * Supports persistence, debug logging, and Redux DevTools integration.
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={['user', 'cart']} debug>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
   ({
@@ -160,7 +173,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     const [state, setStateRaw] = useState<GlobalState>(() => {
       if (shouldLoadOnInit && storageAdapter && typeof window !== 'undefined') {
         try {
-          // Check if this is an extended storage adapter with sync support
           const extendedAdapter = storageAdapter as ExtendedStorageAdapter;
           if (extendedAdapter.getItemSync) {
             const item = extendedAdapter.getItemSync(`${keyPrefix}_all`);
@@ -203,7 +215,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     const isInitialLoadDone = useRef<boolean>(false);
     const prevPersistedState = useRef<GlobalState>({});
 
-    // Handle synchronous load errors
     useEffect(() => {
       if (syncLoadErrorRef.current) {
         if (debug) {
@@ -292,7 +303,9 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       return (newState: GlobalState): GlobalState => {
         const persistKeys = persistenceRef.current?.persistKeys;
 
-        if (!persistKeys) return {...newState};
+        if (!persistKeys) return {}; // No persistence
+
+        if (persistKeys === true) return {...newState}; // Persist all keys
 
         const filteredState: GlobalState = {};
 
@@ -327,6 +340,9 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
 
         // Filter keys if persistence.persistKeys is defined
         const stateToSave = filterPersistKeys(newState);
+
+        // If no keys to persist, skip saving entirely
+        if (Object.keys(stateToSave).length === 0) return;
 
         try {
           // ✅ Optimization: check if data has actually changed
