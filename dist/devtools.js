@@ -88,7 +88,7 @@ class FusionStateDevTools {
             console.warn('[FusionState DevTools] Send failed:', error);
         }
     }
-    /** Vérifier si les DevTools sont actives */
+    /** Check if DevTools are active */
     get enabled() {
         return this.isEnabled;
     }
@@ -104,8 +104,8 @@ class FusionStateDevTools {
 /** Instance globale des DevTools (singleton) */
 let devToolsInstance = null;
 /**
- * Créer ou obtenir l'instance des DevTools
- * ✅ PERFORMANCE: Singleton pattern pour éviter les instances multiples
+ * Create or get DevTools instance
+ * ✅ PERFORMANCE: Singleton pattern to avoid multiple instances
  */
 function createDevTools(config) {
     if (!devToolsInstance) {
@@ -134,8 +134,8 @@ function useDevTools() {
 }
 exports.useDevTools = useDevTools;
 /**
- * Types d'actions pour les DevTools
- * Aide à standardiser les messages
+ * Action types for DevTools
+ * Helps standardize messages
  */
 exports.DevToolsActions = {
     INIT: 'INIT',

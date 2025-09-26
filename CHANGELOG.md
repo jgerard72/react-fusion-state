@@ -5,6 +5,51 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2024-12-25 - Major Technical Refactoring & Performance
+
+### 🏗️ **Major Architecture Improvements**
+- **BREAKING (Internal)**: Completely refactored persistence logic - now handled exclusively in `FusionStateProvider`
+- **BREAKING (Internal)**: Removed all persistence options from `useFusionState` hook (moved to Provider level)
+- **Enhanced**: Unified initialization logic - merged dual `useEffect` into single, more efficient effect
+- **Enhanced**: Persistence adapter configuration now frozen at mount for predictable behavior
+
+### ⚡ **Performance Enhancements**
+- **NEW**: `Object.is()` priority equality comparison for optimal performance
+- **NEW**: Cross-platform batched notifications using `unstable_batchedUpdates`
+- **Enhanced**: Intelligent fallback: `Object.is` → `shallowEqual` → `simpleDeepEqual`
+- **Optimized**: Significant reduction in unnecessary re-renders through better equality checks
+- **Added**: New `batch()` utility with automatic React DOM/Native detection
+
+### 🔧 **SSR & Cross-Platform Fixes**
+- **Fixed**: Proper `getServerSnapshot` implementation for robust SSR support
+- **Fixed**: Cross-platform timeout types (`ReturnType<typeof setTimeout>` vs `NodeJS.Timeout`)
+- **Enhanced**: Server-side rendering now uses actual initial state instead of fallback values
+
+### 🆕 **New Features**
+- **NEW**: `useFusionHydrated()` hook for hydration status tracking (useful for React Native/AsyncStorage)
+- **NEW**: Cross-platform batching utility (`src/utils/batch.ts`)
+- **Enhanced**: Better TypeScript support across web and React Native environments
+
+### 🛠️ **Developer Experience**
+- **Simplified**: Persistence configuration now centralized in Provider only
+- **Enhanced**: Cleaner, more maintainable codebase with reduced duplication
+- **Added**: Comprehensive test suite for new functionality
+- **Maintained**: 100% backward compatibility - no API breaking changes for users
+
+### 📚 **Documentation & Testing**
+- **Added**: New test suite covering all enhanced functionality
+- **Added**: Cross-platform batching tests
+- **Enhanced**: Better documentation of persistence behavior
+- **Added**: Migration notes and architectural decisions
+
+### 🔄 **Migration Notes**
+- ✅ **No user code changes required** - all improvements are internal
+- ✅ **Persistence options at hook level are deprecated but still work**
+- ✅ **Recommended**: Move persistence config to `FusionStateProvider` level
+- ✅ **Performance improvements are automatic**
+
+---
+
 ## [0.4.1] - 2024-12-24 - SSR & Performance Improvements
 
 ### 🔧 **Bug Fixes**

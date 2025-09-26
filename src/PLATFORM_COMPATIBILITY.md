@@ -1,6 +1,6 @@
-# 🚀 Platform Compatibility Guide
+# 🚀 Platform Compatibility Guide v0.4.22
 
-React Fusion State targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **zero dependencies** and full persistence support.
+React Fusion State v0.4.22 targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **zero dependencies**, full persistence support, and new **useFusionHydrated()** hook for hydration tracking.
 
 ## ✅ Platform Support Matrix
 
@@ -51,8 +51,10 @@ function App() {
 ### ✅ **Fully Supported Features:**
 - ✅ AsyncStorage persistence
 - ✅ Asynchronous loading
+- ✅ **NEW v0.4.22:** `useFusionHydrated()` hook for hydration status
 - ✅ Error handling with callbacks
 - ✅ Auto-detection of React Native environment
+- ✅ Object.is performance optimization and batched updates
 
 ### 📦 **Required Dependencies:**
 ```bash

@@ -39,6 +39,7 @@ const storageAdapters_1 = require("./storage/storageAdapters");
 const autoDetect_1 = require("./storage/autoDetect");
 const utils_1 = require("./utils");
 const devtools_1 = require("./devtools");
+const batch_1 = require("./utils/batch");
 const GlobalStateContext = (0, react_1.createContext)(undefined);
 /**
  * Hook to access the global state context
@@ -60,7 +61,6 @@ function normalizePersistenceConfig(config, debug = false) {
     if (!config)
         return undefined;
     const defaultAdapter = (0, autoDetect_1.detectBestStorageAdapter)(debug);
-    // Boolean: default persistence
     if (typeof config === 'boolean') {
         return {
             adapter: defaultAdapter,
@@ -69,7 +69,6 @@ function normalizePersistenceConfig(config, debug = false) {
             saveOnChange: true,
         };
     }
-    // Array: specific keys
     if (Array.isArray(config)) {
         return {
             adapter: defaultAdapter,
@@ -78,11 +77,9 @@ function normalizePersistenceConfig(config, debug = false) {
             saveOnChange: true,
         };
     }
-    // Complete PersistenceConfig
     if ('adapter' in config && !('keyPrefix' in config)) {
         return config;
     }
-    // SimplePersistenceConfig
     const simple = config;
     return {
         adapter: simple.adapter || defaultAdapter,
@@ -101,7 +98,6 @@ function normalizePersistenceConfig(config, debug = false) {
  */
 exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence, devTools = false, }) => {
     var _a, _b, _c, _d, _e, _f, _g;
-    // Normalize persistence configuration
     const normalizedPersistence = (0, react_1.useMemo)(() => normalizePersistenceConfig(persistence, debug), [persistence, debug]);
     const devToolsInstance = (0, react_1.useMemo)(() => {
         var _a;
@@ -112,17 +108,14 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
             : Object.assign(Object.assign({}, devTools), { devOnly: (_a = devTools.devOnly) !== null && _a !== void 0 ? _a : true });
         return (0, devtools_1.createDevTools)(config);
     }, [devTools]);
-    // Initialize storage - use NoopStorage if not configured
     const persistenceRef = (0, react_1.useRef)(normalizedPersistence);
     const storageAdapter = (0, react_1.useMemo)(() => { var _a; return ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)(); }, []);
     const keyPrefix = ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.keyPrefix) || 'fusion_state';
-    const shouldLoadOnInit = (_c = (_b = persistenceRef.current) === null || _b === void 0 ? void 0 : _b.loadOnInit) !== null && _c !== void 0 ? _c : true; // Default: load
-    const shouldSaveOnChange = (_e = (_d = persistenceRef.current) === null || _d === void 0 ? void 0 : _d.saveOnChange) !== null && _e !== void 0 ? _e : true; // Default: save
+    const shouldLoadOnInit = (_c = (_b = persistenceRef.current) === null || _b === void 0 ? void 0 : _b.loadOnInit) !== null && _c !== void 0 ? _c : true;
+    const shouldSaveOnChange = (_e = (_d = persistenceRef.current) === null || _d === void 0 ? void 0 : _d.saveOnChange) !== null && _e !== void 0 ? _e : true;
     const debounceTime = (_g = (_f = persistenceRef.current) === null || _f === void 0 ? void 0 : _f.debounceTime) !== null && _g !== void 0 ? _g : 0;
-    // State management with synchronous loading
     const syncLoadErrorRef = (0, react_1.useRef)(null);
     const [state, setStateRaw] = (0, react_1.useState)(() => {
-        // Try to load synchronously if possible (for localStorage)
         if (shouldLoadOnInit && storageAdapter && typeof window !== 'undefined') {
             try {
                 // Check if this is an extended storage adapter with sync support
@@ -361,12 +354,18 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
     const notifyKey = (0, react_1.useCallback)((key) => {
         const listeners = keyListenersRef.current.get(key);
         if (listeners) {
-            listeners.forEach(l => l());
+            (0, batch_1.batch)(() => {
+                listeners.forEach(l => l());
+            });
         }
     }, []);
     const getKeySnapshot = (0, react_1.useCallback)((key) => {
         return key in state ? state[key] : undefined;
     }, [state]);
+    const getServerSnapshot = (0, react_1.useCallback)((key) => {
+        // For SSR, return the initial state value or undefined
+        return key in initialState ? initialState[key] : undefined;
+    }, [initialState]);
     // Wrap setState to notify only affected keys
     const setStateAndNotify = (0, react_1.useCallback)((updater) => {
         setState(prev => {
@@ -385,8 +384,14 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
         initializingKeys: initializingKeys.current,
         subscribeKey,
         getKeySnapshot,
-        getServerSnapshot: undefined,
-    }), [state, setStateAndNotify, subscribeKey, getKeySnapshot]);
+        getServerSnapshot,
+    }), [
+        state,
+        setStateAndNotify,
+        subscribeKey,
+        getKeySnapshot,
+        getServerSnapshot,
+    ]);
     return (react_1.default.createElement(GlobalStateContext.Provider, { value: value }, children));
 });
 //# sourceMappingURL=FusionStateProvider.js.map

@@ -123,7 +123,7 @@ class FusionStateDevTools {
     }
   }
 
-  /** Vérifier si les DevTools sont actives */
+  /** Check if DevTools are active */
   public get enabled(): boolean {
     return this.isEnabled;
   }
@@ -142,8 +142,8 @@ class FusionStateDevTools {
 let devToolsInstance: FusionStateDevTools | null = null;
 
 /**
- * Créer ou obtenir l'instance des DevTools
- * ✅ PERFORMANCE: Singleton pattern pour éviter les instances multiples
+ * Create or get DevTools instance
+ * ✅ PERFORMANCE: Singleton pattern to avoid multiple instances
  */
 export function createDevTools(config?: DevToolsConfig): FusionStateDevTools {
   if (!devToolsInstance) {
@@ -172,8 +172,8 @@ export function useDevTools() {
 }
 
 /**
- * Types d'actions pour les DevTools
- * Aide à standardiser les messages
+ * Action types for DevTools
+ * Helps standardize messages
  */
 export const DevToolsActions = {
   INIT: 'INIT',

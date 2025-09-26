@@ -23,6 +23,7 @@ import {
 import {detectBestStorageAdapter} from './storage/autoDetect';
 import {debounce, formatErrorMessage, simpleDeepEqual} from './utils';
 import {createDevTools, DevToolsActions, DevToolsConfig} from './devtools';
+import {batch} from './utils/batch';
 
 const GlobalStateContext = createContext<
   GlobalFusionStateContextType | undefined
@@ -82,7 +83,6 @@ function normalizePersistenceConfig(
 
   const defaultAdapter = detectBestStorageAdapter(debug);
 
-  // Boolean: default persistence
   if (typeof config === 'boolean') {
     return {
       adapter: defaultAdapter,
@@ -92,7 +92,6 @@ function normalizePersistenceConfig(
     };
   }
 
-  // Array: specific keys
   if (Array.isArray(config)) {
     return {
       adapter: defaultAdapter,
@@ -102,12 +101,10 @@ function normalizePersistenceConfig(
     };
   }
 
-  // Complete PersistenceConfig
   if ('adapter' in config && !('keyPrefix' in config)) {
     return config as PersistenceConfig;
   }
 
-  // SimplePersistenceConfig
   const simple = config as SimplePersistenceConfig;
   return {
     adapter: simple.adapter || defaultAdapter,
@@ -134,7 +131,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     persistence,
     devTools = false,
   }) => {
-    // Normalize persistence configuration
     const normalizedPersistence = useMemo(
       () => normalizePersistenceConfig(persistence, debug),
       [persistence, debug],
@@ -149,7 +145,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       return createDevTools(config);
     }, [devTools]);
 
-    // Initialize storage - use NoopStorage if not configured
     const persistenceRef = useRef(normalizedPersistence);
     const storageAdapter = useMemo(
       () => persistenceRef.current?.adapter || createNoopStorageAdapter(),
@@ -157,14 +152,12 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     );
 
     const keyPrefix = persistenceRef.current?.keyPrefix || 'fusion_state';
-    const shouldLoadOnInit = persistenceRef.current?.loadOnInit ?? true; // Default: load
-    const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true; // Default: save
+    const shouldLoadOnInit = persistenceRef.current?.loadOnInit ?? true;
+    const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true;
     const debounceTime = persistenceRef.current?.debounceTime ?? 0;
 
-    // State management with synchronous loading
     const syncLoadErrorRef = useRef<Error | null>(null);
     const [state, setStateRaw] = useState<GlobalState>(() => {
-      // Try to load synchronously if possible (for localStorage)
       if (shouldLoadOnInit && storageAdapter && typeof window !== 'undefined') {
         try {
           // Check if this is an extended storage adapter with sync support
@@ -493,7 +486,9 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
     const notifyKey = useCallback((key: string) => {
       const listeners = keyListenersRef.current.get(key);
       if (listeners) {
-        listeners.forEach(l => l());
+        batch(() => {
+          listeners.forEach(l => l());
+        });
       }
     }, []);
 
@@ -502,6 +497,14 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
         return key in state ? state[key] : undefined;
       },
       [state],
+    );
+
+    const getServerSnapshot = useCallback(
+      (key: string) => {
+        // For SSR, return the initial state value or undefined
+        return key in initialState ? initialState[key] : undefined;
+      },
+      [initialState],
     );
 
     // Wrap setState to notify only affected keys
@@ -527,9 +530,15 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
         initializingKeys: initializingKeys.current,
         subscribeKey,
         getKeySnapshot,
-        getServerSnapshot: undefined,
+        getServerSnapshot,
       }),
-      [state, setStateAndNotify, subscribeKey, getKeySnapshot],
+      [
+        state,
+        setStateAndNotify,
+        subscribeKey,
+        getKeySnapshot,
+        getServerSnapshot,
+      ],
     );
 
     return (

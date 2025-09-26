@@ -1,8 +1,24 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 0.4.1  
+**Version:** 0.4.22  
 **Author:** Jacques GERARD  
 **License:** MIT
+
+## 🆕 **What's New in v0.4.22**
+
+### 🚀 **Major Performance Upgrade**
+- **Object.is() Priority:** Optimal equality comparison for all value types
+- **Batched Updates:** Cross-platform `unstable_batchedUpdates` for better performance
+- **Unified Architecture:** Cleaner persistence logic, single initialization effect
+- **SSR Enhanced:** Proper server snapshots for robust hydration
+
+### 🔄 **New Hooks**
+- **`useFusionHydrated()`:** Track hydration status (perfect for React Native + AsyncStorage)
+
+### 🏗️ **Architecture Improvements**
+- **Centralized Persistence:** All persistence logic moved to Provider level
+- **Cross-Platform Types:** Better TypeScript support for web + React Native
+- **Batched Notifications:** Automatic update batching reduces re-renders
 
 ---
 
@@ -117,6 +133,55 @@ import {
 const [theme, setTheme] = useSharedState('theme', 'light');
 const [user, setUser] = usePersistentState('user', null);
 const [config, setConfig] = useAppState('config', {});
+```
+
+### `useFusionHydrated()` ⭐ **NEW in v0.4.22**
+
+Hook to check if the initial hydration from persistence is complete.
+
+```jsx
+import { useFusionHydrated } from 'react-fusion-state';
+
+function App() {
+  const isHydrated = useFusionHydrated();
+  
+  if (!isHydrated) {
+    return <LoadingSpinner />; // Show loading while hydrating
+  }
+  
+  return <MainApp />; // Show app when ready
+}
+```
+
+**Returns:**
+- `boolean` - `true` when initial load from storage is complete
+
+**Use Cases:**
+- **React Native + AsyncStorage:** Show loader while data loads asynchronously
+- **SSR Applications:** Ensure proper hydration before rendering
+- **Progressive Loading:** Display skeleton UI during data restoration
+
+**React Native Example:**
+```jsx
+function UserProfile() {
+  const isHydrated = useFusionHydrated();
+  const [profile, setProfile] = useFusionState('profile', {
+    name: '',
+    settings: {}
+  });
+
+  // AsyncStorage is async, so show loader until ready
+  if (!isHydrated) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" />
+        <Text>Loading your data...</Text>
+      </View>
+    );
+  }
+
+  return <ProfileView profile={profile} />;
+}
 ```
 
 **Example:**

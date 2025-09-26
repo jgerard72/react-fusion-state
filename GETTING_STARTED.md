@@ -1,8 +1,8 @@
-# 🚀 Getting Started - React Fusion State
+# 🚀 Getting Started - React Fusion State v0.4.22
 
 **New to the project?** This guide will get you up and running in 5 minutes!
 
-**🎯 React Fusion State:** Zero dependencies, maximum performance state management for React.
+**🎯 React Fusion State v0.4.22:** Zero dependencies, maximum performance state management with Object.is optimization and batched updates.
 
 ---
 
@@ -73,7 +73,7 @@ function Counter() {
 - Run [**demo/demo-persistence.html**](demo/) - Interactive demo
 
 ### For Users
-- Read [**README.md**](readme.md) - Main introduction
+- Read [**README.md**](README.md) - Main introduction
 - Try [**demo/demo-persistence.html**](demo/) - Live demo
 - Check [**DOCUMENTATION.md**](DOCUMENTATION.md) - Complete guide
 - Browse [**src/examples/**](src/examples/) - Usage examples

@@ -1,8 +1,8 @@
 export { useFusionState } from './useFusionState';
 export { FusionStateProvider, useGlobalState } from './FusionStateProvider';
 export { useFusionStateLog } from './useFusionStateLog';
-export { createKey, createNamespacedKey, isTypedKey, extractKeyName, AppKeys, // Exemples de clés prédéfinies
-UserKeys, } from './createKey';
+export { useFusionHydrated } from './useFusionHydrated';
+export { createKey, createNamespacedKey, isTypedKey, extractKeyName, AppKeys, UserKeys, } from './createKey';
 export type { TypedKey, ExtractKeyType } from './createKey';
 export { createDevTools, getDevTools, useDevTools, DevToolsActions, } from './devtools';
 export type { DevToolsConfig } from './devtools';

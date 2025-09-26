@@ -19,7 +19,6 @@ describe('useFusionState - Advanced Coverage', () => {
     jest.restoreAllMocks();
   });
 
-  // Test des timeouts de sauvegarde (lignes 51-68) - Version simplifiée
   it('should handle debounced persistence', async () => {
     const TestComponent = () => {
       const [value, setValue] = useFusionState('testKey', 'initial', {
@@ -83,7 +82,6 @@ describe('useFusionState - Advanced Coverage', () => {
     expect(getByTestId('value')).toHaveTextContent('new value');
   });
 
-  // Test des options par défaut et branches conditionnelles
   it('should handle various option combinations', async () => {
     const TestComponent = () => {
       // Test sans options (ligne 160)
@@ -118,7 +116,6 @@ describe('useFusionState - Advanced Coverage', () => {
     });
   });
 
-  // Test des fonctions de mise à jour (ligne 224, 241)
   it('should handle function updates correctly', () => {
     const TestComponent = () => {
       const [count, setCount] = useFusionState('counter', 0);
@@ -174,7 +171,6 @@ describe('useFusionState - Advanced Coverage', () => {
     expect(countElement).toHaveTextContent('0');
   });
 
-  // Test des clés dynamiques et initialisation (lignes 76-140)
   it('should handle dynamic keys and initialization', () => {
     const TestComponent = ({keyName}: {keyName: string}) => {
       const [value, setValue] = useFusionState(keyName, `default-${keyName}`);
@@ -204,7 +200,6 @@ describe('useFusionState - Advanced Coverage', () => {
     });
     expect(getByTestId('value-key1')).toHaveTextContent('updated-key1');
 
-    // Test avec une nouvelle clé
     rerender(
       <FusionStateProvider>
         <TestComponent keyName="key2" />

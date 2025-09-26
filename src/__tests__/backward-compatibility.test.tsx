@@ -1,6 +1,6 @@
 /**
- * Test de rétrocompatibilité complète pour React Fusion State v0.4.0
- * Vérifie que tout le code v0.3.x fonctionne exactement pareil
+ * Complete backward compatibility test for React Fusion State v0.4.0
+ * Verifies that all v0.3.x code works exactly the same
  */
 
 import React from 'react';
@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import {
   FusionStateProvider,
   useFusionState,
-  // Nouvelles fonctionnalités (ne doivent pas casser l'ancien code)
+  // New features (should not break old code)
   createKey,
   useDevTools,
 } from '../index';
@@ -53,7 +53,7 @@ function LegacyAppWithPersistence() {
   );
 }
 
-// 🎯 TEST 4: Mélange ancien/nouveau code (doit coexister)
+// 🎯 TEST 4: Mix old/new code (should coexist)
 const newUserKey = createKey<{name: string; id: number} | null>('newUser');
 
 function MixedComponent() {
@@ -84,15 +84,15 @@ describe('🔄 Backward Compatibility Tests v0.4.0', () => {
   test('✅ Legacy code v0.3.x works exactly the same', async () => {
     render(<LegacyApp />);
 
-    // État initial doit être préservé
+    // Initial state should be preserved
     expect(screen.getByTestId('count')).toHaveTextContent('Count: 5');
     expect(screen.getByTestId('user')).toHaveTextContent('User: None');
 
-    // Fonctionnalité increment doit marcher pareil
+    // Increment functionality should work the same
     fireEvent.click(screen.getByTestId('increment'));
     expect(screen.getByTestId('count')).toHaveTextContent('Count: 6');
 
-    // Fonctionnalité setUser doit marcher pareil
+    // SetUser functionality should work the same
     fireEvent.click(screen.getByTestId('set-user'));
     await waitFor(() => {
       expect(screen.getByTestId('user')).toHaveTextContent('User: John');
@@ -115,7 +115,7 @@ describe('🔄 Backward Compatibility Tests v0.4.0', () => {
       </FusionStateProvider>,
     );
 
-    // État initial
+    // Initial state
     expect(screen.getByTestId('old-counter')).toHaveTextContent('Old: 0');
     expect(screen.getByTestId('new-user')).toHaveTextContent('New: None');
 
@@ -205,7 +205,7 @@ describe('🔄 Backward Compatibility Tests v0.4.0', () => {
   });
 
   test('✅ New exports dont break existing imports', () => {
-    // Test que les nouveaux exports n'interfèrent pas
+    // Test that new exports don't interfere
     expect(typeof createKey).toBe('function');
     expect(typeof useDevTools).toBe('function');
 
@@ -221,7 +221,7 @@ describe('🆕 New Features v0.4.0 (should work alongside legacy)', () => {
 
     function NewTypedComponent() {
       const [user, setUser] = useFusionState(userKey, null);
-      // TypeScript devrait inférer le type automatiquement
+      // TypeScript should infer the type automatically
 
       return (
         <div>

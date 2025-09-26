@@ -37,7 +37,7 @@ declare class FusionStateDevTools {
     onTimeTravel?: (payload: any) => void;
     init(state: GlobalState): void;
     send(actionType: string, state: GlobalState, key?: string, payload?: unknown): void;
-    /** Vérifier si les DevTools sont actives */
+    /** Check if DevTools are active */
     get enabled(): boolean;
     /** Obtenir les statistiques */
     get stats(): {
@@ -47,8 +47,8 @@ declare class FusionStateDevTools {
     };
 }
 /**
- * Créer ou obtenir l'instance des DevTools
- * ✅ PERFORMANCE: Singleton pattern pour éviter les instances multiples
+ * Create or get DevTools instance
+ * ✅ PERFORMANCE: Singleton pattern to avoid multiple instances
  */
 export declare function createDevTools(config?: DevToolsConfig): FusionStateDevTools;
 /** Obtenir l'instance actuelle des DevTools */
@@ -67,8 +67,8 @@ export declare function useDevTools(): {
     send: (actionType: string, state: GlobalState, key?: string | undefined, payload?: unknown) => void;
 };
 /**
- * Types d'actions pour les DevTools
- * Aide à standardiser les messages
+ * Action types for DevTools
+ * Helps standardize messages
  */
 export declare const DevToolsActions: {
     readonly INIT: "INIT";

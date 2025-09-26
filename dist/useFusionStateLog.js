@@ -27,7 +27,7 @@ const useFusionStateLog = (keys, options = {}) => {
             }
         }
         return result;
-    }, [state, keys === null || keys === void 0 ? void 0 : keys.join(',')]); // ✅ Stabiliser la dépendance keys
+    }, [state, keys === null || keys === void 0 ? void 0 : keys.join(',')]);
     const [selectedState, setSelectedState] = (0, react_1.useState)(filteredState);
     // Track previous state for change detection
     const previousState = (0, react_1.useRef)({});

@@ -61,7 +61,7 @@ export const useFusionStateLog = (
       }
     }
     return result;
-  }, [state, keys?.join(',')]); // ✅ Stabiliser la dépendance keys
+  }, [state, keys?.join(',')]);
 
   const [selectedState, setSelectedState] =
     useState<SelectedState>(filteredState);

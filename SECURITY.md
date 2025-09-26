@@ -6,7 +6,9 @@ We actively maintain and provide security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.2.x   | ✅ Yes             |
+| 0.4.x   | ✅ Yes (Current)   |
+| 0.3.x   | ✅ Yes             |
+| 0.2.x   | ⚠️ Limited         |
 | 0.1.x   | ❌ No              |
 
 ## Reporting a Vulnerability

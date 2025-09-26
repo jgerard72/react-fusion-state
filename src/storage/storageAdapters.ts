@@ -60,7 +60,7 @@ export interface ExtendedStorageAdapter extends StorageAdapter {
 export const createLocalStorageAdapter = (
   debug = false,
 ): ExtendedStorageAdapter => {
-  // Vérifier si localStorage est disponible
+  // Check if localStorage is available
   if (typeof localStorage === 'undefined') {
     if (debug) {
       console.warn(

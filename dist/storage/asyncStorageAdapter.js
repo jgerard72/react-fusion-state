@@ -11,9 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createAsyncStorageAdapter = void 0;
 /**
- * Crée un adaptateur AsyncStorage pour React Native
+ * Creates an AsyncStorage adapter for React Native
  *
- * @param AsyncStorage - L'instance AsyncStorage importée de @react-native-async-storage/async-storage
+ * @param AsyncStorage - AsyncStorage instance imported from @react-native-async-storage/async-storage
  * @param debug - Whether to enable debug logging
  * @returns Un adaptateur compatible avec FusionState
  *

@@ -2,19 +2,18 @@
 export {useFusionState} from './useFusionState';
 export {FusionStateProvider, useGlobalState} from './FusionStateProvider';
 export {useFusionStateLog} from './useFusionStateLog';
+export {useFusionHydrated} from './useFusionHydrated';
 
-// 🚀 NOUVEAUTÉ v0.4.0: Clés typées pour une meilleure DX TypeScript
 export {
   createKey,
   createNamespacedKey,
   isTypedKey,
   extractKeyName,
-  AppKeys, // Exemples de clés prédéfinies
+  AppKeys,
   UserKeys,
 } from './createKey';
 export type {TypedKey, ExtractKeyType} from './createKey';
 
-// 🛠️ NOUVEAUTÉ v0.4.0: Support des React DevTools
 export {
   createDevTools,
   getDevTools,
@@ -22,9 +21,6 @@ export {
   DevToolsActions,
 } from './devtools';
 export type {DevToolsConfig} from './devtools';
-
-// ✅ AUTOMATIC OPTIMIZATIONS: Built into useFusionState
-// No need for separate hooks, everything is optimized automatically!
 
 // Convenient aliases for different use cases
 export {useFusionState as useSharedState} from './useFusionState';
@@ -54,13 +50,10 @@ export {
 // Utilities
 export {formatErrorMessage, debounce, simpleDeepEqual} from './utils';
 
-// ✅ SIMPLE: No complex middleware
-
 // Persistence exports
 export {
   createNoopStorageAdapter,
   createLocalStorageAdapter,
-  // For backward compatibility
   NoopStorageAdapter,
 } from './storage/storageAdapters';
 export {

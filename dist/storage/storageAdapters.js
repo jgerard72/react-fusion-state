@@ -38,7 +38,7 @@ exports.createNoopStorageAdapter = createNoopStorageAdapter;
  * @returns A storage adapter that uses browser's localStorage
  */
 const createLocalStorageAdapter = (debug = false) => {
-    // Vérifier si localStorage est disponible
+    // Check if localStorage is available
     if (typeof localStorage === 'undefined') {
         if (debug) {
             console.warn('localStorage is not available, falling back to noop adapter');

@@ -1,9 +1,9 @@
 /**
- * 🚀 EXEMPLE: Nouvelles fonctionnalités React Fusion State v0.4.0
+ * 🚀 EXAMPLE: New React Fusion State v0.4.0 features
  * 
- * ✅ 100% RÉTROCOMPATIBLE - L'ancienne API fonctionne toujours
- * ✅ ZÉRO IMPACT PERFORMANCE - Optimisations au compile-time
- * ✅ MEILLEURE DX - IntelliSense et typage automatique
+ * ✅ 100% BACKWARD COMPATIBLE - Old API still works
+ * ✅ ZERO PERFORMANCE IMPACT - Compile-time optimizations
+ * ✅ BETTER DX - IntelliSense and automatic typing
  */
 
 import React, { useState } from 'react';
@@ -16,7 +16,7 @@ import {
   DevToolsConfig,
 } from '../index';
 
-// 🎯 ÉTAPE 1: Définir les types de votre application
+// 🎯 STEP 1: Define your application types
 interface User {
   id: number;
   name: string;
@@ -37,7 +37,7 @@ interface AppSettings {
   notifications: boolean;
 }
 
-// 🚀 ÉTAPE 2: Créer des clés typées (NOUVEAU!)
+// 🚀 STEP 2: Create typed keys (NEW!)
 const AppKeys = {
   user: createKey<User | null>('user'),
   cart: createKey<CartItem[]>('cart'),
@@ -45,27 +45,27 @@ const AppKeys = {
   currentPage: createKey<string>('currentPage'),
 } as const;
 
-// 🔥 BONUS: Clés avec namespace pour éviter les collisions
+// 🔥 BONUS: Namespaced keys to avoid collisions
 const UserKeys = {
   profile: createNamespacedKey<User>('user', 'profile'),
   preferences: createNamespacedKey<{ theme: string }>('user', 'preferences'),
 } as const;
 
-// 🛠️ Configuration DevTools (NOUVEAU!)
+// 🛠️ DevTools Configuration (NEW!)
 const devToolsConfig: DevToolsConfig = {
   name: 'E-commerce App',
   trace: true,
   maxAge: 100,
-  devOnly: true, // Seulement en développement
+  devOnly: true, // Only in development
 };
 
-// 📱 Composant principal avec Provider
+// 📱 Main component with Provider
 function App() {
   return (
     <FusionStateProvider
-      persistence={['user', 'cart', 'settings']} // Persistance sélective
+      persistence={['user', 'cart', 'settings']} // Selective persistence
       debug={process.env.NODE_ENV === 'development'}
-      devTools={devToolsConfig} // 🆕 DevTools activés!
+      devTools={devToolsConfig} // 🆕 DevTools enabled!
       initialState={{
         settings: {
           theme: 'light',
@@ -84,9 +84,9 @@ function App() {
   );
 }
 
-// 👤 Composant User avec clés typées
+// 👤 User component with typed keys
 function UserProfile() {
-  // 🚀 NOUVELLE API: Type inféré automatiquement!
+  // 🚀 NEW API: Type inferred automatically!
   const [user, setUser] = useFusionState(AppKeys.user, null);
   // TypeScript sait que user est User | null ✅
 
@@ -123,9 +123,9 @@ function UserProfile() {
   );
 }
 
-// 🛒 Composant Panier avec types stricts
+// 🛒 Shopping Cart component with strict types
 function ShoppingCart() {
-  // Type inféré: CartItem[] ✅
+  // Inferred type: CartItem[] ✅
   const [cart, setCart] = useFusionState(AppKeys.cart, []);
 
   const addItem = () => {
@@ -162,7 +162,7 @@ function ShoppingCart() {
 
 // ⚙️ Composant Settings
 function Settings() {
-  // Type inféré: AppSettings ✅
+  // Inferred type: AppSettings ✅
   const [settings, setSettings] = useFusionState(AppKeys.settings, {
     theme: 'light',
     language: 'en',
@@ -211,7 +211,7 @@ function DevToolsInfo() {
 
 // 🧭 Header avec navigation
 function Header() {
-  // ✅ Ancienne API toujours supportée (rétrocompatibilité)
+  // ✅ Old API still supported (backward compatibility)
   const [currentPage, setCurrentPage] = useFusionState('currentPage', 'home');
 
   return (
@@ -243,18 +243,18 @@ function OldWay() {
   // user.name // ❌ Pas d'IntelliSense
 }
 
-// ✅ Maintenant (v0.4.0+) - Typé automatiquement
+// ✅ Now (v0.4.0+) - Automatically typed
 function NewWay() {
   const [user, setUser] = useFusionState(AppKeys.user, null); // User | null
   // user?.name // ✅ IntelliSense complet!
 }
 
-// 🚀 EXEMPLE AVANCÉ: Selectors avec types
+// 🚀 ADVANCED EXAMPLE: Selectors with types
 function AdvancedExample() {
   const [user] = useFusionState(AppKeys.user, null);
   const [cart] = useFusionState(AppKeys.cart, []);
 
-  // Calculs dérivés avec types stricts
+  // Derived calculations with strict types
   const isLoggedIn = user !== null;
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const itemCount = cart.length;
@@ -270,18 +270,18 @@ function AdvancedExample() {
 export default App;
 
 /**
- * 🎉 RÉSUMÉ DES NOUVEAUTÉS v0.4.0
+ * 🎉 SUMMARY OF NEW FEATURES v0.4.0
  * 
- * ✅ Clés typées avec createKey<T>() pour IntelliSense
- * ✅ DevTools React pour debugging avancé
- * ✅ 100% rétrocompatible - ancien code fonctionne
- * ✅ Zéro impact performance - optimisations compile-time
- * ✅ Namespace de clés pour éviter collisions
+ * ✅ Typed keys with createKey<T>() for IntelliSense
+ * ✅ React DevTools for advanced debugging
+ * ✅ 100% backward compatible - old code works
+ * ✅ Zero performance impact - compile-time optimizations
+ * ✅ Key namespacing to avoid collisions
  * ✅ Configuration DevTools flexible
  * 
  * 🚀 Migration facile:
- * 1. Créer vos clés typées avec createKey<T>()
- * 2. Remplacer progressivement les strings par les clés
+ * 1. Create your typed keys with createKey<T>()
+ * 2. Progressively replace strings with keys
  * 3. Activer les DevTools avec devTools={true}
  * 4. Profiter de l'IntelliSense automatique!
  */
