@@ -1,6 +1,6 @@
-# 🧪 React Fusion State v0.4.25 - Interactive Demos
+# 🧪 React Fusion State v1.0.0 - Interactive Demos
 
-This directory contains interactive demonstrations of React Fusion State features. **Zero dependencies, maximum performance with Object.is optimization and batched updates.**
+This directory contains interactive demonstrations of React Fusion State features. **Zero dependencies, maximum performance with ultra-simple API.**
 
 ## 📁 Available Demos
 

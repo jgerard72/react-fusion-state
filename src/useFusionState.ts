@@ -13,7 +13,7 @@ import {TypedKey, extractKeyName} from './createKey';
  * Hook for global state management with automatic persistence and SSR support
  *
  * @template T - The type of the state value
- * @param key - Unique key for the state (string or TypedKey)
+ * @param key - Unique string key for the state
  * @param initialValue - Initial value for the state
  * @param options - Additional options for state management
  * @returns Tuple of [value, setValue] similar to React's useState
@@ -21,20 +21,22 @@ import {TypedKey, extractKeyName} from './createKey';
  * @example
  * ```tsx
  * const [count, setCount] = useFusionState('counter', 0);
- * const [user, setUser] = useFusionState(userKey, null);
+ * const [user, setUser] = useFusionState('user', null);
  * ```
  */
+export function useFusionState<T = unknown>(
+  key: string,
+  initialValue?: T,
+  options?: UseFusionStateOptions,
+): [T, StateUpdater<T>];
+
+// Backward compatibility overload (internal use only)
 export function useFusionState<T>(
   key: TypedKey<T>,
   initialValue?: T,
   options?: UseFusionStateOptions,
 ): [T, StateUpdater<T>];
 
-export function useFusionState<T = unknown>(
-  key: string,
-  initialValue?: T,
-  options?: UseFusionStateOptions,
-): [T, StateUpdater<T>];
 export function useFusionState<T = unknown>(
   keyInput: string | TypedKey<T>,
   initialValue?: T,

@@ -185,14 +185,17 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                     if (storedDataRaw) {
                         const storedData = JSON.parse(storedDataRaw);
                         // Merge with current state - stored data takes precedence
-                        setStateRaw(prevState => {
-                            const mergedState = Object.assign(Object.assign({}, prevState), storedData);
-                            if (debug) {
-                                console.log('[FusionState] Loaded state from storage (async):', storedData);
-                                console.log('[FusionState] Merged state:', mergedState);
-                            }
-                            return mergedState;
-                        });
+                        // Use setTimeout to avoid act() warnings in tests for async persistence
+                        setTimeout(() => {
+                            setStateRaw(prevState => {
+                                const mergedState = Object.assign(Object.assign({}, prevState), storedData);
+                                if (debug) {
+                                    console.log('[FusionState] Loaded state from storage (async):', storedData);
+                                    console.log('[FusionState] Merged state:', mergedState);
+                                }
+                                return mergedState;
+                            });
+                        }, 0);
                         // Store for comparison
                         prevPersistedState.current = Object.assign({}, storedData);
                     }

@@ -249,17 +249,20 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
               const storedData = JSON.parse(storedDataRaw) as GlobalState;
 
               // Merge with current state - stored data takes precedence
-              setStateRaw(prevState => {
-                const mergedState = {...prevState, ...storedData};
-                if (debug) {
-                  console.log(
-                    '[FusionState] Loaded state from storage (async):',
-                    storedData,
-                  );
-                  console.log('[FusionState] Merged state:', mergedState);
-                }
-                return mergedState;
-              });
+              // Use setTimeout to avoid act() warnings in tests for async persistence
+              setTimeout(() => {
+                setStateRaw(prevState => {
+                  const mergedState = {...prevState, ...storedData};
+                  if (debug) {
+                    console.log(
+                      '[FusionState] Loaded state from storage (async):',
+                      storedData,
+                    );
+                    console.log('[FusionState] Merged state:', mergedState);
+                  }
+                  return mergedState;
+                });
+              }, 0);
 
               // Store for comparison
               prevPersistedState.current = {...storedData};

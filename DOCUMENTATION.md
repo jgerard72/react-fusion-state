@@ -1,10 +1,10 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 0.4.23  
+**Version:** 1.0.0  
 **Author:** Jacques GERARD  
 **License:** MIT
 
-## 🆕 **What's New in v0.4.25**
+## 🎉 **What's New in v1.0.0 - STABLE RELEASE**
 
 ### 🚀 **Major Performance Upgrade**
 - **Granular Persistence by Default:** Choose exactly which state keys to persist
@@ -136,54 +136,6 @@ const [user, setUser] = usePersistentState('user', null);
 const [config, setConfig] = useAppState('config', {});
 ```
 
-### `useFusionHydrated()` ⭐ **NEW in v0.4.25**
-
-Hook to check if the initial hydration from persistence is complete.
-
-```jsx
-import { useFusionHydrated } from 'react-fusion-state';
-
-function App() {
-  const isHydrated = useFusionHydrated();
-  
-  if (!isHydrated) {
-    return <LoadingSpinner />; // Show loading while hydrating
-  }
-  
-  return <MainApp />; // Show app when ready
-}
-```
-
-**Returns:**
-- `boolean` - `true` when initial load from storage is complete
-
-**Use Cases:**
-- **React Native + AsyncStorage:** Show loader while data loads asynchronously
-- **SSR Applications:** Ensure proper hydration before rendering
-- **Progressive Loading:** Display skeleton UI during data restoration
-
-**React Native Example:**
-```jsx
-function UserProfile() {
-  const isHydrated = useFusionHydrated();
-  const [profile, setProfile] = useFusionState('profile', {
-    name: '',
-    settings: {}
-  });
-
-  // AsyncStorage is async, so show loader until ready
-  if (!isHydrated) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" />
-        <Text>Loading your data...</Text>
-      </View>
-    );
-  }
-
-  return <ProfileView profile={profile} />;
-}
-```
 
 **Example:**
 ```jsx

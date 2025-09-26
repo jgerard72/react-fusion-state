@@ -1,7 +1,9 @@
 export { useFusionState } from './useFusionState';
-export { FusionStateProvider, useGlobalState } from './FusionStateProvider';
+export { FusionStateProvider } from './FusionStateProvider';
+export { createAsyncStorageAdapter } from './storage/asyncStorageAdapter';
 export { useFusionStateLog } from './useFusionStateLog';
 export { useFusionHydrated } from './useFusionHydrated';
+export { useGlobalState } from './FusionStateProvider';
 export { createKey, createNamespacedKey, isTypedKey, extractKeyName, AppKeys, UserKeys, } from './createKey';
 export type { TypedKey, ExtractKeyType } from './createKey';
 export { createDevTools, getDevTools, useDevTools, DevToolsActions, } from './devtools';
@@ -17,7 +19,6 @@ export { FusionStateErrorMessages, FusionStateError, PersistenceError, } from '.
 export { formatErrorMessage, debounce, simpleDeepEqual } from './utils';
 export { createNoopStorageAdapter, createLocalStorageAdapter, NoopStorageAdapter, } from './storage/storageAdapters';
 export { detectBestStorageAdapter, createMemoryStorageAdapter, isSSREnvironment, } from './storage/autoDetect';
-export { createAsyncStorageAdapter } from './storage/asyncStorageAdapter';
 export { createLocalStorageAdapter as createWebStorageAdapter } from './storage/storageAdapters';
 export { createAsyncStorageAdapter as createRNStorageAdapter } from './storage/asyncStorageAdapter';
 export { createAsyncStorageAdapter as createMobileStorageAdapter } from './storage/asyncStorageAdapter';

@@ -1,8 +1,14 @@
-// Core hooks
+// Core API - v1.0 Ultra Simple
 export {useFusionState} from './useFusionState';
-export {FusionStateProvider, useGlobalState} from './FusionStateProvider';
+export {FusionStateProvider} from './FusionStateProvider';
+
+// React Native Support
+export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
+
+// Advanced/Internal (backward compatibility only)
 export {useFusionStateLog} from './useFusionStateLog';
 export {useFusionHydrated} from './useFusionHydrated';
+export {useGlobalState} from './FusionStateProvider';
 
 export {
   createKey,
@@ -22,7 +28,6 @@ export {
 } from './devtools';
 export type {DevToolsConfig} from './devtools';
 
-// Convenient aliases for different use cases
 export {useFusionState as useSharedState} from './useFusionState';
 export {useFusionState as usePersistentState} from './useFusionState';
 export {useFusionState as useAppState} from './useFusionState';
@@ -30,7 +35,6 @@ export {FusionStateProvider as GlobalStateProvider} from './FusionStateProvider'
 export {FusionStateProvider as StateProvider} from './FusionStateProvider';
 export {FusionStateProvider as AppStateProvider} from './FusionStateProvider';
 
-// Main types
 export type {
   GlobalState,
   SetStateAction,
@@ -47,10 +51,8 @@ export {
   PersistenceError,
 } from './types';
 
-// Utilities
 export {formatErrorMessage, debounce, simpleDeepEqual} from './utils';
 
-// Persistence exports
 export {
   createNoopStorageAdapter,
   createLocalStorageAdapter,
@@ -61,9 +63,7 @@ export {
   createMemoryStorageAdapter,
   isSSREnvironment,
 } from './storage/autoDetect';
-export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
 
-// Storage adapter aliases for convenience
 export {createLocalStorageAdapter as createWebStorageAdapter} from './storage/storageAdapters';
 export {createAsyncStorageAdapter as createRNStorageAdapter} from './storage/asyncStorageAdapter';
 export {createAsyncStorageAdapter as createMobileStorageAdapter} from './storage/asyncStorageAdapter';

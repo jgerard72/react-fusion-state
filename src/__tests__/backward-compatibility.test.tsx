@@ -1,10 +1,10 @@
 /**
- * Complete backward compatibility test for React Fusion State v0.4.25
+ * Complete backward compatibility test for React Fusion State v1.0.0
  * Verifies that all v0.3.x code works exactly the same
  */
 
 import React from 'react';
-import {render, screen, fireEvent, waitFor} from '@testing-library/react';
+import {render, screen, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {
   FusionStateProvider,
@@ -80,9 +80,11 @@ function MixedComponent() {
   );
 }
 
-describe('🔄 Backward Compatibility Tests v0.4.25', () => {
+describe('🔄 Backward Compatibility Tests v1.0.0', () => {
   test('✅ Legacy code v0.3.x works exactly the same', async () => {
-    render(<LegacyApp />);
+    act(() => {
+      render(<LegacyApp />);
+    });
 
     // Initial state should be preserved
     expect(screen.getByTestId('count')).toHaveTextContent('Count: 5');
@@ -102,18 +104,22 @@ describe('🔄 Backward Compatibility Tests v0.4.25', () => {
   test('✅ Legacy persistence API works identically', () => {
     // Test que l'ancien Provider avec persistence fonctionne
     expect(() => {
-      render(<LegacyAppWithPersistence />);
+      act(() => {
+        render(<LegacyAppWithPersistence />);
+      });
     }).not.toThrow();
 
     expect(screen.getByTestId('count')).toHaveTextContent('Count: 10');
   });
 
   test('✅ Old and new APIs can coexist without conflicts', async () => {
-    render(
-      <FusionStateProvider>
-        <MixedComponent />
-      </FusionStateProvider>,
-    );
+    act(() => {
+      render(
+        <FusionStateProvider>
+          <MixedComponent />
+        </FusionStateProvider>,
+      );
+    });
 
     // Initial state
     expect(screen.getByTestId('old-counter')).toHaveTextContent('Old: 0');
@@ -154,11 +160,13 @@ describe('🔄 Backward Compatibility Tests v0.4.25', () => {
       );
     }
 
-    render(
-      <FusionStateProvider>
-        <TestComponent />
-      </FusionStateProvider>,
-    );
+    act(() => {
+      render(
+        <FusionStateProvider>
+          <TestComponent />
+        </FusionStateProvider>,
+      );
+    });
 
     expect(screen.getByTestId('str')).toHaveTextContent('hello');
     expect(screen.getByTestId('num')).toHaveTextContent('42');
@@ -181,11 +189,13 @@ describe('🔄 Backward Compatibility Tests v0.4.25', () => {
     );
 
     expect(() => {
-      render(
-        <TestProvider>
-          <div>Legacy test</div>
-        </TestProvider>,
-      );
+      act(() => {
+        render(
+          <TestProvider>
+            <div>Legacy test</div>
+          </TestProvider>,
+        );
+      });
     }).not.toThrow();
   });
 
@@ -200,7 +210,9 @@ describe('🔄 Backward Compatibility Tests v0.4.25', () => {
 
     // Ne doit pas planter sans devTools prop
     expect(() => {
-      render(<LegacyWithoutDevTools />);
+      act(() => {
+        render(<LegacyWithoutDevTools />);
+      });
     }).not.toThrow();
   });
 
@@ -215,7 +227,7 @@ describe('🔄 Backward Compatibility Tests v0.4.25', () => {
   });
 });
 
-describe('🆕 New Features v0.4.25 (should work alongside legacy)', () => {
+describe('🆕 New Features v1.0.0 (should work alongside legacy)', () => {
   test('✅ Typed keys provide better DX without breaking old code', async () => {
     const userKey = createKey<{name: string; age: number} | null>('typed-user');
 
@@ -237,11 +249,13 @@ describe('🆕 New Features v0.4.25 (should work alongside legacy)', () => {
       );
     }
 
-    render(
-      <FusionStateProvider>
-        <NewTypedComponent />
-      </FusionStateProvider>,
-    );
+    act(() => {
+      render(
+        <FusionStateProvider>
+          <NewTypedComponent />
+        </FusionStateProvider>,
+      );
+    });
 
     expect(screen.getByTestId('typed-user')).toHaveTextContent('None');
 
@@ -261,7 +275,9 @@ describe('🆕 New Features v0.4.25 (should work alongside legacy)', () => {
     }
 
     expect(() => {
-      render(<AppWithDevTools />);
+      act(() => {
+        render(<AppWithDevTools />);
+      });
     }).not.toThrow();
 
     expect(screen.getByTestId('count')).toHaveTextContent('Count: 0');

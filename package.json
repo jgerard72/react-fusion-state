@@ -1,6 +1,6 @@
 {
   "name": "react-fusion-state",
-  "version": "0.4.25",
+  "version": "1.0.0",
   "description": "🚀 The simplest AND most performant React state management library. Zero dependencies, 99.9% fewer re-renders, 2.8KB bundle, Object.is performance, batched updates, built-in persistence, TypeScript magic, DevTools ready.",
   "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
   "main": "dist/index.js",

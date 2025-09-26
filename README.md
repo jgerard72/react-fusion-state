@@ -11,14 +11,13 @@
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🆕 **v0.4.25 Granular Persistence & Performance Upgrade**
+### 🎉 **v1.0.0 - STABLE RELEASE - Ultra Simple API**
 - 🎯 **Granular persistence** - Choose exactly which state keys to persist with `persistence={['user', 'cart']}`
 - 📚 **Professional JSDoc** - Complete IntelliSense support with examples and detailed documentation
 - 🚀 **Object.is() priority equality** - Optimal performance for all value types
-- 🎯 **Batched notifications** - Cross-platform `unstable_batchedUpdates` support  
-- 🏗️ **Unified architecture** - Cleaner persistence logic, better SSR support
-- 🔄 **useFusionHydrated()** - New hook for hydration status (React Native friendly)
-- ✅ **100% backward compatible** - Zero breaking changes for users
+- 🎯 **Batched notifications** - Cross-platform performance optimization  
+- 🎯 **Ultra-simple API** - Just `useFusionState` and `FusionStateProvider` - nothing else needed!
+- ✅ **100% backward compatible** - Zero breaking changes for existing users
 
 ---
 
@@ -226,27 +225,20 @@ function App() {
 
 ### React Native App
 ```jsx
-import { useFusionState, useFusionHydrated } from 'react-fusion-state';
+import { useFusionState } from 'react-fusion-state';
 
 function UserProfile() {
-  // Check if data has been loaded from AsyncStorage
-  const isHydrated = useFusionHydrated();
-  
-  // Works identically in React Native
+  // Works identically in React Native with automatic persistence
   const [userProfile, setUserProfile] = useFusionState('profile', {
     name: '',
     settings: {}
   });
 
-  if (!isHydrated) {
-    return <LoadingSpinner />; // Show loader while hydrating
-  }
-
   return <ProfileView profile={userProfile} />;
 }
 ```
 
-### Advanced Performance (v0.4.25+)
+### Advanced Performance (v1.0+)
 ```jsx
 function OptimizedComponent() {
   // Automatic Object.is() equality + intelligent fallbacks

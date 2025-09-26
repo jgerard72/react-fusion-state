@@ -1,6 +1,6 @@
-# 🚀 Platform Compatibility Guide v0.4.25
+# 🚀 Platform Compatibility Guide v1.0.0
 
-React Fusion State v0.4.25 targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **zero dependencies**, full persistence support, and new **useFusionHydrated()** hook for hydration tracking.
+React Fusion State v1.0.0 targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **zero dependencies** and ultra-simple API.
 
 ## ✅ Platform Support Matrix
 
@@ -61,10 +61,10 @@ function AppWithCustomAdapter() {
 ### ✅ **Fully Supported Features:**
 - ✅ AsyncStorage persistence
 - ✅ Asynchronous loading
-- ✅ **NEW v0.4.25:** `useFusionHydrated()` hook for hydration status
+- ✅ Automatic persistence handling
 - ✅ Error handling with callbacks
 - ✅ Auto-detection of React Native environment
-- ✅ Object.is performance optimization and batched updates
+- ✅ Ultra-simple API with performance optimization
 
 ### 📦 **Required Dependencies:**
 ```bash
