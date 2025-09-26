@@ -25,7 +25,7 @@ export function isSSREnvironment(): boolean {
  * @returns The best available storage adapter
  */
 export function detectBestStorageAdapter(debug = false): StorageAdapter {
-  // 🔥 SSR Detection first (prevents server crashes)
+  // SSR Detection first (prevents server crashes)
   if (isSSREnvironment()) {
     if (debug) {
       console.info(
@@ -99,7 +99,7 @@ export function detectBestStorageAdapter(debug = false): StorageAdapter {
  * Detects if we are in a React Native environment
  */
 function isReactNativeEnvironment(): boolean {
-  // Method 1: Check navigator.product
+  // Check navigator.product
   if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
     return true;
   }

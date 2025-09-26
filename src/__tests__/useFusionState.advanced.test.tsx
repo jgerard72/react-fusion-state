@@ -22,8 +22,6 @@ describe('useFusionState - Advanced Coverage', () => {
   it('should handle debounced persistence', async () => {
     const TestComponent = () => {
       const [value, setValue] = useFusionState('testKey', 'initial', {
-        persist: true,
-        debounceTime: 50, // Plus court pour les tests
         debug: true,
       });
 
@@ -54,7 +52,6 @@ describe('useFusionState - Advanced Coverage', () => {
   it('should handle errors without crashing', () => {
     const TestComponent = () => {
       const [value, setValue] = useFusionState('errorKey', 'initial', {
-        persist: true,
         debug: true,
       });
 
@@ -89,9 +86,7 @@ describe('useFusionState - Advanced Coverage', () => {
 
       // Test avec options partielles
       const [withDebug] = useFusionState('withDebug', 'value', {debug: true});
-      const [withPersist] = useFusionState('withPersist', 'value', {
-        persist: true,
-      });
+      const [withPersist] = useFusionState('withPersist', 'value');
 
       return (
         <div>

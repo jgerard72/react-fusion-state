@@ -45,12 +45,6 @@ export interface SimplePersistenceConfig {
   persistKeys?: PersistenceKeys;
 
   /**
-   * Storage key prefix for namespacing (default: 'fusion_state')
-   * This helps avoid collisions with other storage in the same application.
-   */
-  keyPrefix?: string;
-
-  /**
    * Debounce time in ms (0 = immediate save)
    * Increasing this value reduces the number of writes but may lose recent changes
    */
@@ -66,7 +60,6 @@ export interface SimplePersistenceConfig {
   customSaveCallback?: (
     state: GlobalState,
     adapter: StorageAdapter,
-    keyPrefix: string,
   ) => Promise<void>;
 
   /** Callback called on storage read error */
@@ -86,12 +79,6 @@ export interface PersistenceConfig {
    * Implement the StorageAdapter interface for your specific platform.
    */
   adapter: StorageAdapter;
-
-  /**
-   * Storage key prefix for namespacing (default: 'fusion_state')
-   * This helps avoid collisions with other storage in the same application.
-   */
-  keyPrefix?: string;
 
   /**
    * Keys to persist - if not provided, all state keys will be persisted
@@ -167,24 +154,10 @@ export class PersistenceError extends FusionStateError {
 }
 
 /**
- * ✅ REMOVED: No more options needed, everything is optimized automatically!
- * Interface kept for backward compatibility but no longer used.
+ * Options for useFusionState hook
  */
 export interface UseFusionStateOptions {
-  /** @deprecated No longer used - automatic optimizations */
-  skipLocalState?: boolean;
-  /** @deprecated No longer used - automatic optimizations */
-  compare?: (a: unknown, b: unknown) => boolean;
-
-  /** Enable persistence for this specific key */
-  persist?: boolean;
-  /** Storage adapter to use (auto-detected if not provided) */
-  adapter?: StorageAdapter;
-  /** Storage key prefix (default: 'fusion_persistent') */
-  keyPrefix?: string;
-  /** Debounce time for saving in ms (default: 300) */
-  debounceTime?: number;
-  /** Enable debug logging for persistence */
+  /** Enable debug logging for this specific key */
   debug?: boolean;
   /** Use shallow comparison instead of deep comparison for objects (default: false) */
   shallow?: boolean;

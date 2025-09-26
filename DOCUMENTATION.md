@@ -29,7 +29,7 @@
 2. [🎛️ Core API](#️-core-api)
 3. [💾 Persistence](#-persistence)
 4. [🔑 Per-Key Persistence](#-per-key-persistence) ⭐ **NEW**
-5. [⚡ Performance Options](#-performance-options) ⭐ **v0.4.1**
+5. [⚡ Performance Options](#-performance-options) ⭐ **v1.0.0**
 6. [🌐 Platform Support](#-platform-support)
 6. [🔧 Advanced Configuration](#-advanced-configuration)
 7. [🛠️ Development Setup](#️-development-setup)
@@ -201,7 +201,6 @@ import { createLocalStorageAdapter } from 'react-fusion-state';
 <FusionStateProvider 
   persistence={{
     adapter: createLocalStorageAdapter(),
-    keyPrefix: 'myapp',                    // Storage key prefix
     persistKeys: ['user', 'settings'],     // Only persist specific keys
     debounceTime: 500,                     // Debounce saves (ms)
     onLoadError: (error, key) => {         // Handle load errors
@@ -221,7 +220,6 @@ import { createLocalStorageAdapter } from 'react-fusion-state';
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `adapter` | `StorageAdapter` | `detectBestStorageAdapter()` | Storage implementation |
-| `keyPrefix` | `string` | `'fusion_state'` | Prefix for storage keys |
 | `persistKeys` | `string[] \| function` | All keys | Which keys to persist |
 | `debounceTime` | `number` | `0` | Delay before saving (ms) |
 | `onLoadError` | `function` | `undefined` | Error callback for loading |

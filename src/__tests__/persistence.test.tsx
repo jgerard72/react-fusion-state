@@ -66,7 +66,6 @@ describe('Persistence Tests', () => {
         debug={true}
         persistence={{
           adapter: storageAdapter,
-          keyPrefix: 'test',
           persistKeys: ['counter', 'name'],
           debounceTime: 0, // No debounce for testing
         }}>
@@ -94,7 +93,7 @@ describe('Persistence Tests', () => {
     });
 
     // Check if data was saved
-    const savedData = localStorageMock.getItem('test_all');
+    const savedData = localStorageMock.getItem('fusion_state_all');
     expect(savedData).toBeTruthy();
 
     if (savedData) {
@@ -112,7 +111,7 @@ describe('Persistence Tests', () => {
       counter: 42,
       name: 'Jane',
     };
-    localStorageMock.setItem('test_all', JSON.stringify(initialData));
+    localStorageMock.setItem('fusion_state_all', JSON.stringify(initialData));
 
     const storageAdapter = createLocalStorageAdapter();
 
@@ -121,7 +120,6 @@ describe('Persistence Tests', () => {
         debug={true}
         persistence={{
           adapter: storageAdapter,
-          keyPrefix: 'test',
           persistKeys: ['counter', 'name'],
         }}>
         <TestCounter />
@@ -134,7 +132,7 @@ describe('Persistence Tests', () => {
       expect(screen.getByTestId('name')).toHaveTextContent('Jane');
     });
 
-    expect(localStorageMock.getItem).toHaveBeenCalledWith('test_all');
+    expect(localStorageMock.getItem).toHaveBeenCalledWith('fusion_state_all');
   });
 
   test('should merge with initialState correctly', async () => {
@@ -142,7 +140,7 @@ describe('Persistence Tests', () => {
     const storedData = {
       counter: 100,
     };
-    localStorageMock.setItem('test_all', JSON.stringify(storedData));
+    localStorageMock.setItem('fusion_state_all', JSON.stringify(storedData));
 
     const storageAdapter = createLocalStorageAdapter();
 
@@ -156,7 +154,6 @@ describe('Persistence Tests', () => {
         debug={true}
         persistence={{
           adapter: storageAdapter,
-          keyPrefix: 'test',
           persistKeys: ['counter', 'name'],
         }}>
         <TestCounter />
@@ -201,7 +198,6 @@ describe('Persistence Tests', () => {
         debug={true}
         persistence={{
           adapter: errorAdapter,
-          keyPrefix: 'test',
           persistKeys: ['counter', 'name'],
           onLoadError,
         }}>
@@ -258,7 +254,6 @@ describe('Persistence Tests', () => {
         debug={true}
         persistence={{
           adapter: storageAdapter,
-          keyPrefix: 'test',
           persistKeys: ['counter', 'name'], // Only persist counter and name
           debounceTime: 0,
         }}>
@@ -279,7 +274,7 @@ describe('Persistence Tests', () => {
     });
 
     // Check saved data - should only contain counter and name
-    const savedData = localStorageMock.getItem('test_all');
+    const savedData = localStorageMock.getItem('fusion_state_all');
     expect(savedData).toBeTruthy();
 
     if (savedData) {

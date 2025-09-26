@@ -74,7 +74,6 @@ function App() {
 #### **Custom Options**
 - **debounceTime**: Control save frequency (0ms to 2000ms)
 - **debug**: Enable/disable console logging
-- **keyPrefix**: Namespace your storage (`user_data`, `app_config`)
 - **adapter**: Custom storage backends (auto-detected)
 
 ## 🧪 Testing the Demos
@@ -160,7 +159,6 @@ function MyComponent() {
 // Advanced configuration
 <FusionStateProvider persistence={{
   persistKeys: ['counter', 'name'],
-  keyPrefix: 'my_demo',
   debounce: 1000,
 }}>
   <App />
@@ -189,7 +187,7 @@ function App() {
 ### Key Persistence Specific Issues
 1. **Debug logs not showing**: Check `debug: true` option
 2. **Debounced saves not working**: Wait for debounce delay
-3. **Wrong storage keys**: Verify `keyPrefix` setting
+3. **Wrong storage keys**: Check browser localStorage in DevTools
 4. **Data not loading**: Check browser's localStorage in DevTools
 
 ## 📚 Learning from the Demos

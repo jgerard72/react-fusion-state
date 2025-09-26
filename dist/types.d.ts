@@ -34,11 +34,6 @@ export interface SimplePersistenceConfig {
      */
     persistKeys?: PersistenceKeys;
     /**
-     * Storage key prefix for namespacing (default: 'fusion_state')
-     * This helps avoid collisions with other storage in the same application.
-     */
-    keyPrefix?: string;
-    /**
      * Debounce time in ms (0 = immediate save)
      * Increasing this value reduces the number of writes but may lose recent changes
      */
@@ -49,7 +44,7 @@ export interface SimplePersistenceConfig {
      */
     adapter?: StorageAdapter;
     /** Custom callback function to handle saving (called instead of default logic) */
-    customSaveCallback?: (state: GlobalState, adapter: StorageAdapter, keyPrefix: string) => Promise<void>;
+    customSaveCallback?: (state: GlobalState, adapter: StorageAdapter) => Promise<void>;
     /** Callback called on storage read error */
     onLoadError?: (error: Error, key: string) => void;
     /** Callback called on storage write error */
@@ -65,11 +60,6 @@ export interface PersistenceConfig {
      * Implement the StorageAdapter interface for your specific platform.
      */
     adapter: StorageAdapter;
-    /**
-     * Storage key prefix for namespacing (default: 'fusion_state')
-     * This helps avoid collisions with other storage in the same application.
-     */
-    keyPrefix?: string;
     /**
      * Keys to persist - if not provided, all state keys will be persisted
      * Can be an array of keys or a filter function
@@ -118,23 +108,10 @@ export declare class PersistenceError extends FusionStateError {
     constructor(message: string, operation: 'read' | 'write', storageKey?: string | undefined, context?: Record<string, unknown>);
 }
 /**
- * ✅ REMOVED: No more options needed, everything is optimized automatically!
- * Interface kept for backward compatibility but no longer used.
+ * Options for useFusionState hook
  */
 export interface UseFusionStateOptions {
-    /** @deprecated No longer used - automatic optimizations */
-    skipLocalState?: boolean;
-    /** @deprecated No longer used - automatic optimizations */
-    compare?: (a: unknown, b: unknown) => boolean;
-    /** Enable persistence for this specific key */
-    persist?: boolean;
-    /** Storage adapter to use (auto-detected if not provided) */
-    adapter?: StorageAdapter;
-    /** Storage key prefix (default: 'fusion_persistent') */
-    keyPrefix?: string;
-    /** Debounce time for saving in ms (default: 300) */
-    debounceTime?: number;
-    /** Enable debug logging for persistence */
+    /** Enable debug logging for this specific key */
     debug?: boolean;
     /** Use shallow comparison instead of deep comparison for objects (default: false) */
     shallow?: boolean;

@@ -106,7 +106,7 @@ function normalizePersistenceConfig(
     };
   }
 
-  if ('adapter' in config && !('keyPrefix' in config)) {
+  if ('adapter' in config) {
     return config as PersistenceConfig;
   }
 
@@ -114,7 +114,6 @@ function normalizePersistenceConfig(
   return {
     adapter: simple.adapter || defaultAdapter,
     persistKeys: simple.persistKeys || false,
-    keyPrefix: simple.keyPrefix,
     debounceTime: simple.debounce,
     loadOnInit: true,
     saveOnChange: true,
@@ -164,7 +163,7 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       [],
     );
 
-    const keyPrefix = persistenceRef.current?.keyPrefix || 'fusion_state';
+    const keyPrefix = 'fusion_state'; // Fixed prefix - no customization needed
     const shouldLoadOnInit = persistenceRef.current?.loadOnInit ?? true;
     const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true;
     const debounceTime = persistenceRef.current?.debounceTime ?? 0;
@@ -249,7 +248,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
               const storedData = JSON.parse(storedDataRaw) as GlobalState;
 
               // Merge with current state - stored data takes precedence
-              // Use setTimeout to avoid act() warnings in tests for async persistence
               setTimeout(() => {
                 setStateRaw(prevState => {
                   const mergedState = {...prevState, ...storedData};
@@ -285,7 +283,7 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
               );
             }
 
-            // Appeler le callback d'erreur si fourni
+            // Call error callback if provided
             const config = persistenceRef.current as SimplePersistenceConfig;
             if (config?.onLoadError) {
               config.onLoadError(errorObj, `${keyPrefix}_all`);

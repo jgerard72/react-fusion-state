@@ -80,14 +80,13 @@ function normalizePersistenceConfig(config, debug = false) {
             saveOnChange: true,
         };
     }
-    if ('adapter' in config && !('keyPrefix' in config)) {
+    if ('adapter' in config) {
         return config;
     }
     const simple = config;
     return {
         adapter: simple.adapter || defaultAdapter,
         persistKeys: simple.persistKeys || false,
-        keyPrefix: simple.keyPrefix,
         debounceTime: simple.debounce,
         loadOnInit: true,
         saveOnChange: true,
@@ -109,7 +108,7 @@ function normalizePersistenceConfig(config, debug = false) {
  * ```
  */
 exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence, devTools = false, }) => {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f;
     const normalizedPersistence = (0, react_1.useMemo)(() => normalizePersistenceConfig(persistence, debug), [persistence, debug]);
     const devToolsInstance = (0, react_1.useMemo)(() => {
         var _a;
@@ -122,10 +121,10 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
     }, [devTools]);
     const persistenceRef = (0, react_1.useRef)(normalizedPersistence);
     const storageAdapter = (0, react_1.useMemo)(() => { var _a; return ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)(); }, []);
-    const keyPrefix = ((_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.keyPrefix) || 'fusion_state';
-    const shouldLoadOnInit = (_c = (_b = persistenceRef.current) === null || _b === void 0 ? void 0 : _b.loadOnInit) !== null && _c !== void 0 ? _c : true;
-    const shouldSaveOnChange = (_e = (_d = persistenceRef.current) === null || _d === void 0 ? void 0 : _d.saveOnChange) !== null && _e !== void 0 ? _e : true;
-    const debounceTime = (_g = (_f = persistenceRef.current) === null || _f === void 0 ? void 0 : _f.debounceTime) !== null && _g !== void 0 ? _g : 0;
+    const keyPrefix = 'fusion_state'; // Fixed prefix - no customization needed
+    const shouldLoadOnInit = (_b = (_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.loadOnInit) !== null && _b !== void 0 ? _b : true;
+    const shouldSaveOnChange = (_d = (_c = persistenceRef.current) === null || _c === void 0 ? void 0 : _c.saveOnChange) !== null && _d !== void 0 ? _d : true;
+    const debounceTime = (_f = (_e = persistenceRef.current) === null || _e === void 0 ? void 0 : _e.debounceTime) !== null && _f !== void 0 ? _f : 0;
     const syncLoadErrorRef = (0, react_1.useRef)(null);
     const [state, setStateRaw] = (0, react_1.useState)(() => {
         if (shouldLoadOnInit && storageAdapter && typeof window !== 'undefined') {
@@ -185,7 +184,6 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                     if (storedDataRaw) {
                         const storedData = JSON.parse(storedDataRaw);
                         // Merge with current state - stored data takes precedence
-                        // Use setTimeout to avoid act() warnings in tests for async persistence
                         setTimeout(() => {
                             setStateRaw(prevState => {
                                 const mergedState = Object.assign(Object.assign({}, prevState), storedData);
@@ -209,7 +207,7 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                     if (debug) {
                         console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(error)));
                     }
-                    // Appeler le callback d'erreur si fourni
+                    // Call error callback if provided
                     const config = persistenceRef.current;
                     if (config === null || config === void 0 ? void 0 : config.onLoadError) {
                         config.onLoadError(errorObj, `${keyPrefix}_all`);

@@ -43,7 +43,6 @@ function AppWithCustomAdapter() {
       persistence={{
         adapter: storageAdapter,
         persistKeys: ['user', 'settings'],
-        keyPrefix: 'myapp',
         onSaveError: (error, state) => console.error('Save error:', error),
         onLoadError: (error, key) => console.error('Load error:', error),
       }}
@@ -86,7 +85,6 @@ function App() {
       persistence={{
         adapter: asyncStorageAdapter,
         persistKeys: ['user', 'settings'],
-        keyPrefix: 'MyReactNativeApp',
         debounceTime: 500, // Recommended for mobile
         onSaveError: (error, state) => {
           console.error('Save error:', error);
@@ -132,7 +130,6 @@ export default function App() {
       persistence={{
         adapter: asyncStorageAdapter,
         persistKeys: ['userPreferences', 'gameState'],
-        keyPrefix: 'MyExpoApp',
         debounceTime: 300,
       }}
     >
@@ -222,7 +219,7 @@ Internally, subscriptions are per key using `useSyncExternalStore` (React 18), w
 ## 💡 Best Practices
 
 1. **Choose Appropriate Keys**: Only persist data that should survive app restarts
-2. **Use Key Prefixes**: Avoid conflicts with other apps/libraries
+2. **Use Fixed Prefix**: All keys use 'fusion_state' prefix automatically
 3. **Handle Errors Gracefully**: Always provide fallback behavior
 4. **Optimize for Platform**: Use debouncing on mobile, immediate saves on web
 5. **Test Thoroughly**: Test persistence across app restarts and platform-specific scenarios
