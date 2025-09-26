@@ -11,7 +11,7 @@
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🆕 **v0.4.23 Granular Persistence & Performance Upgrade**
+### 🆕 **v0.4.25 Granular Persistence & Performance Upgrade**
 - 🎯 **Granular persistence** - Choose exactly which state keys to persist with `persistence={['user', 'cart']}`
 - 📚 **Professional JSDoc** - Complete IntelliSense support with examples and detailed documentation
 - 🚀 **Object.is() priority equality** - Optimal performance for all value types
@@ -246,7 +246,7 @@ function UserProfile() {
 }
 ```
 
-### Advanced Performance (v0.4.23+)
+### Advanced Performance (v0.4.25+)
 ```jsx
 function OptimizedComponent() {
   // Automatic Object.is() equality + intelligent fallbacks

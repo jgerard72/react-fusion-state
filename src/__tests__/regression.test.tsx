@@ -1,5 +1,5 @@
 /**
- * Regression tests to ensure our v0.4.2 improvements don't break existing functionality
+ * Regression tests to ensure our v0.4.25 improvements don't break existing functionality
  */
 
 import React from 'react';
@@ -7,7 +7,7 @@ import {render, screen, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {FusionStateProvider, useFusionState, useFusionHydrated} from '../index';
 
-describe('Regression Tests v0.4.2', () => {
+describe('Regression Tests v0.4.25', () => {
   describe('Object.is equality optimization', () => {
     test('should prevent unnecessary updates with Object.is', () => {
       function TestComponent() {

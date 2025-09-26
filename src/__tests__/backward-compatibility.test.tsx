@@ -1,5 +1,5 @@
 /**
- * Complete backward compatibility test for React Fusion State v0.4.0
+ * Complete backward compatibility test for React Fusion State v0.4.25
  * Verifies that all v0.3.x code works exactly the same
  */
 
@@ -80,7 +80,7 @@ function MixedComponent() {
   );
 }
 
-describe('🔄 Backward Compatibility Tests v0.4.0', () => {
+describe('🔄 Backward Compatibility Tests v0.4.25', () => {
   test('✅ Legacy code v0.3.x works exactly the same', async () => {
     render(<LegacyApp />);
 
@@ -215,7 +215,7 @@ describe('🔄 Backward Compatibility Tests v0.4.0', () => {
   });
 });
 
-describe('🆕 New Features v0.4.0 (should work alongside legacy)', () => {
+describe('🆕 New Features v0.4.25 (should work alongside legacy)', () => {
   test('✅ Typed keys provide better DX without breaking old code', async () => {
     const userKey = createKey<{name: string; age: number} | null>('typed-user');
 
