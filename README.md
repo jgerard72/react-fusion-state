@@ -7,9 +7,18 @@
 
 **🎯 The simplest AND most performant React state management library.**
 
-✨ **Zero dependencies** • 🏆 **99.9% fewer re-renders** • 📦 **2.8KB bundle** • ⚡ **Zero setup** • 🔄 **Built-in persistence**
+✨ **Zero dependencies** • 🏆 **99.9% fewer re-renders** • 📦 **2.8KB bundle** • ⚡ **Zero setup** • 🔄 **Built-in persistence** • 🚀 **Object.is performance** • 🎯 **Batched updates**
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
+
+### 🆕 **v0.4.23 Granular Persistence & Performance Upgrade**
+- 🎯 **Granular persistence** - Choose exactly which state keys to persist with `persistence={['user', 'cart']}`
+- 📚 **Professional JSDoc** - Complete IntelliSense support with examples and detailed documentation
+- 🚀 **Object.is() priority equality** - Optimal performance for all value types
+- 🎯 **Batched notifications** - Cross-platform `unstable_batchedUpdates` support  
+- 🏗️ **Unified architecture** - Cleaner persistence logic, better SSR support
+- 🔄 **useFusionHydrated()** - New hook for hydration status (React Native friendly)
+- ✅ **100% backward compatible** - Zero breaking changes for users
 
 ---
 
@@ -26,7 +35,7 @@ import { FusionStateProvider, useFusionState } from 'react-fusion-state';
 
 function App() {
   return (
-    <FusionStateProvider persistence>
+    <FusionStateProvider persistence={['counter']}>
       <Counter />
     </FusionStateProvider>
   );
@@ -50,6 +59,33 @@ function Counter() {
 - ✅ **Automatically persisted** (survives page refresh)
 - ✅ **Optimally rendered** (99.9% fewer re-renders)
 - ✅ **TypeScript ready** with full type inference
+
+### 🚀 Performance Options
+
+For optimal performance with large objects, use the `shallow` option:
+
+```jsx
+function UserProfile() {
+  const [user, setUser] = useFusionState('user', {
+    name: 'John',
+    email: 'john@example.com',
+    preferences: { theme: 'dark' }
+  }, { shallow: true }); // ← Only compares top-level properties
+  
+  // This won't re-render if user object reference changes but content is the same
+  return <div>{user.name}</div>;
+}
+```
+
+**When to use `shallow: true`:**
+- ✅ Large objects with many properties
+- ✅ When you only change top-level properties
+- ✅ Performance-critical components
+
+**When to use default (deep comparison):**
+- ✅ Nested objects that change frequently
+- ✅ Small objects (< 10 properties)
+- ✅ When you need precise change detection
 
 ---
 
@@ -88,15 +124,18 @@ const [user] = useFusionState('user'); // Same state, automatically synced
 
 ### 💾 **Built-in Persistence**
 ```jsx
-// Global persistence (all keys)
-<FusionStateProvider persistence>
+// Granular persistence (RECOMMENDED)
+<FusionStateProvider persistence={['user', 'settings']}>
 
-// Per-key persistence with options
-const [data, setData] = useFusionState('myData', {}, {
-  persist: true,
-  debounceTime: 1000, // Save after 1s of inactivity
+// Persist all keys (use with caution)
+<FusionStateProvider persistence={true}>
+
+// Advanced persistence configuration
+<FusionStateProvider persistence={{
+  persistKeys: ['user', 'cart'],
+  debounce: 1000, // Save after 1s of inactivity
   keyPrefix: 'myApp'   // Namespace your storage
-});
+}}>
 ```
 
 ### 🎯 **Optimized Re-renders**
@@ -168,23 +207,67 @@ open demo/demo-persistence.html
 
 ### E-commerce App
 ```jsx
-// Shopping cart state
-const [cart, setCart] = useFusionState('cart', [], { persist: true });
+// Configure persistence for important data only
+<FusionStateProvider persistence={['cart', 'user', 'theme']}>
+  <App />
+</FusionStateProvider>
 
-// User preferences
-const [theme, setTheme] = useFusionState('theme', 'light', { persist: true });
-
-// Session data
-const [currentPage, setCurrentPage] = useFusionState('page', 'home');
+function App() {
+  // Shopping cart state (persisted)
+  const [cart, setCart] = useFusionState('cart', []);
+  
+  // User preferences (persisted)
+  const [theme, setTheme] = useFusionState('theme', 'light');
+  
+  // Session data (NOT persisted - temporary)
+  const [currentPage, setCurrentPage] = useFusionState('page', 'home');
+}
 ```
 
 ### React Native App
 ```jsx
-// Works identically in React Native
-const [userProfile, setUserProfile] = useFusionState('profile', {}, {
-  persist: true, // Uses AsyncStorage automatically
-  debounceTime: 2000
-});
+import { useFusionState, useFusionHydrated } from 'react-fusion-state';
+
+function UserProfile() {
+  // Check if data has been loaded from AsyncStorage
+  const isHydrated = useFusionHydrated();
+  
+  // Works identically in React Native
+  const [userProfile, setUserProfile] = useFusionState('profile', {
+    name: '',
+    settings: {}
+  });
+
+  if (!isHydrated) {
+    return <LoadingSpinner />; // Show loader while hydrating
+  }
+
+  return <ProfileView profile={userProfile} />;
+}
+```
+
+### Advanced Performance (v0.4.23+)
+```jsx
+function OptimizedComponent() {
+  // Automatic Object.is() equality + intelligent fallbacks
+  const [data, setData] = useFusionState('data', {
+    users: [],
+    settings: {}
+  });
+
+  // Shallow comparison for large objects (when you know structure is flat)
+  const [preferences, setPreferences] = useFusionState('prefs', {
+    theme: 'light',
+    language: 'en'
+  }, { shallow: true });
+
+  // Updates are automatically batched across components!
+  const handleUpdate = () => {
+    setData({...data, users: newUsers});     // Batched
+    setPreferences({...preferences, theme: 'dark'}); // Batched
+    // Both updates happen in single render cycle ✨
+  };
+}
 ```
 
 ---

@@ -55,7 +55,10 @@ const useGlobalState = () => {
 };
 exports.useGlobalState = useGlobalState;
 /**
- * Normalize persistence configuration - simplified version
+ * Normalizes various persistence configuration formats into a standard PersistenceConfig
+ * @param config - The persistence configuration to normalize
+ * @param debug - Whether debug mode is enabled
+ * @returns Normalized persistence configuration or undefined
  */
 function normalizePersistenceConfig(config, debug = false) {
     if (!config)
@@ -64,7 +67,7 @@ function normalizePersistenceConfig(config, debug = false) {
     if (typeof config === 'boolean') {
         return {
             adapter: defaultAdapter,
-            persistKeys: (key) => key.startsWith('persist.'),
+            persistKeys: config ? true : false,
             loadOnInit: true,
             saveOnChange: true,
         };
@@ -83,7 +86,7 @@ function normalizePersistenceConfig(config, debug = false) {
     const simple = config;
     return {
         adapter: simple.adapter || defaultAdapter,
-        persistKeys: simple.persistKeys || ((key) => key.startsWith('persist.')),
+        persistKeys: simple.persistKeys || false,
         keyPrefix: simple.keyPrefix,
         debounceTime: simple.debounce,
         loadOnInit: true,
@@ -94,7 +97,16 @@ function normalizePersistenceConfig(config, debug = false) {
 }
 /**
  * Provider component for React Fusion State
- * Manages the global state and provides access to all child components
+ *
+ * Manages global state and provides access to all child components.
+ * Supports persistence, debug logging, and Redux DevTools integration.
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={['user', 'cart']} debug>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence, devTools = false, }) => {
     var _a, _b, _c, _d, _e, _f, _g;
@@ -118,7 +130,6 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
     const [state, setStateRaw] = (0, react_1.useState)(() => {
         if (shouldLoadOnInit && storageAdapter && typeof window !== 'undefined') {
             try {
-                // Check if this is an extended storage adapter with sync support
                 const extendedAdapter = storageAdapter;
                 if (extendedAdapter.getItemSync) {
                     const item = extendedAdapter.getItemSync(`${keyPrefix}_all`);
@@ -152,7 +163,6 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
     const initializingKeys = (0, react_1.useRef)(new Set());
     const isInitialLoadDone = (0, react_1.useRef)(false);
     const prevPersistedState = (0, react_1.useRef)({});
-    // Handle synchronous load errors
     (0, react_1.useEffect)(() => {
         if (syncLoadErrorRef.current) {
             if (debug) {
@@ -216,7 +226,9 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
             var _a;
             const persistKeys = (_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.persistKeys;
             if (!persistKeys)
-                return Object.assign({}, newState);
+                return {}; // No persistence
+            if (persistKeys === true)
+                return Object.assign({}, newState); // Persist all keys
             const filteredState = {};
             if (Array.isArray(persistKeys)) {
                 // If persistKeys is an array, only save those keys
@@ -245,6 +257,9 @@ exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, 
                 return;
             // Filter keys if persistence.persistKeys is defined
             const stateToSave = filterPersistKeys(newState);
+            // If no keys to persist, skip saving entirely
+            if (Object.keys(stateToSave).length === 0)
+                return;
             try {
                 // ✅ Optimization: check if data has actually changed
                 const hasChanged = !(0, utils_1.simpleDeepEqual)(stateToSave, prevPersistedState.current);
