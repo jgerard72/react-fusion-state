@@ -1,5 +1,5 @@
 /**
- * 🚀 EXAMPLE: React Fusion State v0.4.23 features
+ * 🚀 EXAMPLE: React Fusion State v0.4.25 features
  *
  * ✅ 100% BACKWARD COMPATIBLE - Old API still works
  * ✅ ZERO PERFORMANCE IMPACT - Compile-time optimizations
@@ -275,7 +275,7 @@ function AdvancedExample() {
 export default App;
 
 /**
- * 🎉 SUMMARY OF NEW FEATURES v0.4.23
+ * 🎉 SUMMARY OF NEW FEATURES v0.4.25
  *
  * ✅ Granular persistence - Choose exactly which keys to persist
  * ✅ Typed keys with createKey<T>() for IntelliSense

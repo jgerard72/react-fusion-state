@@ -1,8 +1,8 @@
-# 🚀 Getting Started - React Fusion State v0.4.23
+# 🚀 Getting Started - React Fusion State v0.4.25
 
 **New to the project?** This guide will get you up and running in 5 minutes!
 
-**🎯 React Fusion State v0.4.23:** Zero dependencies, maximum performance state management with granular persistence, Object.is optimization and batched updates.
+**🎯 React Fusion State v0.4.25:** Zero dependencies, maximum performance state management with granular persistence, Object.is optimization and batched updates.
 
 ---
 

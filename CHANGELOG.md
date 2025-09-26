@@ -5,7 +5,30 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.23] - 2025-09-26 - Granular Persistence & Enhanced Control
+## [0.4.25] - 2025-09-26 - Professional JSDoc & Enhanced Developer Experience
+
+### 📚 **Professional JSDoc Implementation**
+- **NEW**: Complete JSDoc added to all core functions and components
+- **Enhanced**: Full IntelliSense support with parameter descriptions and examples
+- **Enhanced**: Better developer experience with detailed documentation in IDE
+- **Enhanced**: Type hints and examples directly in code editor
+
+### 🔧 **Developer Experience Improvements**
+- **Enhanced**: Better code readability and maintainability
+- **Enhanced**: Professional documentation standards throughout codebase
+- **Enhanced**: Improved onboarding for new developers
+
+### 📚 **Documentation Updates**
+- **Updated**: All version references to v0.4.25
+- **Updated**: README.md with latest feature descriptions
+- **Updated**: All documentation files with consistent versioning
+
+### 🧪 **Testing & Compatibility**
+- **Maintained**: 100% backward compatibility - no breaking changes
+- **Tested**: All 75 tests pass including backward compatibility tests
+- **Verified**: Existing codebases require no changes
+
+## [0.4.24] - 2025-09-26 - Granular Persistence & Enhanced Control
 
 ### 🎯 **Major Persistence Improvements**
 - **NEW**: Granular persistence by default - choose exactly which state keys to persist

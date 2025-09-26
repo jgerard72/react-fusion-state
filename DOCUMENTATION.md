@@ -4,7 +4,7 @@
 **Author:** Jacques GERARD  
 **License:** MIT
 
-## 🆕 **What's New in v0.4.23**
+## 🆕 **What's New in v0.4.25**
 
 ### 🚀 **Major Performance Upgrade**
 - **Granular Persistence by Default:** Choose exactly which state keys to persist
@@ -136,7 +136,7 @@ const [user, setUser] = usePersistentState('user', null);
 const [config, setConfig] = useAppState('config', {});
 ```
 
-### `useFusionHydrated()` ⭐ **NEW in v0.4.23**
+### `useFusionHydrated()` ⭐ **NEW in v0.4.25**
 
 Hook to check if the initial hydration from persistence is complete.
 

@@ -1,4 +1,4 @@
-# 🤝 Contributing to React Fusion State v0.4.23
+# 🤝 Contributing to React Fusion State v0.4.25
 
 Thank you for your interest in contributing to React Fusion State! This guide will help you get started with our latest performance-optimized version.
 
