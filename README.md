@@ -11,8 +11,9 @@
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🎉 **v1.0.0 - STABLE RELEASE - Ultra Simple API**
+### 🎉 **v1.0.1 - STABLE RELEASE - Reset Functionality Confirmed**
 - 🎯 **Granular persistence** - Choose exactly which state keys to persist with `persistence={['user', 'cart']}`
+- ✅ **Reset functionality verified** - `setValue(initialValue)` provides perfect reset behavior
 - 📚 **Professional JSDoc** - Complete IntelliSense support with examples and detailed documentation
 - 🚀 **Object.is() priority equality** - Optimal performance for all value types
 - 🎯 **Batched notifications** - Cross-platform performance optimization  
