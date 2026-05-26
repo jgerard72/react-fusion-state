@@ -7,11 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-26 - Deprecation, Cleanup & Audit Fixes
+
+### Added
+- Migration guide for v2 in `README.md` listing all deprecated → canonical name mappings (hooks, provider, storage adapters, example key objects).
+- `GlobalFusionStateContextType.isHydrated?: boolean` — optional field exposing real hydration status from the provider.
+
 ### Deprecated
 - Hook aliases `useSharedState`, `usePersistentState`, `useAppState` — use `useFusionState` instead. Will be removed in v2.
 - Provider aliases `GlobalStateProvider`, `StateProvider`, `AppStateProvider` — use `FusionStateProvider` instead. Will be removed in v2.
 - Storage adapter aliases `createWebStorageAdapter`, `createRNStorageAdapter`, `createMobileStorageAdapter`, `createInMemoryAdapter`, `autoDetectStorage`, `NoopStorageAdapter` — use their canonical names instead. Will be removed in v2.
 - Example objects `AppKeys` and `UserKeys` — define your own typed keys with `createKey` / `createNamespacedKey` in your application code. Will be removed in v2.
+
+### Fixed
+- **Public TypeScript surface**: `src/types.ts` now uses a relative import for `StorageAdapter` instead of the `@storage/*` path alias. Previously `dist/types.d.ts` shipped the unresolved alias to npm, breaking type resolution for every TypeScript consumer using `PersistenceConfig`, `SimplePersistenceConfig`, `GlobalState`, `GlobalFusionStateContextType`, or `UseFusionStateOptions`.
+- `FusionStateProvider`: `setState` updater is now pure. Listener notification, persistence saves, debug logging and DevTools dispatch were moved to a post-commit `useEffect`, so they no longer fire twice in React 18 StrictMode.
+- `FusionStateProvider`: removed unnecessary `setTimeout(0)` wrapping the async hydration `setState` call — hydration now applies on the next React commit instead of one macrotask later.
+- `useFusionHydrated`: dropped the hardcoded 100 ms timer that flipped the flag regardless of actual hydration. The hook now reads real hydration status from the provider context and stays `false` until the async load resolves on AsyncStorage.
+- `useFusionState`: `initializingKeys` add/delete moved outside the `setState` updater (StrictMode double-invocation safety).
+- `useFusionStateLog`: removed dead internal `useState`/`setSelectedState` that triggered extra re-renders for nothing. The memoization key for `keys` is now collision-safe.
+- `detectBestStorageAdapter`: result is memoized at module scope. The `localStorage.setItem('fusion_test', ...)` probe now runs once per JS context instead of on every Provider mount.
+- `FusionStateProvider`: the empty-deps `useEffect` for synchronous-load error reporting now has an explicit eslint-disable with a justification; closure stability is unchanged.
 
 ### Removed
 - Internal `deepClone` helper (was never exported, never used).
@@ -22,11 +38,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Internal restructure: `src/utils.ts` merged into `src/utils/index.ts` alongside `src/utils/batch.ts`. No public API change — all consumer imports `from 'react-fusion-state'` continue to work unchanged.
 - Internal deduplication: `simpleDeepEqual` is now a direct alias of `customIsEqual` (they were already functionally identical). Both names remain available; only the duplicate implementation was removed.
+- `src/utils/batch.ts`: lazy resolution of `react-dom` / `react-native` `unstable_batchedUpdates`. The previous top-level `require` chain is replaced with a one-shot resolver triggered on first `batch()` call. Pure-ESM environments without `require` cleanly fall back to the identity function.
+- `useFusionStateLog`: `'deep'` and `'simple'` change-detection modes now share the same code path (they have always been functionally identical).
 - `tsconfig-build.json`: removed dangling `"src/devtools"` exclude entry that had no effect.
+- Documentation cleaned up: removed promotion of deprecated hook aliases (`useSharedState`, `usePersistentState`, `useAppState`) in `DOCUMENTATION.md`; replaced with a short notice pointing to the new migration guide.
+- JSDoc clarifications: `persistence` prop is documented as captured at mount; `keyPrefix` documented as fixed and shared across providers; `createDevTools` documented as a singleton.
+- README banner updated for v1.2.0.
 
 ### Notes
 - **Zero breaking change**: every public export available in 1.0.1 is still available with the exact same signature.
-- All 75 existing tests continue to pass.
+- All existing tests continue to pass.
 
 ## [1.0.1] - 2025-01-27 - ✅ **Reset Functionality Confirmed**
 

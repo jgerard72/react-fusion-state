@@ -1,32 +1,49 @@
 /**
- * Cross-platform batching utility for React updates
- * Maps to unstable_batchedUpdates in React DOM and React Native
+ * Cross-platform batching utility for React updates.
+ * Maps to `unstable_batchedUpdates` in React DOM and React Native.
+ *
+ * Resolution is lazy (on first call) so that:
+ * - bundlers don't eagerly resolve `react-native` in web bundles,
+ * - pure-ESM runtimes that lack `require` simply fall back to the identity
+ *   function instead of crashing at module load time.
  */
 
-let batchUpdates: (fn: () => void) => void;
+type BatchFn = (fn: () => void) => void;
 
-try {
-  // Try to import from react-dom first (web environment)
-  const ReactDOM = require('react-dom');
-  if (ReactDOM && ReactDOM.unstable_batchedUpdates) {
-    batchUpdates = ReactDOM.unstable_batchedUpdates;
-  } else {
-    // Fallback to react-native
-    const ReactNative = require('react-native');
+let resolved: BatchFn | null = null;
+
+function resolve(): BatchFn {
+  if (resolved) return resolved;
+
+  // Avoid bundler static resolution; only attempt require at runtime.
+  const safeRequire =
+    typeof require !== 'undefined'
+      ? (name: string) => {
+          try {
+            return require(name);
+          } catch {
+            return undefined;
+          }
+        }
+      : null;
+
+  if (safeRequire) {
+    const ReactDOM = safeRequire('react-dom');
+    if (ReactDOM && ReactDOM.unstable_batchedUpdates) {
+      return (resolved = ReactDOM.unstable_batchedUpdates as BatchFn);
+    }
+    const ReactNative = safeRequire('react-native');
     if (ReactNative && ReactNative.unstable_batchedUpdates) {
-      batchUpdates = ReactNative.unstable_batchedUpdates;
-    } else {
-      // Final fallback - just execute the function
-      batchUpdates = (fn: () => void) => fn();
+      return (resolved = ReactNative.unstable_batchedUpdates as BatchFn);
     }
   }
-} catch {
-  // If imports fail, use identity function
-  batchUpdates = (fn: () => void) => fn();
+
+  // Identity fallback — no batching available, but the call site still works.
+  return (resolved = (fn: () => void) => fn());
 }
 
 /**
- * Batch React updates for better performance
- * Automatically detects the environment and uses the appropriate batching function
+ * Batch React updates for better performance.
+ * Automatically detects the environment and uses the appropriate batching function.
  */
-export const batch = batchUpdates;
+export const batch: BatchFn = fn => resolve()(fn);

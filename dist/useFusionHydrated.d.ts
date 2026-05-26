@@ -1,10 +1,15 @@
 /**
- * Hook to check if the initial hydration from persistence is complete
+ * Hook to check if the initial hydration from persistence is complete.
  *
- * Useful for React Native with AsyncStorage or other async storage solutions
- * to show a loading state while values are being restored.
+ * Returns `true` immediately when there's nothing to hydrate from storage
+ * (no persistence configured, SSR fallback, or synchronous web hydration),
+ * and flips to `true` once the asynchronous load resolves on platforms with
+ * async storage (React Native + AsyncStorage).
  *
- * @returns `true` when initial load from storage is complete, `false` during loading
+ * Useful for gating UI on storage hydration, e.g. avoiding a flicker
+ * between default values and persisted values on first render.
+ *
+ * @returns `true` when initial load from storage is complete
  *
  * @example
  * ```tsx

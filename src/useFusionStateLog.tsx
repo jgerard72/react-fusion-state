@@ -1,6 +1,6 @@
 import {useGlobalState} from './FusionStateProvider';
-import {useEffect, useState, useRef, useMemo, useCallback} from 'react';
-import {customIsEqual, simpleDeepEqual} from './utils';
+import {useEffect, useRef, useMemo, useCallback} from 'react';
+import {simpleDeepEqual} from './utils';
 
 type StateKey = string;
 type SelectedState = Record<string, unknown>;
@@ -17,8 +17,8 @@ interface FusionStateLogOptions {
 
   /**
    * How to track changes. Default is 'reference' which is faster
-   * but might miss deeply nested changes. 'deep' uses custom deep equality
-   * for deep equality checks.
+   * but might miss deeply nested changes. 'deep' and 'simple' are
+   * equivalent and use a custom deep equality check.
    */
   changeDetection?: 'reference' | 'deep' | 'simple';
 
@@ -46,14 +46,19 @@ export const useFusionStateLog = (
 ): SelectedState => {
   const {state} = useGlobalState();
 
-  // Filter state based on keys - optimized with deep comparison
+  // Stable hash for the keys array so identical key lists across renders
+  // don't bust the memo (caller doesn't have to memoize the array).
+  const keysHash = useMemo(() => {
+    if (!keys || keys.length === 0) return '';
+    return `${keys.length}:${keys.join('\u0001')}`;
+  }, [keys]);
+
+  // Filter state based on keys
   const filteredState = useMemo(() => {
-    // If no keys, return all state
     if (!keys || keys.length === 0) {
       return state;
     }
 
-    // Filter only requested keys
     const result: SelectedState = {};
     for (const key of keys) {
       if (key in state) {
@@ -61,14 +66,11 @@ export const useFusionStateLog = (
       }
     }
     return result;
-  }, [state, keys?.join(',')]);
-
-  const [selectedState, setSelectedState] =
-    useState<SelectedState>(filteredState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, keysHash]);
 
   // Track previous state for change detection
   const previousState = useRef<SelectedState>({});
-  const previousKeys = useRef<StateKey[] | undefined>(undefined);
 
   // Default options
   const {
@@ -78,22 +80,16 @@ export const useFusionStateLog = (
     consoleLog = false,
   } = options;
 
-  // Compare values based on selected change detection method
+  // 'deep' and 'simple' are equivalent (simpleDeepEqual is an alias of customIsEqual).
+  // Both go through the same path; 'reference' uses === for speed.
   const compareValues = useCallback(
     (a: unknown, b: unknown): boolean => {
-      if (changeDetection === 'reference') {
-        return a === b;
-      } else if (changeDetection === 'deep') {
-        return customIsEqual(a, b);
-      } else {
-        return simpleDeepEqual(a, b);
-      }
+      return changeDetection === 'reference' ? a === b : simpleDeepEqual(a, b);
     },
     [changeDetection],
   );
 
   useEffect(() => {
-    // Calculate changes if requested
     let changes: SelectedState | undefined;
 
     if (trackChanges) {
@@ -107,19 +103,13 @@ export const useFusionStateLog = (
           };
         }
       }
-      // If no changes, no need to continue
       if (Object.keys(changes).length === 0) {
         changes = undefined;
       }
     }
 
-    // Update selected state
-    setSelectedState(filteredState);
-
-    // Save for next comparison
     previousState.current = {...filteredState};
 
-    // Log if enabled
     if (consoleLog && (changes || !trackChanges)) {
       const logData = formatter
         ? formatter(filteredState, changes)

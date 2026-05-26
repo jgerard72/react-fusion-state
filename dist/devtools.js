@@ -104,8 +104,15 @@ class FusionStateDevTools {
 /** Instance globale des DevTools (singleton) */
 let devToolsInstance = null;
 /**
- * Create or get DevTools instance
- * ✅ PERFORMANCE: Singleton pattern to avoid multiple instances
+ * Create or get the DevTools instance.
+ *
+ * NOTE: this is a singleton — the first call wins. If multiple
+ * `FusionStateProvider`s are mounted with different `devTools` configs in
+ * the same app, only the first config takes effect. Typically you only
+ * want a single root provider with DevTools enabled.
+ *
+ * @param config - DevTools configuration (only used on first call)
+ * @returns The shared DevTools instance
  */
 function createDevTools(config) {
     if (!devToolsInstance) {

@@ -59,6 +59,10 @@ export interface FusionStateProviderProps {
    * - `true`: persist ALL state keys (use with caution)
    * - `string[]`: persist only specified keys (recommended)
    * - `object`: detailed configuration
+   *
+   * Note: this prop is captured at mount and frozen for the lifetime of the
+   * provider. Changing it after mount has no effect — unmount and remount
+   * the provider to switch persistence behavior.
    */
   persistence?:
     | boolean
@@ -123,10 +127,15 @@ function normalizePersistenceConfig(
 }
 
 /**
- * Provider component for React Fusion State
+ * Provider component for React Fusion State.
  *
  * Manages global state and provides access to all child components.
  * Supports persistence, debug logging, and Redux DevTools integration.
+ *
+ * Storage keys are namespaced under a fixed `fusion_state` prefix. If you
+ * mount multiple `FusionStateProvider`s in the same app with persistence
+ * enabled, they will share the same storage slot — typically you want a
+ * single root provider.
  *
  * @example
  * ```tsx
@@ -157,13 +166,15 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       return createDevTools(config);
     }, [devTools]);
 
+    // Persistence config is captured at mount and never resynced — this is
+    // the documented "frozen at mount" semantics.
     const persistenceRef = useRef(normalizedPersistence);
     const storageAdapter = useMemo(
       () => persistenceRef.current?.adapter || createNoopStorageAdapter(),
       [],
     );
 
-    const keyPrefix = 'fusion_state'; // Fixed prefix - no customization needed
+    const keyPrefix = 'fusion_state';
     const shouldLoadOnInit = persistenceRef.current?.loadOnInit ?? true;
     const shouldSaveOnChange = persistenceRef.current?.saveOnChange ?? true;
     const debounceTime = persistenceRef.current?.debounceTime ?? 0;
@@ -201,6 +212,27 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       return initialState;
     });
 
+    // Whether the initial hydration step is complete. `true` immediately when
+    // there's no async load to wait for; flipped to `true` once the async
+    // load resolves (success or failure) for AsyncStorage / RN.
+    const computeInitialHydrated = (): boolean => {
+      // No persistence configured at all → nothing to hydrate.
+      if (!persistenceRef.current) return true;
+      if (!shouldLoadOnInit || !storageAdapter) return true;
+      // Web sync path resolves inside the useState initializer above —
+      // nothing to wait for. RN / async storage needs the async useEffect.
+      if (typeof window !== 'undefined') {
+        const extendedAdapter = storageAdapter as ExtendedStorageAdapter;
+        if (extendedAdapter.getItemSync) return true;
+      }
+      return false;
+    };
+    const [isHydrated, setIsHydrated] = useState<boolean>(computeInitialHydrated);
+    // Mirror of `isHydrated` for the async load callback to avoid calling
+    // `setIsHydrated(true)` when already hydrated (would trigger spurious
+    // act() warnings in tests for a no-op state update).
+    const isHydratedRef = useRef<boolean>(isHydrated);
+
     useEffect(() => {
       if (devToolsInstance?.enabled) {
         devToolsInstance.init(state);
@@ -208,11 +240,17 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
           initialState,
         });
       }
+      // We intentionally only initialize devtools once with the initial state.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [devToolsInstance]);
 
     const initializingKeys = useRef<Set<string>>(new Set());
     const isInitialLoadDone = useRef<boolean>(false);
     const prevPersistedState = useRef<GlobalState>({});
+    const prevStateRef = useRef<GlobalState>(state);
+    // Set when the async hydration path writes to state, so the side-effects
+    // effect can skip persisting freshly-loaded data (avoids re-save loop).
+    const skipPersistOnceRef = useRef<boolean>(false);
 
     useEffect(() => {
       if (syncLoadErrorRef.current) {
@@ -225,18 +263,32 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
           );
         }
 
-        // Call error callback if provided
         const config = persistenceRef.current as SimplePersistenceConfig;
         if (config?.onLoadError) {
           config.onLoadError(syncLoadErrorRef.current, `${keyPrefix}_all`);
         }
 
-        syncLoadErrorRef.current = null; // Clear the error after handling
+        syncLoadErrorRef.current = null;
       }
-    }, []); // Run only once
+      // Run only once on mount — debug/keyPrefix are stable for the lifetime
+      // of the provider (debug is captured into the persistence config; the
+      // prefix is hardcoded).
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    // Load state from storage on initialization (async fallback)
+    // Load state from storage on initialization (async fallback for RN / AsyncStorage).
     useEffect(() => {
+      // Synchronous web hydration already ran inside `useState`'s lazy
+      // initializer, and `isHydrated` started at `true` in that case — so
+      // the only path that needs to flip `isHydrated` is the async one.
+      const markHydrated = () => {
+        isInitialLoadDone.current = true;
+        if (!isHydratedRef.current) {
+          isHydratedRef.current = true;
+          setIsHydrated(true);
+        }
+      };
+
       if (shouldLoadOnInit && !isInitialLoadDone.current && storageAdapter) {
         const loadStateFromStorage = async () => {
           try {
@@ -247,26 +299,26 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
             if (storedDataRaw) {
               const storedData = JSON.parse(storedDataRaw) as GlobalState;
 
-              // Merge with current state - stored data takes precedence
-              setTimeout(() => {
-                setStateRaw(prevState => {
-                  const mergedState = {...prevState, ...storedData};
-                  if (debug) {
-                    console.log(
-                      '[FusionState] Loaded state from storage (async):',
-                      storedData,
-                    );
-                    console.log('[FusionState] Merged state:', mergedState);
-                  }
-                  return mergedState;
-                });
-              }, 0);
-
-              // Store for comparison
+              // Capture the loaded state as the "last persisted" snapshot
+              // BEFORE applying it, so the side-effects effect's deep-equal
+              // check skips re-saving freshly-loaded data.
               prevPersistedState.current = {...storedData};
+              skipPersistOnceRef.current = true;
+
+              setStateRaw(prevState => {
+                const mergedState = {...prevState, ...storedData};
+                if (debug) {
+                  console.log(
+                    '[FusionState] Loaded state from storage (async):',
+                    storedData,
+                  );
+                  console.log('[FusionState] Merged state:', mergedState);
+                }
+                return mergedState;
+              });
             }
 
-            isInitialLoadDone.current = true;
+            markHydrated();
 
             if (debug && !storedDataRaw) {
               console.log('[FusionState] No stored data found');
@@ -283,42 +335,41 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
               );
             }
 
-            // Call error callback if provided
             const config = persistenceRef.current as SimplePersistenceConfig;
             if (config?.onLoadError) {
               config.onLoadError(errorObj, `${keyPrefix}_all`);
             }
 
-            isInitialLoadDone.current = true;
+            markHydrated();
           }
         };
 
         loadStateFromStorage();
       } else {
+        // No async hydration path — `isHydrated` was already initialized to
+        // `true` by useState. Just record that we're done.
         isInitialLoadDone.current = true;
       }
     }, [storageAdapter, keyPrefix, shouldLoadOnInit, debug]);
 
-    // Function to filter state based on persistKeys
+    // Filter helper for persistence keys
     const filterPersistKeys = useMemo(() => {
       return (newState: GlobalState): GlobalState => {
         const persistKeys = persistenceRef.current?.persistKeys;
 
-        if (!persistKeys) return {}; // No persistence
+        if (!persistKeys) return {};
 
-        if (persistKeys === true) return {...newState}; // Persist all keys
+        if (persistKeys === true) return {...newState};
 
         const filteredState: GlobalState = {};
 
         if (Array.isArray(persistKeys)) {
-          // If persistKeys is an array, only save those keys
           persistKeys.forEach(key => {
             if (key in newState) {
               filteredState[key] = newState[key];
             }
           });
         } else if (typeof persistKeys === 'function') {
-          // If persistKeys is a function, use it to filter keys
           Object.keys(newState).forEach(key => {
             const filterFn = persistKeys as (
               key: string,
@@ -334,25 +385,21 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       };
     }, []);
 
-    // Function to save state to storage
+    // Save helper. Stable identity so the side-effects effect doesn't re-fire
+    // unnecessarily; reads "live" config off refs.
     const saveStateToStorage = useMemo(() => {
       const save = async (newState: GlobalState) => {
         if (!storageAdapter || !shouldSaveOnChange) return;
 
-        // Filter keys if persistence.persistKeys is defined
         const stateToSave = filterPersistKeys(newState);
-
-        // If no keys to persist, skip saving entirely
         if (Object.keys(stateToSave).length === 0) return;
 
         try {
-          // ✅ Optimization: check if data has actually changed
           const hasChanged = !simpleDeepEqual(
             stateToSave,
             prevPersistedState.current,
           );
 
-          // Only save if there are changes
           if (!hasChanged) {
             if (debug) {
               console.log('[FusionState] No changes detected, skipping save');
@@ -360,8 +407,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
             return;
           }
 
-          // Check if customSaveCallback is provided in the persistence config
-          // SimplePersistenceConfig peut avoir customSaveCallback, mais pas PersistenceConfig
           const persistenceConfig = persistenceRef.current;
 
           if (persistenceConfig) {
@@ -374,24 +419,20 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
               customSaveCallback &&
               typeof customSaveCallback === 'function'
             ) {
-              // Use the custom save callback if provided
               await customSaveCallback(stateToSave, storageAdapter, keyPrefix);
             } else {
-              // Save all state in one key for simplicity (default behavior)
               await storageAdapter.setItem(
                 `${keyPrefix}_all`,
                 JSON.stringify(stateToSave),
               );
             }
           } else {
-            // If no persistence config, use default behavior
             await storageAdapter.setItem(
               `${keyPrefix}_all`,
               JSON.stringify(stateToSave),
             );
           }
 
-          // Update reference for future comparisons
           prevPersistedState.current = {...stateToSave};
 
           if (debug) {
@@ -410,7 +451,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
             );
           }
 
-          // Appeler le callback d'erreur si fourni
           const config = persistenceRef.current as SimplePersistenceConfig;
           if (config?.onSaveError) {
             config.onSaveError(errorObj, stateToSave);
@@ -418,7 +458,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
         }
       };
 
-      // Return debounced version if needed
       return debounceTime > 0 ? debounce(save, debounceTime) : save;
     }, [
       storageAdapter,
@@ -428,59 +467,6 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
       debounceTime,
       filterPersistKeys,
     ]);
-
-    // ✅ SIMPLE: stable setState with useCallback
-    const setState = useCallback(
-      (updater: React.SetStateAction<GlobalState>) => {
-        setStateRaw(prevState => {
-          const nextState =
-            typeof updater === 'function' ? updater(prevState) : updater;
-
-          // Trigger persistence if needed
-          if (shouldSaveOnChange) {
-            saveStateToStorage(nextState);
-          }
-
-          // Debug logging
-          if (debug) {
-            console.log('[FusionState] State updated:', {
-              previous: prevState,
-              next: nextState,
-              diff: Object.fromEntries(
-                Object.entries(nextState).filter(
-                  ([key, value]) => prevState[key] !== value,
-                ),
-              ),
-            });
-          }
-
-          if (devToolsInstance?.enabled) {
-            const changedKeys = Object.keys(nextState).filter(
-              key => prevState[key] !== nextState[key],
-            );
-            if (changedKeys.length > 0) {
-              devToolsInstance.send(
-                DevToolsActions.SET_STATE,
-                nextState,
-                changedKeys.join(', '),
-                {
-                  changed: changedKeys,
-                  diff: Object.fromEntries(
-                    changedKeys.map(key => [
-                      key,
-                      {from: prevState[key], to: nextState[key]},
-                    ]),
-                  ),
-                },
-              );
-            }
-          }
-
-          return nextState;
-        });
-      },
-      [debug, shouldSaveOnChange, saveStateToStorage, devToolsInstance],
-    );
 
     // Per-key subscription registry
     const keyListenersRef = useRef<Map<string, Set<() => void>>>(new Map());
@@ -518,43 +504,105 @@ export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
 
     const getServerSnapshot = useCallback(
       (key: string) => {
-        // For SSR, return the initial state value or undefined
         return key in initialState ? initialState[key] : undefined;
       },
       [initialState],
     );
 
-    // Wrap setState to notify only affected keys
-    const setStateAndNotify = useCallback(
+    // Pure setState — no side effects in the updater. Listener notification,
+    // persistence, debug logging and DevTools dispatch all happen in the
+    // post-commit effect below.
+    const setState = useCallback(
       (updater: React.SetStateAction<GlobalState>) => {
-        setState(prev => {
-          const next =
-            typeof updater === 'function' ? (updater as any)(prev) : updater;
-          // Determine changed keys and notify
-          Object.keys(next).forEach(k => {
-            if (prev[k] !== next[k]) notifyKey(k);
-          });
-          return next;
-        });
+        setStateRaw(updater);
       },
-      [setState, notifyKey],
+      [],
     );
+
+    // Post-commit side effects: runs once per state change (after batched
+    // updates have settled). Compares the latest state against the previous
+    // committed state to compute changed keys.
+    useEffect(() => {
+      const prev = prevStateRef.current;
+      if (prev === state) return;
+      prevStateRef.current = state;
+
+      const seen = new Set<string>();
+      const changedKeys: string[] = [];
+      for (const k of Object.keys(prev)) {
+        seen.add(k);
+        if (prev[k] !== state[k]) changedKeys.push(k);
+      }
+      for (const k of Object.keys(state)) {
+        if (seen.has(k)) continue;
+        if (prev[k] !== state[k]) changedKeys.push(k);
+      }
+
+      if (changedKeys.length === 0) return;
+
+      // 1. Notify per-key subscribers (always — including hydration so
+      //    useSyncExternalStore consumers see the loaded value).
+      changedKeys.forEach(notifyKey);
+
+      // 2. Debug logging
+      if (debug) {
+        console.log('[FusionState] State updated:', {
+          previous: prev,
+          next: state,
+          diff: Object.fromEntries(changedKeys.map(k => [k, state[k]])),
+        });
+      }
+
+      // 3. DevTools dispatch
+      if (devToolsInstance?.enabled) {
+        devToolsInstance.send(
+          DevToolsActions.SET_STATE,
+          state,
+          changedKeys.join(', '),
+          {
+            changed: changedKeys,
+            diff: Object.fromEntries(
+              changedKeys.map(k => [k, {from: prev[k], to: state[k]}]),
+            ),
+          },
+        );
+      }
+
+      // 4. Persistence — skipped on the hydration tick because the freshly
+      //    loaded snapshot is already what's in storage.
+      if (skipPersistOnceRef.current) {
+        skipPersistOnceRef.current = false;
+        return;
+      }
+      if (shouldSaveOnChange) {
+        saveStateToStorage(state);
+      }
+    }, [
+      state,
+      notifyKey,
+      debug,
+      devToolsInstance,
+      shouldSaveOnChange,
+      saveStateToStorage,
+    ]);
 
     const value = useMemo(
       () => ({
         state,
-        setState: setStateAndNotify,
+        setState,
         initializingKeys: initializingKeys.current,
         subscribeKey,
         getKeySnapshot,
         getServerSnapshot,
+        isHydrated,
       }),
       [
         state,
-        setStateAndNotify,
+        setState,
         subscribeKey,
         getKeySnapshot,
         getServerSnapshot,
+        isHydrated,
       ],
     );
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import {StorageAdapter} from '@storage/storageAdapters';
+import {StorageAdapter} from './storage/storageAdapters';
 
 /**
  * Common types for React Fusion State
@@ -25,6 +25,12 @@ export interface GlobalFusionStateContextType {
   getKeySnapshot: (key: string) => unknown;
   /** Optional: server snapshot getter for SSR environments. */
   getServerSnapshot?: (key: string) => unknown;
+  /**
+   * `true` once the initial hydration from persistence has completed
+   * (or `true` immediately if no async hydration is needed). Optional for
+   * backward compatibility with custom mocks of this context.
+   */
+  isHydrated?: boolean;
 }
 
 /** Simplified type for persistence keys */

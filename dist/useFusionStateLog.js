@@ -13,13 +13,18 @@ const utils_1 = require("./utils");
  */
 const useFusionStateLog = (keys, options = {}) => {
     const { state } = (0, FusionStateProvider_1.useGlobalState)();
-    // Filter state based on keys - optimized with deep comparison
+    // Stable hash for the keys array so identical key lists across renders
+    // don't bust the memo (caller doesn't have to memoize the array).
+    const keysHash = (0, react_1.useMemo)(() => {
+        if (!keys || keys.length === 0)
+            return '';
+        return `${keys.length}:${keys.join('\u0001')}`;
+    }, [keys]);
+    // Filter state based on keys
     const filteredState = (0, react_1.useMemo)(() => {
-        // If no keys, return all state
         if (!keys || keys.length === 0) {
             return state;
         }
-        // Filter only requested keys
         const result = {};
         for (const key of keys) {
             if (key in state) {
@@ -27,27 +32,18 @@ const useFusionStateLog = (keys, options = {}) => {
             }
         }
         return result;
-    }, [state, keys === null || keys === void 0 ? void 0 : keys.join(',')]);
-    const [selectedState, setSelectedState] = (0, react_1.useState)(filteredState);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state, keysHash]);
     // Track previous state for change detection
     const previousState = (0, react_1.useRef)({});
-    const previousKeys = (0, react_1.useRef)(undefined);
     // Default options
     const { trackChanges = false, changeDetection = 'reference', formatter = undefined, consoleLog = false, } = options;
-    // Compare values based on selected change detection method
+    // 'deep' and 'simple' are equivalent (simpleDeepEqual is an alias of customIsEqual).
+    // Both go through the same path; 'reference' uses === for speed.
     const compareValues = (0, react_1.useCallback)((a, b) => {
-        if (changeDetection === 'reference') {
-            return a === b;
-        }
-        else if (changeDetection === 'deep') {
-            return (0, utils_1.customIsEqual)(a, b);
-        }
-        else {
-            return (0, utils_1.simpleDeepEqual)(a, b);
-        }
+        return changeDetection === 'reference' ? a === b : (0, utils_1.simpleDeepEqual)(a, b);
     }, [changeDetection]);
     (0, react_1.useEffect)(() => {
-        // Calculate changes if requested
         let changes;
         if (trackChanges) {
             changes = {};
@@ -60,16 +56,11 @@ const useFusionStateLog = (keys, options = {}) => {
                     };
                 }
             }
-            // If no changes, no need to continue
             if (Object.keys(changes).length === 0) {
                 changes = undefined;
             }
         }
-        // Update selected state
-        setSelectedState(filteredState);
-        // Save for next comparison
         previousState.current = Object.assign({}, filteredState);
-        // Log if enabled
         if (consoleLog && (changes || !trackChanges)) {
             const logData = formatter
                 ? formatter(filteredState, changes)

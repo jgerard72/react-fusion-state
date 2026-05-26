@@ -15,16 +15,17 @@ function useFusionState(keyInput, initialValue, options) {
             if (initializingKeys.has(key)) {
                 throw new Error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.KEY_ALREADY_INITIALIZING, key));
             }
+            // Mark this key as initializing, queue the update, then immediately
+            // clear the marker. The setState updater itself stays pure (the
+            // mutations live outside it), satisfying React 18's purity contract.
+            // The updater is idempotent across StrictMode double-invocation.
             initializingKeys.add(key);
-            setState(prev => {
-                if (key in prev) {
-                    initializingKeys.delete(key);
-                    return prev;
-                }
-                const newState = Object.assign(Object.assign({}, prev), { [key]: initialValue });
+            try {
+                setState(prev => (key in prev ? prev : Object.assign(Object.assign({}, prev), { [key]: initialValue })));
+            }
+            finally {
                 initializingKeys.delete(key);
-                return newState;
-            });
+            }
         }
         else if (!(key in state) && initialValue === undefined) {
             throw new Error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.KEY_MISSING_NO_INITIAL, key));

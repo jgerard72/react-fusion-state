@@ -25,13 +25,27 @@ function isSSREnvironment() {
 }
 exports.isSSREnvironment = isSSREnvironment;
 /**
+ * Cached adapter from the first detection pass. Detection is environment-driven
+ * and the environment doesn't change for the lifetime of a JS context, so we
+ * resolve once and reuse — avoids a `localStorage.setItem` probe on every
+ * Provider mount and any side effects of `require('react-native')`.
+ */
+let cachedAdapter = null;
+/**
  * Automatically detects the most appropriate storage adapter
- * based on the runtime environment.
+ * based on the runtime environment. Result is memoized at module scope.
  *
  * @param debug - Whether to enable debug logging
  * @returns The best available storage adapter
  */
 function detectBestStorageAdapter(debug = false) {
+    if (cachedAdapter)
+        return cachedAdapter;
+    cachedAdapter = resolveAdapter(debug);
+    return cachedAdapter;
+}
+exports.detectBestStorageAdapter = detectBestStorageAdapter;
+function resolveAdapter(debug) {
     // SSR Detection first (prevents server crashes)
     if (isSSREnvironment()) {
         if (debug) {
@@ -85,7 +99,6 @@ function detectBestStorageAdapter(debug = false) {
     }
     return (0, storageAdapters_1.createNoopStorageAdapter)();
 }
-exports.detectBestStorageAdapter = detectBestStorageAdapter;
 /**
  * Detects if we are in a React Native environment
  */

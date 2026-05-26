@@ -64,16 +64,16 @@ export function useFusionState<T = unknown>(
         );
       }
 
+      // Mark this key as initializing, queue the update, then immediately
+      // clear the marker. The setState updater itself stays pure (the
+      // mutations live outside it), satisfying React 18's purity contract.
+      // The updater is idempotent across StrictMode double-invocation.
       initializingKeys.add(key);
-      setState(prev => {
-        if (key in prev) {
-          initializingKeys.delete(key);
-          return prev;
-        }
-        const newState = {...prev, [key]: initialValue};
+      try {
+        setState(prev => (key in prev ? prev : {...prev, [key]: initialValue}));
+      } finally {
         initializingKeys.delete(key);
-        return newState;
-      });
+      }
     } else if (!(key in state) && initialValue === undefined) {
       throw new Error(
         formatErrorMessage(

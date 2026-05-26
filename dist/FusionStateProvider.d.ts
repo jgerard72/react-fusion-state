@@ -22,16 +22,25 @@ export interface FusionStateProviderProps {
      * - `true`: persist ALL state keys (use with caution)
      * - `string[]`: persist only specified keys (recommended)
      * - `object`: detailed configuration
+     *
+     * Note: this prop is captured at mount and frozen for the lifetime of the
+     * provider. Changing it after mount has no effect — unmount and remount
+     * the provider to switch persistence behavior.
      */
     persistence?: boolean | string[] | SimplePersistenceConfig | PersistenceConfig;
     /** DevTools configuration for Redux DevTools integration */
     devTools?: boolean | DevToolsConfig;
 }
 /**
- * Provider component for React Fusion State
+ * Provider component for React Fusion State.
  *
  * Manages global state and provides access to all child components.
  * Supports persistence, debug logging, and Redux DevTools integration.
+ *
+ * Storage keys are namespaced under a fixed `fusion_state` prefix. If you
+ * mount multiple `FusionStateProvider`s in the same app with persistence
+ * enabled, they will share the same storage slot — typically you want a
+ * single root provider.
  *
  * @example
  * ```tsx

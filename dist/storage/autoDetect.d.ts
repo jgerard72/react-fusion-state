@@ -6,7 +6,7 @@ import { StorageAdapter } from './storageAdapters';
 export declare function isSSREnvironment(): boolean;
 /**
  * Automatically detects the most appropriate storage adapter
- * based on the runtime environment.
+ * based on the runtime environment. Result is memoized at module scope.
  *
  * @param debug - Whether to enable debug logging
  * @returns The best available storage adapter
