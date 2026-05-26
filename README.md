@@ -1,13 +1,15 @@
-# 🚀 React Fusion State
+# React Fusion State
 
 [![npm version](https://badge.fury.io/js/react-fusion-state.svg)](https://badge.fury.io/js/react-fusion-state)
 [![Downloads](https://img.shields.io/npm/dm/react-fusion-state.svg)](https://npmjs.com/package/react-fusion-state)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
-**🎯 The simplest AND most performant React state management library.**
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png" alt="react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7 KB gzipped" width="100%" />
+</p>
 
-✨ **Zero dependencies** • 🏆 **99.9% fewer re-renders** • 📦 **~7 KB gzipped** • ⚡ **Zero setup** • 🔄 **Built-in persistence** • 🚀 **Object.is performance** • 🎯 **Batched updates**
+**🎯 The simplest AND most performant React state management library.**
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
@@ -30,6 +32,11 @@ npm install react-fusion-state
 ```
 
 ### Basic Usage
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/quick-start.png" alt="Three steps to use react-fusion-state: wrap your app with FusionStateProvider, use the useFusionState hook, and persist state automatically across Browser, React Native and SSR" width="100%" />
+</p>
+
 ```jsx
 import { FusionStateProvider, useFusionState } from 'react-fusion-state';
 
