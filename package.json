@@ -1,6 +1,6 @@
 {
   "name": "react-fusion-state",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Simple, fast React state management with zero dependencies, built-in persistence (localStorage / AsyncStorage), TypeScript inference, and a compact bundle.",
   "keywords": [
     "react",

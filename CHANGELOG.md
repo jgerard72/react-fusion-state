@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-05-27 - Visual Branding & README Polish
+
+### Added
+- `assets/hero.png`: marketing hero banner showing the library identity, six headline features (zero dependencies, TypeScript first, built-in persistence, React 18+/StrictMode-safe, fine-grained renders, cross-platform), the `~7 KB` size badge, and a real `App.tsx` code snippet using the actual public API (`FusionStateProvider` + `useFusionState`). Hosted in-repo so npmjs.com can render it via absolute `raw.githubusercontent.com` URL.
+- `assets/quick-start.png`: three-step onboarding visual (`Wrap your app` → `Use the hook` → `Persist & share`) with real code matching `src/FusionStateProvider.tsx` and `src/useFusionState.ts`. Step 3 illustrates the cross-platform auto-detection (Browser · React Native · SSR/Next.js → `localStorage` · `AsyncStorage` · in-memory).
+
+### Changed
+- `README.md`: top of the file now leads with the hero image (centered, full-width) right under the npm badges. The redundant features bullet line was removed since the hero already conveys the same six headline claims; the unique performance claims (99.9% fewer re-renders, batched updates, Object.is) remain documented further down in the `Why React Fusion State?` section.
+- `README.md`: removed the `🚀` emoji from the H1 title — the hero carries the visual identity now, the H1 stays clean and SEO-friendly.
+- `README.md`: the `Basic Usage` subsection now opens with the quick-start image as a visual TLDR, immediately followed by the copy-pasteable code block (kept intact so users can still copy).
+
+### Notes
+- **Pure documentation / marketing release.** No source code change, no public API change, no runtime behavior change, no dependency change. Bundle size, behavior, and `dist/` output are byte-identical to 1.1.1.
+- Images live in `assets/` at the repo root. The folder is intentionally NOT listed in `package.json#files`, so it is excluded from the npm tarball — verified with `npm pack --dry-run` (44 files, 45.8 kB, zero asset bytes shipped to consumers).
+- The README references images via absolute `https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/*.png` URLs because relative paths render on GitHub but fail on npmjs.com.
+
 ## [1.1.1] - 2026-05-27 - Honest Bundle Size & Marketing Alignment
 
 ### Changed
