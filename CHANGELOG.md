@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.0] - 2026-05-26 - Deprecation, Cleanup & Audit Fixes
+## [1.1.0] - 2026-05-26 - Deprecation, Cleanup & Audit Fixes
 
 ### Added
 - Migration guide for v2 in `README.md` listing all deprecated → canonical name mappings (hooks, provider, storage adapters, example key objects).
@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tsconfig-build.json`: removed dangling `"src/devtools"` exclude entry that had no effect.
 - Documentation cleaned up: removed promotion of deprecated hook aliases (`useSharedState`, `usePersistentState`, `useAppState`) in `DOCUMENTATION.md`; replaced with a short notice pointing to the new migration guide.
 - JSDoc clarifications: `persistence` prop is documented as captured at mount; `keyPrefix` documented as fixed and shared across providers; `createDevTools` documented as a singleton.
-- README banner updated for v1.2.0.
+- README banner updated for v1.1.0.
 
 ### Notes
 - **Zero breaking change**: every public export available in 1.0.1 is still available with the exact same signature.

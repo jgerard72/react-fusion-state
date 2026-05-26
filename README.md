@@ -7,11 +7,11 @@
 
 **🎯 The simplest AND most performant React state management library.**
 
-✨ **Zero dependencies** • 🏆 **99.9% fewer re-renders** • 📦 **2.8KB bundle** • ⚡ **Zero setup** • 🔄 **Built-in persistence** • 🚀 **Object.is performance** • 🎯 **Batched updates**
+✨ **Zero dependencies** • 🏆 **99.9% fewer re-renders** • 📦 **~7 KB gzipped** • ⚡ **Zero setup** • 🔄 **Built-in persistence** • 🚀 **Object.is performance** • 🎯 **Batched updates**
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🎉 **v1.2.0 - Cleanup & Migration Path**
+### 🎉 **v1.1.0 - Cleanup & Migration Path**
 - 🧹 **Deprecation pass** - Legacy aliases (`useSharedState`, `GlobalStateProvider`, `createWebStorageAdapter`, …) are now marked `@deprecated` and will be removed in v2.0.0
 - 🗺️ **Migration guide** - New [Migration to v2 (preview)](#-migration-to-v2-preview) section listing every old → new name mapping
 - 📚 **Docs cleaned up** - Removed promotion of deprecated aliases in `DOCUMENTATION.md`
@@ -93,7 +93,7 @@ function UserProfile() {
 
 ### 🏆 **Performance Champion**
 - **99.9% fewer re-renders** than Redux/Zustand/Recoil
-- **2.8KB bundle size** (vs 45KB+ for competitors)
+- **~7 KB gzipped, zero dependencies** (vs 45KB+ for Redux/Recoil)
 - **Zero dependencies** - no bloat, maximum speed
 - [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) - Grade A+ performance
 
@@ -194,7 +194,7 @@ open demo/demo-persistence.html
 
 | Library | Bundle Size | Re-renders | Dependencies | Setup |
 |---------|-------------|------------|--------------|--------|
-| **React Fusion State** | **2.8KB** | **99.9% fewer** | **0** | **Zero** |
+| **React Fusion State** | **~7 KB** | **99.9% fewer** | **0** | **Zero** |
 | Redux Toolkit | 45KB+ | Many | 15+ | Complex |
 | Zustand | 8KB+ | Many | 2+ | Moderate |
 | Recoil | 120KB+ | Many | 10+ | Complex |
@@ -267,7 +267,7 @@ function OptimizedComponent() {
 
 ## 🗺️ Migration to v2 (preview)
 
-v1.2.0 marks every legacy alias as `@deprecated`. They still work — your IDE will just show them with a strikethrough. **All of them will be removed in v2.0.0.** Use the table below to migrate ahead of time.
+v1.1.0 marks every legacy alias as `@deprecated`. They still work — your IDE will just show them with a strikethrough. **All of them will be removed in v2.0.0.** Use the table below to migrate ahead of time.
 
 ### Hooks
 
