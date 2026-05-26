@@ -13,7 +13,7 @@ It complements `.cursor/rules` and provides a clear shared operating model for C
 Primary goals:
 
 - keep the API ultra-simple (`useFusionState` + `FusionStateProvider`)
-- keep the bundle tiny (~2.8 KB gzipped)
+- keep the bundle tight (~7 KB gzipped — measured with `esbuild --minify --bundle` on `dist/index.js`, externalising react/react-dom, then gzip level 9)
 - stay 100% backward compatible inside the 1.x line
 - preserve cross-platform support (React Web + React Native, with SSR safety)
 - maintain a green test suite at all times
@@ -127,7 +127,7 @@ The current canonical migration table lives in `README.md` under `## Migration t
 
 # Bundle Size and Zero Dependencies
 
-`react-fusion-state` ships with **zero runtime dependencies** and a ~2.8 KB gzipped bundle. This is a core selling point.
+`react-fusion-state` ships with **zero runtime dependencies** and a ~7 KB gzipped bundle (minified). This is a core selling point — comparable to Zustand on raw size, with built-in persistence and DevTools support included rather than required as separate middleware.
 
 Rules:
 

@@ -82,14 +82,16 @@ React Fusion State **DOMINATES** the competition with **Grade A+ performance** a
 
 ## 📦 **Bundle Size Comparison**
 
-| Library | Bundle Size | Gzipped | Dependencies | vs React Fusion State |
-|---------|-------------|---------|--------------|----------------------|
-| **React Fusion State** | **7.2KB** | **2.8KB** | **0** | **Baseline** |
-| Zustand | 8.1KB | 3.2KB | 1 | +14% larger |
-| Recoil | 78.4KB | 24.1KB | 3+ | **+760% larger** |
-| Redux Toolkit | 135.2KB | 42.7KB | 5+ | **+1,425% larger** |
+| Library | Minified | Gzipped | Dependencies | vs React Fusion State |
+|---------|----------|---------|--------------|----------------------|
+| **React Fusion State** | **23.5 KB** | **~7 KB** | **0** | **Baseline** |
+| Zustand | 8.1 KB | 3.2 KB | 1 | comparable / smaller |
+| Recoil | 78.4 KB | 24.1 KB | 3+ | **+245% larger** |
+| Redux Toolkit | 135.2 KB | 42.7 KB | 5+ | **+510% larger** |
 
-**🎯 Result:** React Fusion State has the **smallest bundle** AND **zero dependencies** - Redux is **15x larger**!
+> **Methodology:** React Fusion State numbers are measured locally with `esbuild --minify --bundle` on `dist/index.js`, externalising `react` / `react-dom`, then gzipped at level 9. Competitor numbers are taken from bundlephobia at the time of writing.
+
+**🎯 Result:** React Fusion State is **lightweight with zero runtime dependencies** — comparable to Zustand on raw bundle size, but ships with **built-in persistence, DevTools support, and SSR-safe auto-detection out of the box**, where Zustand requires additional middleware. Redux Toolkit is **6× larger** with 5+ transitive deps.
 
 ---
 
@@ -234,12 +236,12 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 ✅ **Object.is Optimization** - Fastest possible equality comparison with intelligent fallbacks  
 ✅ **Cross-Platform Batching** - Automatic batched updates for React DOM and React Native  
 ✅ **Persistence Support** - Built-in cross-platform persistence  
-✅ **Smallest Bundle** - 2.8KB vs 42.7KB for Redux  
+✅ **Lightweight & Zero Deps** - ~7 KB gzipped vs 42.7 KB for Redux (with 5+ deps)  
 ✅ **Best Developer Experience** - 1 line setup vs 18+ for Redux  
 ✅ **Unique Features** - Only library with smart object comparison  
 ✅ **Perfect Scores** - Grade A+ across all metrics  
 
-**Choose React Fusion State for the fastest, smallest, and easiest state management solution!**
+**Choose React Fusion State for fast, zero-dependency state management with built-in persistence — the easiest setup with the most features per kilobyte.**
 
 ---
 
@@ -265,12 +267,14 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 ### **Bundle Size Impact on Load Time**
 
-| Library | Bundle Size | Load Time (3G) | Load Time (4G) |
-|---------|-------------|----------------|----------------|
-| **React Fusion State** | **2.8KB** | **~85ms** | **~42ms** |
-| Zustand | 3.2KB | ~95ms | ~48ms |
-| Recoil | 24.1KB | ~720ms | ~360ms |
-| Redux Toolkit | 42.7KB | ~1.28s | ~640ms |
+| Library | Bundle (gzipped) | Load Time (3G) | Load Time (4G) |
+|---------|------------------|----------------|----------------|
+| **React Fusion State** | **~7 KB** | **~210 ms** | **~105 ms** |
+| Zustand | 3.2 KB | ~95 ms | ~48 ms |
+| Recoil | 24.1 KB | ~720 ms | ~360 ms |
+| Redux Toolkit | 42.7 KB | ~1.28 s | ~640 ms |
+
+> Load times are linear projections from the gzipped size (3G ≈ 30 KB/s, 4G ≈ 65 KB/s) and ignore parse/eval cost — useful for relative comparison, not absolute UX.
 
 ---
 

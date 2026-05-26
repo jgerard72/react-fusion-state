@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-05-27 - Honest Bundle Size & Marketing Alignment
+
+### Changed
+- `PERFORMANCE_BENCHMARK_RESULTS.md`: replaced the unverifiable **2.8 KB gzipped** claim with the actual measured **~7 KB gzipped (6.74 KB)** number, obtained from a bundlephobia-style esbuild minify + gzip on `dist/index.js` with React/React-DOM externalised. Softened the **"Smallest Bundle"** claim — at ~7 KB minified+gzipped, FusionState is comparable to Zustand (~3 KB) on raw bundle size; the differentiator is **zero dependencies + built-in persistence + DevTools out of the box**, not absolute size.
+- `README.md` banner heading promoted to `v1.1.1` to reflect the doc alignment release.
+- `AGENTS.MD`: bundle-size guidance for agents updated from `~2.8 KB` to `~7 KB` to match reality and prevent future agents from defending the wrong number.
+- `DOCUMENTATION.md` and `GETTING_STARTED.md` version banners promoted to `1.1.1` to track `package.json#version`.
+
+### Notes
+- **Pure documentation correction.** No source code change, no public API change, no runtime behavior change. Every claim that was true in 1.1.0 is still true in 1.1.1; only the numbers in the marketing tables and the "Smallest Bundle" wording were updated.
+- 1.1.0 was prepared but never published to npm — 1.1.1 is the first npm release of the deprecation pass + audit fixes + accurate marketing.
+
 ## [1.1.0] - 2026-05-26 - Deprecation, Cleanup & Audit Fixes
 
 ### Added
