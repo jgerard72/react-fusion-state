@@ -26,11 +26,6 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 /**
- * Simplified deep clone
- */
-export const deepClone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
-
-/**
  * Custom lightweight deep equality check
  * Optimized for React Fusion State use cases - replaces lodash.isequal
  */
@@ -107,7 +102,8 @@ export const shallowEqual = (a: unknown, b: unknown): boolean => {
 };
 
 /**
- * Optimized deep comparison
+ * Optimized deep comparison.
+ * Alias of {@link customIsEqual} - they are functionally identical
+ * (kept as separate name for backward compatibility with the public API).
  */
-export const simpleDeepEqual = (a: unknown, b: unknown): boolean =>
-  a === b || customIsEqual(a, b);
+export const simpleDeepEqual = customIsEqual;

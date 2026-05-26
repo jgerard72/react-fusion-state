@@ -10,7 +10,7 @@ export declare const useGlobalState: () => GlobalFusionStateContextType;
 /**
  * Props for the FusionStateProvider component
  */
-interface FusionStateProviderProps {
+export interface FusionStateProviderProps {
     /** Child components that will have access to fusion state */
     children: ReactNode;
     /** Initial state values to set when the provider mounts */
@@ -41,4 +41,3 @@ interface FusionStateProviderProps {
  * ```
  */
 export declare const FusionStateProvider: React.FC<FusionStateProviderProps>;
-export {};

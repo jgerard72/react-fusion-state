@@ -44,7 +44,10 @@ function extractKeyName(keyOrString) {
 }
 exports.extractKeyName = extractKeyName;
 /**
- * Example predefined keys for common application state
+ * Example predefined keys for common application state.
+ *
+ * @deprecated Provided as a documentation example only. Define your own
+ * typed keys with {@link createKey} in your application code. Will be removed in v2.
  */
 exports.AppKeys = {
     user: createKey('user'),
@@ -63,6 +66,13 @@ function createNamespacedKey(namespace, key) {
     return createKey(`${namespace}.${key}`);
 }
 exports.createNamespacedKey = createNamespacedKey;
+/**
+ * Example predefined namespaced keys.
+ *
+ * @deprecated Provided as a documentation example only. Define your own
+ * typed keys with {@link createNamespacedKey} in your application code.
+ * Will be removed in v2.
+ */
 exports.UserKeys = {
     profile: createNamespacedKey('user', 'profile'),
     preferences: createNamespacedKey('user', 'preferences'),

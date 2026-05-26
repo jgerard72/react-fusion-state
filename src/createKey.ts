@@ -55,7 +55,10 @@ export function extractKeyName(keyOrString: string | TypedKey): string {
 }
 
 /**
- * Example predefined keys for common application state
+ * Example predefined keys for common application state.
+ *
+ * @deprecated Provided as a documentation example only. Define your own
+ * typed keys with {@link createKey} in your application code. Will be removed in v2.
  */
 export const AppKeys = {
   user: createKey<{id: number; name: string; email: string} | null>('user'),
@@ -83,6 +86,13 @@ export function createNamespacedKey<T = unknown>(
   return createKey<T>(`${namespace}.${key}`);
 }
 
+/**
+ * Example predefined namespaced keys.
+ *
+ * @deprecated Provided as a documentation example only. Define your own
+ * typed keys with {@link createNamespacedKey} in your application code.
+ * Will be removed in v2.
+ */
 export const UserKeys = {
   profile: createNamespacedKey<{name: string; avatar: string}>(
     'user',

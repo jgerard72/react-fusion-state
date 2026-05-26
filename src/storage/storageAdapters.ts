@@ -115,5 +115,7 @@ export const createLocalStorageAdapter = (
   };
 };
 
-// For backward compatibility
+/**
+ * @deprecated Use {@link createNoopStorageAdapter} instead. Will be removed in v2.
+ */
 export const NoopStorageAdapter = createNoopStorageAdapter;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.deepClone = exports.debounce = exports.formatErrorMessage = void 0;
+exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.debounce = exports.formatErrorMessage = void 0;
 /**
  * Format error messages - simplified version
  */
@@ -20,11 +20,6 @@ function debounce(fn, delay) {
     };
 }
 exports.debounce = debounce;
-/**
- * Simplified deep clone
- */
-const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
-exports.deepClone = deepClone;
 /**
  * Custom lightweight deep equality check
  * Optimized for React Fusion State use cases - replaces lodash.isequal
@@ -105,8 +100,9 @@ const shallowEqual = (a, b) => {
 };
 exports.shallowEqual = shallowEqual;
 /**
- * Optimized deep comparison
+ * Optimized deep comparison.
+ * Alias of {@link customIsEqual} - they are functionally identical
+ * (kept as separate name for backward compatibility with the public API).
  */
-const simpleDeepEqual = (a, b) => a === b || (0, exports.customIsEqual)(a, b);
-exports.simpleDeepEqual = simpleDeepEqual;
-//# sourceMappingURL=utils.js.map
+exports.simpleDeepEqual = exports.customIsEqual;
+//# sourceMappingURL=index.js.map

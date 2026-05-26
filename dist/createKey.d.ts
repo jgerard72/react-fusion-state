@@ -36,7 +36,10 @@ export declare function isTypedKey(value: any): value is TypedKey;
  */
 export declare function extractKeyName(keyOrString: string | TypedKey): string;
 /**
- * Example predefined keys for common application state
+ * Example predefined keys for common application state.
+ *
+ * @deprecated Provided as a documentation example only. Define your own
+ * typed keys with {@link createKey} in your application code. Will be removed in v2.
  */
 export declare const AppKeys: {
     readonly user: TypedKey<{
@@ -66,6 +69,13 @@ export type ExtractKeyType<K> = K extends TypedKey<infer T> ? T : never;
  * @returns A typed key with the format "namespace.key"
  */
 export declare function createNamespacedKey<T = unknown>(namespace: string, key: string): TypedKey<T>;
+/**
+ * Example predefined namespaced keys.
+ *
+ * @deprecated Provided as a documentation example only. Define your own
+ * typed keys with {@link createNamespacedKey} in your application code.
+ * Will be removed in v2.
+ */
 export declare const UserKeys: {
     readonly profile: TypedKey<{
         name: string;

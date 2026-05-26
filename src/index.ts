@@ -1,9 +1,13 @@
 // Core API - v1.0 Ultra Simple
-export {useFusionState} from './useFusionState';
-export {FusionStateProvider} from './FusionStateProvider';
+import {useFusionState} from './useFusionState';
+import {FusionStateProvider} from './FusionStateProvider';
+
+export {useFusionState, FusionStateProvider};
 
 // React Native Support
-export {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
+import {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
+
+export {createAsyncStorageAdapter};
 
 // Advanced/Internal (backward compatibility only)
 export {useFusionStateLog} from './useFusionStateLog';
@@ -28,12 +32,18 @@ export {
 } from './devtools';
 export type {DevToolsConfig} from './devtools';
 
-export {useFusionState as useSharedState} from './useFusionState';
-export {useFusionState as usePersistentState} from './useFusionState';
-export {useFusionState as useAppState} from './useFusionState';
-export {FusionStateProvider as GlobalStateProvider} from './FusionStateProvider';
-export {FusionStateProvider as StateProvider} from './FusionStateProvider';
-export {FusionStateProvider as AppStateProvider} from './FusionStateProvider';
+/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
+export const useSharedState = useFusionState;
+/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
+export const usePersistentState = useFusionState;
+/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
+export const useAppState = useFusionState;
+/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
+export const GlobalStateProvider: typeof FusionStateProvider = FusionStateProvider;
+/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
+export const StateProvider: typeof FusionStateProvider = FusionStateProvider;
+/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
+export const AppStateProvider: typeof FusionStateProvider = FusionStateProvider;
 
 export type {
   GlobalState,
@@ -53,6 +63,15 @@ export {
 
 export {formatErrorMessage, debounce, simpleDeepEqual} from './utils';
 
+import {
+  createNoopStorageAdapter,
+  createLocalStorageAdapter,
+} from './storage/storageAdapters';
+import {
+  detectBestStorageAdapter,
+  createMemoryStorageAdapter,
+} from './storage/autoDetect';
+
 export {
   createNoopStorageAdapter,
   createLocalStorageAdapter,
@@ -64,11 +83,17 @@ export {
   isSSREnvironment,
 } from './storage/autoDetect';
 
-export {createLocalStorageAdapter as createWebStorageAdapter} from './storage/storageAdapters';
-export {createAsyncStorageAdapter as createRNStorageAdapter} from './storage/asyncStorageAdapter';
-export {createAsyncStorageAdapter as createMobileStorageAdapter} from './storage/asyncStorageAdapter';
-export {createMemoryStorageAdapter as createInMemoryAdapter} from './storage/autoDetect';
-export {detectBestStorageAdapter as autoDetectStorage} from './storage/autoDetect';
+/** @deprecated Use {@link createLocalStorageAdapter} instead. Will be removed in v2. */
+export const createWebStorageAdapter = createLocalStorageAdapter;
+/** @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2. */
+export const createRNStorageAdapter = createAsyncStorageAdapter;
+/** @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2. */
+export const createMobileStorageAdapter = createAsyncStorageAdapter;
+/** @deprecated Use {@link createMemoryStorageAdapter} instead. Will be removed in v2. */
+export const createInMemoryAdapter = createMemoryStorageAdapter;
+/** @deprecated Use {@link detectBestStorageAdapter} instead. Will be removed in v2. */
+export const autoDetectStorage = detectBestStorageAdapter;
+
 export type {
   StorageAdapter,
   ExtendedStorageAdapter,

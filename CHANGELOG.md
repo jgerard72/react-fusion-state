@@ -5,6 +5,29 @@ All notable changes to React Fusion State will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Deprecated
+- Hook aliases `useSharedState`, `usePersistentState`, `useAppState` — use `useFusionState` instead. Will be removed in v2.
+- Provider aliases `GlobalStateProvider`, `StateProvider`, `AppStateProvider` — use `FusionStateProvider` instead. Will be removed in v2.
+- Storage adapter aliases `createWebStorageAdapter`, `createRNStorageAdapter`, `createMobileStorageAdapter`, `createInMemoryAdapter`, `autoDetectStorage`, `NoopStorageAdapter` — use their canonical names instead. Will be removed in v2.
+- Example objects `AppKeys` and `UserKeys` — define your own typed keys with `createKey` / `createNamespacedKey` in your application code. Will be removed in v2.
+
+### Removed
+- Internal `deepClone` helper (was never exported, never used).
+- Internal `src/robustness/` module (`ErrorBoundary`, `MemoryManager`, `StorageRecoveryManager`) — never exported from the public API, never used internally.
+- Empty `src/plugins/` placeholder folder.
+- `REFACTOR_SUMMARY.md` — historical document for the v1.0 refactor, already captured in this changelog.
+
+### Changed
+- Internal restructure: `src/utils.ts` merged into `src/utils/index.ts` alongside `src/utils/batch.ts`. No public API change — all consumer imports `from 'react-fusion-state'` continue to work unchanged.
+- Internal deduplication: `simpleDeepEqual` is now a direct alias of `customIsEqual` (they were already functionally identical). Both names remain available; only the duplicate implementation was removed.
+- `tsconfig-build.json`: removed dangling `"src/devtools"` exclude entry that had no effect.
+
+### Notes
+- **Zero breaking change**: every public export available in 1.0.1 is still available with the exact same signature.
+- All 75 existing tests continue to pass.
+
 ## [1.0.1] - 2025-01-27 - ✅ **Reset Functionality Confirmed**
 
 ### ✅ **Quality Assurance**

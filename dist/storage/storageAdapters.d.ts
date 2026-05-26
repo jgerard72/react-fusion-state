@@ -41,4 +41,7 @@ export interface ExtendedStorageAdapter extends StorageAdapter {
  * @returns A storage adapter that uses browser's localStorage
  */
 export declare const createLocalStorageAdapter: (debug?: boolean) => ExtendedStorageAdapter;
+/**
+ * @deprecated Use {@link createNoopStorageAdapter} instead. Will be removed in v2.
+ */
 export declare const NoopStorageAdapter: () => StorageAdapter;

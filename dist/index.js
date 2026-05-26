@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.autoDetectStorage = exports.createInMemoryAdapter = exports.createMobileStorageAdapter = exports.createRNStorageAdapter = exports.createWebStorageAdapter = exports.isSSREnvironment = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.AppStateProvider = exports.StateProvider = exports.GlobalStateProvider = exports.useAppState = exports.usePersistentState = exports.useSharedState = exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = exports.UserKeys = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createNamespacedKey = exports.createKey = exports.useGlobalState = exports.useFusionHydrated = exports.useFusionStateLog = exports.createAsyncStorageAdapter = exports.FusionStateProvider = exports.useFusionState = void 0;
 // Core API - v1.0 Ultra Simple
-var useFusionState_1 = require("./useFusionState");
+const useFusionState_1 = require("./useFusionState");
 Object.defineProperty(exports, "useFusionState", { enumerable: true, get: function () { return useFusionState_1.useFusionState; } });
-var FusionStateProvider_1 = require("./FusionStateProvider");
+const FusionStateProvider_1 = require("./FusionStateProvider");
 Object.defineProperty(exports, "FusionStateProvider", { enumerable: true, get: function () { return FusionStateProvider_1.FusionStateProvider; } });
 // React Native Support
-var asyncStorageAdapter_1 = require("./storage/asyncStorageAdapter");
+const asyncStorageAdapter_1 = require("./storage/asyncStorageAdapter");
 Object.defineProperty(exports, "createAsyncStorageAdapter", { enumerable: true, get: function () { return asyncStorageAdapter_1.createAsyncStorageAdapter; } });
 // Advanced/Internal (backward compatibility only)
 var useFusionStateLog_1 = require("./useFusionStateLog");
@@ -28,18 +28,18 @@ Object.defineProperty(exports, "createDevTools", { enumerable: true, get: functi
 Object.defineProperty(exports, "getDevTools", { enumerable: true, get: function () { return devtools_1.getDevTools; } });
 Object.defineProperty(exports, "useDevTools", { enumerable: true, get: function () { return devtools_1.useDevTools; } });
 Object.defineProperty(exports, "DevToolsActions", { enumerable: true, get: function () { return devtools_1.DevToolsActions; } });
-var useFusionState_2 = require("./useFusionState");
-Object.defineProperty(exports, "useSharedState", { enumerable: true, get: function () { return useFusionState_2.useFusionState; } });
-var useFusionState_3 = require("./useFusionState");
-Object.defineProperty(exports, "usePersistentState", { enumerable: true, get: function () { return useFusionState_3.useFusionState; } });
-var useFusionState_4 = require("./useFusionState");
-Object.defineProperty(exports, "useAppState", { enumerable: true, get: function () { return useFusionState_4.useFusionState; } });
-var FusionStateProvider_3 = require("./FusionStateProvider");
-Object.defineProperty(exports, "GlobalStateProvider", { enumerable: true, get: function () { return FusionStateProvider_3.FusionStateProvider; } });
-var FusionStateProvider_4 = require("./FusionStateProvider");
-Object.defineProperty(exports, "StateProvider", { enumerable: true, get: function () { return FusionStateProvider_4.FusionStateProvider; } });
-var FusionStateProvider_5 = require("./FusionStateProvider");
-Object.defineProperty(exports, "AppStateProvider", { enumerable: true, get: function () { return FusionStateProvider_5.FusionStateProvider; } });
+/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
+exports.useSharedState = useFusionState_1.useFusionState;
+/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
+exports.usePersistentState = useFusionState_1.useFusionState;
+/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
+exports.useAppState = useFusionState_1.useFusionState;
+/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
+exports.GlobalStateProvider = FusionStateProvider_1.FusionStateProvider;
+/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
+exports.StateProvider = FusionStateProvider_1.FusionStateProvider;
+/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
+exports.AppStateProvider = FusionStateProvider_1.FusionStateProvider;
 var types_1 = require("./types");
 Object.defineProperty(exports, "FusionStateErrorMessages", { enumerable: true, get: function () { return types_1.FusionStateErrorMessages; } });
 Object.defineProperty(exports, "FusionStateError", { enumerable: true, get: function () { return types_1.FusionStateError; } });
@@ -48,22 +48,24 @@ var utils_1 = require("./utils");
 Object.defineProperty(exports, "formatErrorMessage", { enumerable: true, get: function () { return utils_1.formatErrorMessage; } });
 Object.defineProperty(exports, "debounce", { enumerable: true, get: function () { return utils_1.debounce; } });
 Object.defineProperty(exports, "simpleDeepEqual", { enumerable: true, get: function () { return utils_1.simpleDeepEqual; } });
-var storageAdapters_1 = require("./storage/storageAdapters");
-Object.defineProperty(exports, "createNoopStorageAdapter", { enumerable: true, get: function () { return storageAdapters_1.createNoopStorageAdapter; } });
-Object.defineProperty(exports, "createLocalStorageAdapter", { enumerable: true, get: function () { return storageAdapters_1.createLocalStorageAdapter; } });
-Object.defineProperty(exports, "NoopStorageAdapter", { enumerable: true, get: function () { return storageAdapters_1.NoopStorageAdapter; } });
-var autoDetect_1 = require("./storage/autoDetect");
-Object.defineProperty(exports, "detectBestStorageAdapter", { enumerable: true, get: function () { return autoDetect_1.detectBestStorageAdapter; } });
-Object.defineProperty(exports, "createMemoryStorageAdapter", { enumerable: true, get: function () { return autoDetect_1.createMemoryStorageAdapter; } });
-Object.defineProperty(exports, "isSSREnvironment", { enumerable: true, get: function () { return autoDetect_1.isSSREnvironment; } });
+const storageAdapters_1 = require("./storage/storageAdapters");
+const autoDetect_1 = require("./storage/autoDetect");
 var storageAdapters_2 = require("./storage/storageAdapters");
-Object.defineProperty(exports, "createWebStorageAdapter", { enumerable: true, get: function () { return storageAdapters_2.createLocalStorageAdapter; } });
-var asyncStorageAdapter_2 = require("./storage/asyncStorageAdapter");
-Object.defineProperty(exports, "createRNStorageAdapter", { enumerable: true, get: function () { return asyncStorageAdapter_2.createAsyncStorageAdapter; } });
-var asyncStorageAdapter_3 = require("./storage/asyncStorageAdapter");
-Object.defineProperty(exports, "createMobileStorageAdapter", { enumerable: true, get: function () { return asyncStorageAdapter_3.createAsyncStorageAdapter; } });
+Object.defineProperty(exports, "createNoopStorageAdapter", { enumerable: true, get: function () { return storageAdapters_2.createNoopStorageAdapter; } });
+Object.defineProperty(exports, "createLocalStorageAdapter", { enumerable: true, get: function () { return storageAdapters_2.createLocalStorageAdapter; } });
+Object.defineProperty(exports, "NoopStorageAdapter", { enumerable: true, get: function () { return storageAdapters_2.NoopStorageAdapter; } });
 var autoDetect_2 = require("./storage/autoDetect");
-Object.defineProperty(exports, "createInMemoryAdapter", { enumerable: true, get: function () { return autoDetect_2.createMemoryStorageAdapter; } });
-var autoDetect_3 = require("./storage/autoDetect");
-Object.defineProperty(exports, "autoDetectStorage", { enumerable: true, get: function () { return autoDetect_3.detectBestStorageAdapter; } });
+Object.defineProperty(exports, "detectBestStorageAdapter", { enumerable: true, get: function () { return autoDetect_2.detectBestStorageAdapter; } });
+Object.defineProperty(exports, "createMemoryStorageAdapter", { enumerable: true, get: function () { return autoDetect_2.createMemoryStorageAdapter; } });
+Object.defineProperty(exports, "isSSREnvironment", { enumerable: true, get: function () { return autoDetect_2.isSSREnvironment; } });
+/** @deprecated Use {@link createLocalStorageAdapter} instead. Will be removed in v2. */
+exports.createWebStorageAdapter = storageAdapters_1.createLocalStorageAdapter;
+/** @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2. */
+exports.createRNStorageAdapter = asyncStorageAdapter_1.createAsyncStorageAdapter;
+/** @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2. */
+exports.createMobileStorageAdapter = asyncStorageAdapter_1.createAsyncStorageAdapter;
+/** @deprecated Use {@link createMemoryStorageAdapter} instead. Will be removed in v2. */
+exports.createInMemoryAdapter = autoDetect_1.createMemoryStorageAdapter;
+/** @deprecated Use {@link detectBestStorageAdapter} instead. Will be removed in v2. */
+exports.autoDetectStorage = autoDetect_1.detectBestStorageAdapter;
 //# sourceMappingURL=index.js.map
