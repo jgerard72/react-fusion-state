@@ -120,21 +120,14 @@ const [value, setValue] = useFusionState('keyName', defaultValue);
 **Returns:**
 - `[value, setValue]` - Current value and setter function (same as `useState`)
 
-#### **Hook Aliases**
-For better semantic clarity, you can use these aliases:
-```jsx
-import { 
-  useFusionState,      // Original name
-  useSharedState,      // When sharing between components
-  usePersistentState,  // When emphasizing persistence
-  useAppState,         // For app-level state
-} from 'react-fusion-state';
+#### **Legacy aliases (deprecated)**
 
-// All are identical - use what makes sense for your project
-const [theme, setTheme] = useSharedState('theme', 'light');
-const [user, setUser] = usePersistentState('user', null);
-const [config, setConfig] = useAppState('config', {});
-```
+The following aliases still exist for backward compatibility but are **deprecated** and will be **removed in v2.0.0**:
+
+- `useSharedState`, `usePersistentState`, `useAppState` → use `useFusionState`
+- `GlobalStateProvider`, `StateProvider`, `AppStateProvider` → use `FusionStateProvider`
+
+New code should always use `useFusionState` and `FusionStateProvider`. See the [Migration to v2 (preview)](./README.md#-migration-to-v2-preview) section in the README for the full mapping.
 
 
 **Example:**

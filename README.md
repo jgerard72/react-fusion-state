@@ -11,14 +11,14 @@
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🎉 **v1.0.1 - STABLE RELEASE - Reset Functionality Confirmed**
-- 🎯 **Granular persistence** - Choose exactly which state keys to persist with `persistence={['user', 'cart']}`
-- ✅ **Reset functionality verified** - `setValue(initialValue)` provides perfect reset behavior
-- 📚 **Professional JSDoc** - Complete IntelliSense support with examples and detailed documentation
-- 🚀 **Object.is() priority equality** - Optimal performance for all value types
-- 🎯 **Batched notifications** - Cross-platform performance optimization  
+### 🎉 **v1.2.0 - Cleanup & Migration Path**
+- 🧹 **Deprecation pass** - Legacy aliases (`useSharedState`, `GlobalStateProvider`, `createWebStorageAdapter`, …) are now marked `@deprecated` and will be removed in v2.0.0
+- 🗺️ **Migration guide** - New [Migration to v2 (preview)](#-migration-to-v2-preview) section listing every old → new name mapping
+- 📚 **Docs cleaned up** - Removed promotion of deprecated aliases in `DOCUMENTATION.md`
+- ✅ **100% backward compatible** - Zero breaking changes; every 1.0.x export still works identically
 - 🎯 **Ultra-simple API** - Just `useFusionState` and `FusionStateProvider` - nothing else needed!
-- ✅ **100% backward compatible** - Zero breaking changes for existing users
+- 🚀 **Object.is() priority equality** - Optimal performance for all value types
+- 🎯 **Batched notifications** - Cross-platform performance optimization
 
 ---
 
@@ -262,6 +262,65 @@ function OptimizedComponent() {
   };
 }
 ```
+
+---
+
+## 🗺️ Migration to v2 (preview)
+
+v1.2.0 marks every legacy alias as `@deprecated`. They still work — your IDE will just show them with a strikethrough. **All of them will be removed in v2.0.0.** Use the table below to migrate ahead of time.
+
+### Hooks
+
+| Deprecated (1.x) | Use instead |
+| --- | --- |
+| `useSharedState` | `useFusionState` |
+| `usePersistentState` | `useFusionState` |
+| `useAppState` | `useFusionState` |
+
+### Provider
+
+| Deprecated (1.x) | Use instead |
+| --- | --- |
+| `GlobalStateProvider` | `FusionStateProvider` |
+| `StateProvider` | `FusionStateProvider` |
+| `AppStateProvider` | `FusionStateProvider` |
+
+### Storage adapters
+
+| Deprecated (1.x) | Use instead |
+| --- | --- |
+| `createWebStorageAdapter` | `createLocalStorageAdapter` |
+| `createRNStorageAdapter` | `createAsyncStorageAdapter` |
+| `createMobileStorageAdapter` | `createAsyncStorageAdapter` |
+| `createInMemoryAdapter` | `createMemoryStorageAdapter` |
+| `autoDetectStorage` | `detectBestStorageAdapter` |
+| `NoopStorageAdapter` | `createNoopStorageAdapter` |
+
+### Example key objects
+
+`AppKeys` and `UserKeys` were exported as documentation examples only. They will be removed in v2.0.0 — define your own typed keys directly in your app:
+
+```jsx
+import { createKey, createNamespacedKey } from 'react-fusion-state';
+
+const userKey = createKey<{ id: number; name: string } | null>('user');
+const themeKey = createKey<'light' | 'dark'>('theme');
+const profileKey = createNamespacedKey<{ avatar: string }>('user', 'profile');
+```
+
+### Quick codemod
+
+A find-and-replace across your codebase covers the migration — the function signatures are strictly identical:
+
+```bash
+# Hooks
+rg -l 'useSharedState|usePersistentState|useAppState' | xargs sed -i '' 's/useSharedState\|usePersistentState\|useAppState/useFusionState/g'
+
+# Provider
+rg -l 'GlobalStateProvider|StateProvider\b|AppStateProvider' | xargs sed -i '' 's/GlobalStateProvider\|StateProvider\|AppStateProvider/FusionStateProvider/g'
+```
+
+> Always review the diff before committing — `sed` is blunt and may touch unintended occurrences inside comments or strings.
 
 ---
 
