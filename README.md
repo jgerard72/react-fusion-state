@@ -5,9 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png" alt="react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7 KB gzipped" width="100%" />
-</p>
+![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
 
 **🎯 The simplest AND most performant React state management library.**
 
@@ -33,9 +31,7 @@ npm install react-fusion-state
 
 ### Basic Usage
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/quick-start.png" alt="Three steps to use react-fusion-state: wrap your app with FusionStateProvider, use the useFusionState hook, and persist state automatically across Browser, React Native and SSR" width="100%" />
-</p>
+![Three steps to use react-fusion-state: wrap your app with FusionStateProvider, use the useFusionState hook, and persist state automatically across Browser, React Native and SSR](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/quick-start.png)
 
 ```jsx
 import { FusionStateProvider, useFusionState } from 'react-fusion-state';

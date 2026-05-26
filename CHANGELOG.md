@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-05-27 - npm README Image Rendering Fix
+
+### Fixed
+- `README.md`: replaced the two `<p align="center"><img src="..." /></p>` HTML blocks (hero + quick-start) with pure markdown image syntax `![alt](url)`. npmjs.com's README sanitizer (`marky-markdown`) strips raw `<img>` HTML tags, so the images uploaded in 1.1.2 were invisible on the npm package page — the badges (which use markdown syntax) rendered fine, but the two hero / quick-start banners were silently dropped from the rendered output. Verified the failure by diffing the npm-side rendered HTML against the source: three empty paragraph slots appeared exactly where the HTML `<img>` tags were. Pure markdown syntax renders identically on both GitHub and npm; the only cosmetic loss is image centering on GitHub (acceptable trade-off — most popular libs use the same pattern).
+
+### Notes
+- **Pure documentation fix.** No source code, public API, runtime behavior, dependency or `dist/` change. Tarball contents are byte-identical to 1.1.2 except for the README.
+- This release exists solely to push the corrected README to npm — npmjs.com only refreshes README rendering on a new version publish, there is no other mechanism to update it.
+
 ## [1.1.2] - 2026-05-27 - Visual Branding & README Polish
 
 ### Added
