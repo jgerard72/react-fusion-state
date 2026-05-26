@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 React Fusion State - Zero Dependencies Persistence Demo</title>
+    <title>🚀 React Fusion State — Real-Build Demo</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- React peer dependencies, mirroring a real consumer setup -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- The actual library, bundled from dist/ by scripts/build-demo.js -->
+    <script src="./react-fusion-state.umd.js"></script>
 </head>
 <body>
     <div class="container">
@@ -15,164 +18,25 @@
     </div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo, useCallback, memo, createContext, useContext } = React;
+        const { useState } = React;
 
-        // Simplified React Fusion State Implementation for Demo
-        const FusionStateContext = createContext(null);
+        // === Real exports from the published library ===
+        // (loaded above from ./react-fusion-state.umd.js, which esbuild
+        //  produces by bundling dist/index.js — the exact code that ships
+        //  to npm consumers.)
+        const {
+            FusionStateProvider,
+            useFusionState,
+            useFusionStateLog,
+            useFusionHydrated,
+        } = ReactFusionState;
 
-        const useFusionState = (key, initialValue) => {
-            const context = useContext(FusionStateContext);
-            if (!context) {
-                throw new Error('useFusionState must be used within a FusionStateProvider');
-            }
-            
-            const { state, setState } = context;
-            const value = state[key] !== undefined ? state[key] : initialValue;
-            
-            const setValue = useCallback((newValue) => {
-                setState(prevState => ({
-                    ...prevState,
-                    [key]: typeof newValue === 'function' ? newValue(value) : newValue
-                }));
-            }, [key, value, setState]);
-            
-            return [value, setValue];
-        };
+        const STORAGE_KEY = 'fusion_state_all'; // fixed prefix in the lib
 
-        const createLocalStorageAdapter = (debug = false) => {
-            if (typeof localStorage === 'undefined') {
-                if (debug) {
-                    console.warn('localStorage is not available, falling back to noop adapter');
-                }
-                return {
-                    async getItem() { return null; },
-                    getItemSync() { return null; },
-                    async setItem() {},
-                    async removeItem() {},
-                };
-            }
+        // ---------------------------------------------------------------
+        // Components — exercise the real public API surface.
+        // ---------------------------------------------------------------
 
-            return {
-                async getItem(key) {
-                    try {
-                        return localStorage.getItem(key);
-                    } catch (error) {
-                        if (debug) {
-                            console.error('Error reading from localStorage:', error);
-                        }
-                        return null;
-                    }
-                },
-
-                getItemSync(key) {
-                    try {
-                        return localStorage.getItem(key);
-                    } catch (error) {
-                        if (debug) {
-                            console.error('Error reading from localStorage:', error);
-                        }
-                        return null;
-                    }
-                },
-
-                async setItem(key, value) {
-                    try {
-                        localStorage.setItem(key, value);
-                    } catch (error) {
-                        if (debug) {
-                            console.error('Error writing to localStorage:', error);
-                        }
-                    }
-                },
-
-                async removeItem(key) {
-                    try {
-                        localStorage.removeItem(key);
-                    } catch (error) {
-                        if (debug) {
-                            console.error('Error removing from localStorage:', error);
-                        }
-                    }
-                },
-            };
-        };
-
-        const FusionStateProvider = ({ children, persistence = false, debug = false }) => {
-            const adapter = useMemo(() => createLocalStorageAdapter(debug), [debug]);
-            const keyPrefix = 'demo_app';
-            
-            // Synchronous loading at startup
-            const [state, setState] = useState(() => {
-                if (persistence && adapter.getItemSync) {
-                    try {
-                        const stored = adapter.getItemSync(`${keyPrefix}_all`);
-                        if (stored) {
-                            const data = JSON.parse(stored);
-                            if (debug) {
-                                console.log('✅ State loaded from localStorage:', data);
-                            }
-                            return data;
-                        }
-                    } catch (error) {
-                        if (debug) {
-                            console.warn('⚠️ Loading error:', error);
-                        }
-                    }
-                }
-                return {};
-            });
-
-            const [isLoaded, setIsLoaded] = useState(true);
-
-            // Save when state changes
-            useEffect(() => {
-                if (persistence && adapter && isLoaded && Object.keys(state).length > 0) {
-                    const saveData = async () => {
-                        try {
-                            const dataToSave = JSON.stringify(state);
-                            await adapter.setItem(`${keyPrefix}_all`, dataToSave);
-                            if (debug) {
-                                console.log('💾 State saved:', state);
-                            }
-                        } catch (error) {
-                            if (debug) {
-                                console.error('❌ Save error:', error);
-                            }
-                        }
-                    };
-                    saveData();
-                }
-            }, [state, persistence, adapter, isLoaded, debug]);
-
-            const updateState = useCallback((updater) => {
-                setState(prevState => {
-                    const nextState = typeof updater === 'function' ? updater(prevState) : updater;
-                    
-                    if (debug) {
-                        console.log('[FusionState] State updated:', {
-                            previous: prevState,
-                            next: nextState,
-                            diff: Object.fromEntries(
-                                Object.entries(nextState).filter(
-                                    ([key, value]) => prevState[key] !== value,
-                                ),
-                            ),
-                        });
-                    }
-                    
-                    return nextState;
-                });
-            }, [debug]);
-
-            const value = useMemo(() => ({
-                state,
-                setState: updateState,
-            }), [state, updateState]);
-
-            return React.createElement(FusionStateContext.Provider, { value }, children);
-        };
-
-        // Counter Component
         const PersistentCounter = () => {
             const [count, setCount] = useFusionState('counter', 0);
 
@@ -198,7 +62,6 @@
             );
         };
 
-        // Name Component
         const PersistentName = () => {
             const [name, setName] = useFusionState('name', '');
 
@@ -225,91 +88,136 @@
             );
         };
 
-        // Debug Information Component
+        // Showcases useFusionHydrated — the hook that was rewritten in
+        // the audit. Should flip to ✅ on first render in the web sync
+        // path, and stay ❌ longer in async-storage scenarios.
+        const HydrationStatus = () => {
+            const isHydrated = useFusionHydrated();
+            return (
+                <div className="demo-box">
+                    <h3>
+                        <span className="emoji">💧</span>
+                        Hydration Status
+                    </h3>
+                    <div className="value" style={{fontSize: '1.5rem'}}>
+                        {isHydrated ? '✅ Hydrated' : '⏳ Loading…'}
+                    </div>
+                    <p style={{color: '#555', fontSize: '0.9rem'}}>
+                        <code>useFusionHydrated()</code> returns the real
+                        hydration flag from the provider context. On web with
+                        synchronous <code>localStorage</code>, this is
+                        <code>true</code> immediately.
+                    </p>
+                </div>
+            );
+        };
+
+        // Live state observer — exercises useFusionStateLog without the
+        // dead useState that the audit removed.
+        const StateObserver = () => {
+            const fullState = useFusionStateLog();
+            return (
+                <div className="demo-box">
+                    <h3>
+                        <span className="emoji">🧪</span>
+                        Live State (useFusionStateLog)
+                    </h3>
+                    <pre className="debug" style={{margin: 0}}>
+                        {JSON.stringify(fullState, null, 2)}
+                    </pre>
+                </div>
+            );
+        };
+
         const DebugInfo = () => {
             const [counter] = useFusionState('counter', 0);
             const [name] = useFusionState('name', '');
-            
-            const storedData = localStorage.getItem('demo_app_all');
-            
+
+            const storedData = localStorage.getItem(STORAGE_KEY);
+
             return (
                 <div className="demo-box">
                     <h3>
                         <span className="emoji">🔍</span>
-                        Debug Information
+                        localStorage Inspector
                     </h3>
                     <div className="debug">
                         <div>Current state:</div>
-                        <div>  • Counter: {counter}</div>
-                        <div>  • Name: "{name}"</div>
+                        <div>  • counter: {counter}</div>
+                        <div>  • name: "{name}"</div>
                         <br />
-                        <div>localStorage (key: demo_app_all):</div>
-                        <div>  {storedData || 'No data'}</div>
+                        <div>localStorage[{`"${STORAGE_KEY}"`}]:</div>
+                        <div>  {storedData || '<empty>'}</div>
                         <br />
-                        <button 
+                        <button
                             className="button danger"
                             onClick={() => {
-                                localStorage.clear();
+                                localStorage.removeItem(STORAGE_KEY);
                                 window.location.reload();
                             }}
                         >
-                            🗑️ Clear localStorage & Reload
+                            🗑️ Clear & Reload
                         </button>
                     </div>
                 </div>
             );
         };
 
-        // Main Application
         const App = () => {
             const [debugMode, setDebugMode] = useState(false);
-            
+
             return (
                 <>
                     <h1>🚀 React Fusion State</h1>
-                    <div className="subtitle">Zero Dependencies - Persistence Demo with Console Logging</div>
-                    
+                    <div className="version-tag">
+                        Version v{ReactFusionState.VERSION}
+                    </div>
+                    <div className="subtitle">
+                        Real-build demo — loads <code>./react-fusion-state.umd.js</code> (bundled from <code>dist/</code>).
+                    </div>
+
                     <div className="status-box">
-                        <h3>✅ Status: Persistence Fixed!</h3>
-                        <p><strong>Try this:</strong> Change the values below, then refresh the page. The values should persist!</p>
-                        <p><strong>Debug Mode:</strong> Toggle debug mode to see console logs. When disabled, no logs are shown.</p>
+                        <h3>✅ This demo runs the actual library code</h3>
+                        <p><strong>Try this:</strong> change values, refresh the page — they persist.</p>
+                        <p><strong>Debug mode:</strong> toggle to see internal logs in the console (state diffs, save events).</p>
+                        <p><strong>Validation:</strong> open DevTools → Application → Local Storage and watch the <code>fusion_state_all</code> key.</p>
                     </div>
 
                     <div className="debug-control">
                         <h2>🎛️ Debug Control</h2>
                         <label>
-                            <input 
-                                type="checkbox" 
+                            <input
+                                type="checkbox"
                                 checked={debugMode}
                                 onChange={(e) => setDebugMode(e.target.checked)}
                             />
-                            <strong>Debug Mode {debugMode ? '(Check Console! 📝)' : '(Silent 🤫)'}</strong>
+                            <strong>Debug Mode {debugMode ? '(check console 📝)' : '(silent 🤫)'}</strong>
                         </label>
                         <div className="description">
-                            Toggle debug mode to see the difference in console output. 
-                            When disabled, no internal logs are shown.
+                            Toggling this remounts the provider with <code>debug={'{'}true{'}'}</code>,
+                            so you can see persistence saves and state diffs in the console.
                         </div>
                     </div>
-                    
-                    <FusionStateProvider 
-                        persistence={true}
+
+                    <FusionStateProvider
+                        key={debugMode ? 'debug' : 'silent'}
+                        persistence={['counter', 'name']}
                         debug={debugMode}
                     >
+                        <HydrationStatus />
                         <PersistentCounter />
                         <PersistentName />
+                        <StateObserver />
                         <DebugInfo />
                     </FusionStateProvider>
                 </>
             );
         };
 
-        // Render
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
 
-        // Initial state display
-        console.log('🚀 React Fusion State application started');
-        console.log('💡 Open developer tools to see persistence logs');
+        console.log('🚀 React Fusion State demo started — using the real bundled library.');
     </script>
 </body>
 </html>

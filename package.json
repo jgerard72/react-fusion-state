@@ -1,6 +1,6 @@
 {
   "name": "react-fusion-state",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "🚀 The simplest AND most performant React state management library. Zero dependencies, 99.9% fewer re-renders, 2.8KB bundle, Object.is performance, batched updates, built-in persistence, TypeScript magic, DevTools ready.",
   "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
   "main": "dist/index.js",
@@ -14,15 +14,16 @@
   "bugs": {
     "url": "https://github.com/jgerard72/react-fusion-state/issues"
   },
-
   "scripts": {
-    "build": "rm -rf dist/* && tsc -p tsconfig-build.json",
+    "build": "rm -rf dist/* && tsc -p tsconfig-build.json && npm run build:demo",
+    "build:demo": "node scripts/build-demo.js",
     "format": "prettier --write .",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "prepare": "npm run build",
     "dev": "tsc -w -p tsconfig-build.json",
+    "demo": "npm run build && open demo/demo-persistence.html",
     "benchmark": "node benchmark/final-performance-report.js",
     "benchmark:detailed": "node benchmark/performance-comparison.js",
     "benchmark:bundle": "node benchmark/bundle-size-analysis.js",
@@ -44,10 +45,10 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
-
     "@types/node": "^20.14.9",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.28.0",
     "eslint": "^7.32.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -56,6 +57,5 @@
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typescript": "^4.0.0"
-  },
-  "dependencies": {}
+  }
 }
