@@ -41,6 +41,7 @@ describe('Public API surface', () => {
         "createNamespacedKey",
         "createNoopStorageAdapter",
         "createRNStorageAdapter",
+        "createStore",
         "createWebStorageAdapter",
         "debounce",
         "detectBestStorageAdapter",
@@ -87,5 +88,9 @@ describe('Public API surface', () => {
   it('exposes error classes', () => {
     expect(typeof publicApi.FusionStateError).toBe('function');
     expect(typeof publicApi.PersistenceError).toBe('function');
+  });
+
+  it('exposes createStore as a function (v1.4 multi-store factory)', () => {
+    expect(typeof publicApi.createStore).toBe('function');
   });
 });

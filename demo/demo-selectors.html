@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎯 React Fusion State — Selectors API (v1.2.0+)</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Layout extensions for this page (kept inline so styles.css stays
+         shared with the v1.0 demo without drift). */
+      .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1rem;
+      }
+      .badge {
+          display: inline-block;
+          padding: 0.15rem 0.5rem;
+          margin-left: 0.5rem;
+          background: #1f2937;
+          color: #f9fafb;
+          font-size: 0.75rem;
+          font-weight: 600;
+          border-radius: 9999px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+    </style>
+    <!-- React peer dependencies, mirroring a real consumer setup -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- The actual library bundled from dist/ by scripts/build-demo.js -->
+    <script src="./react-fusion-state.umd.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Selectors API</h1>
+        <p style="margin-bottom: 1rem">
+            <strong>The point of this demo:</strong> prove that
+            <code>useFusionStore(selector)</code> components only re-render when
+            the <em>selected slice</em> actually changes — sibling mutations on
+            unrelated keys leave them alone.
+        </p>
+        <p style="margin-bottom: 2rem; opacity: 0.75">
+            Each box shows a <strong>render counter</strong>. Click any mutation
+            button and watch which components re-render (counter ticks) and
+            which stay frozen. Open DevTools console for the full version
+            string printed at boot.
+        </p>
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useRef } = React;
+        const {
+            FusionStateProvider,
+            useFusionState,
+            useFusionStore,
+            shallow,
+        } = ReactFusionState;
+
+        // Tiny helper to count renders without leaking state into the store.
+        // The ref is incremented on every render; the displayed value is read
+        // on the same render so the badge always shows the freshest count.
+        const useRenderBadge = () => {
+            const r = useRef(0);
+            r.current += 1;
+            return r.current;
+        };
+
+        // ------------------------------------------------------------------
+        // Mutators — small components that bump unrelated keys, so we can
+        // visually demonstrate that selectors are NOT re-evaluated when a
+        // sibling key changes.
+        // ------------------------------------------------------------------
+
+        const CartMutator = () => {
+            const [items, setItems] = useFusionState('items', []);
+            const addItem = () =>
+                setItems((prev) => [
+                    ...prev,
+                    { id: Date.now(), name: 'Item', price: 5 + Math.floor(Math.random() * 20) },
+                ]);
+            const clear = () => setItems([]);
+            return (
+                <div className="demo-box" style={{ borderColor: '#22c55e' }}>
+                    <h3>🛒 Cart writer (mutates <code>items</code>)</h3>
+                    <div className="value">{items.length} item(s)</div>
+                    <div className="button-group">
+                        <button onClick={addItem}>Add item</button>
+                        <button onClick={clear}>Clear cart</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const ThemeMutator = () => {
+            const [theme, setTheme] = useFusionState('theme', 'light');
+            return (
+                <div className="demo-box" style={{ borderColor: '#f59e0b' }}>
+                    <h3>🎨 Theme writer (mutates <code>theme</code>)</h3>
+                    <div className="value">{theme}</div>
+                    <div className="button-group">
+                        <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+                            Toggle theme
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const NoisyMutator = () => {
+            const [n, setN] = useFusionState('noise', 0);
+            return (
+                <div className="demo-box" style={{ borderColor: '#a855f7' }}>
+                    <h3>🔊 Noise writer (mutates <code>noise</code>)</h3>
+                    <p style={{ fontSize: '0.85em', opacity: 0.7 }}>
+                        Unrelated key — nobody should re-render on this.
+                    </p>
+                    <div className="value">noise = {n}</div>
+                    <div className="button-group">
+                        <button onClick={() => setN((v) => v + 1)}>
+                            Bump noise (+1)
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // ------------------------------------------------------------------
+        // Selectors — three different shapes that all use useFusionStore.
+        // ------------------------------------------------------------------
+
+        // 1. Pure derived value (number). Default equality is Object.is —
+        //    re-renders only when the computed total changes.
+        const CartTotal = () => {
+            const renders = useRenderBadge();
+            const total = useFusionStore((s) =>
+                (s.items || []).reduce((sum, it) => sum + it.price, 0),
+            );
+            return (
+                <div className="demo-box" style={{ background: '#ecfdf5' }}>
+                    <h3>💰 Cart total <span className="badge">renders: {renders}</span></h3>
+                    <div className="value">{total}€</div>
+                    <p style={{ fontSize: '0.85em', opacity: 0.75 }}>
+                        <code>useFusionStore((s) =&gt; s.items.reduce(...))</code><br />
+                        Re-renders only when the <strong>total value</strong> changes.
+                    </p>
+                </div>
+            );
+        };
+
+        // 2. Item count (number). Also pure derived — separate selector,
+        //    separate cache, separate re-render trigger.
+        const ItemCount = () => {
+            const renders = useRenderBadge();
+            const count = useFusionStore((s) => (s.items || []).length);
+            return (
+                <div className="demo-box" style={{ background: '#eff6ff' }}>
+                    <h3>📦 Item count <span className="badge">renders: {renders}</span></h3>
+                    <div className="value">{count}</div>
+                    <p style={{ fontSize: '0.85em', opacity: 0.75 }}>
+                        <code>useFusionStore((s) =&gt; s.items.length)</code><br />
+                        Re-renders only when the <strong>length</strong> changes.
+                    </p>
+                </div>
+            );
+        };
+
+        // 3. Multi-key object selector — recreates a NEW object every call.
+        //    Without `shallow`, every unrelated mutation would force a
+        //    re-render. With `shallow`, only an actual property change triggers
+        //    one.
+        const ThemeAndCount = () => {
+            const renders = useRenderBadge();
+            const view = useFusionStore(
+                (s) => ({ theme: s.theme || 'light', count: (s.items || []).length }),
+                shallow,
+            );
+            return (
+                <div className="demo-box" style={{ background: '#fffbeb' }}>
+                    <h3>🎨 Theme + count (shallow) <span className="badge">renders: {renders}</span></h3>
+                    <div className="value">{view.theme}, {view.count} item(s)</div>
+                    <p style={{ fontSize: '0.85em', opacity: 0.75 }}>
+                        <code>useFusionStore((s) =&gt; ({'{'} theme, count {'}'}), shallow)</code><br />
+                        Re-renders only when <strong>theme OR count</strong> changes — bumping noise does nothing.
+                    </p>
+                </div>
+            );
+        };
+
+        // Pure read of `noise` (no selector) — a control to compare:
+        // changes to `noise` re-render THIS, but none of the selectors above.
+        const NoiseReader = () => {
+            const renders = useRenderBadge();
+            const [n] = useFusionState('noise', 0);
+            return (
+                <div className="demo-box" style={{ background: '#faf5ff' }}>
+                    <h3>🔊 Noise reader <span className="badge">renders: {renders}</span></h3>
+                    <div className="value">{n}</div>
+                    <p style={{ fontSize: '0.85em', opacity: 0.75 }}>
+                        <code>useFusionState('noise', 0)</code><br />
+                        Direct key subscription — re-renders <strong>only</strong> on noise changes.
+                    </p>
+                </div>
+            );
+        };
+
+        const App = () => (
+            <div>
+                <h2 style={{ marginTop: 0 }}>Writers — bump keys</h2>
+                <div className="grid">
+                    <CartMutator />
+                    <ThemeMutator />
+                    <NoisyMutator />
+                </div>
+                <h2 style={{ marginTop: '2rem' }}>Selectors — observe re-renders</h2>
+                <div className="grid">
+                    <CartTotal />
+                    <ItemCount />
+                    <ThemeAndCount />
+                    <NoiseReader />
+                </div>
+                <h2 style={{ marginTop: '2rem' }}>What to try</h2>
+                <ol style={{ lineHeight: 1.6 }}>
+                    <li>Click <strong>Bump noise</strong> several times — only <em>Noise reader</em> increments. All three selector boxes stay frozen. ✅</li>
+                    <li>Click <strong>Add item</strong> — <em>Cart total</em>, <em>Item count</em>, and <em>Theme + count</em> all bump. ✅</li>
+                    <li>Click <strong>Toggle theme</strong> — only <em>Theme + count</em> re-renders (the other selectors don't care about theme). ✅</li>
+                    <li>Add an item with a price that produces the same total (try clearing and re-adding identical totals) — <em>Cart total</em> stays put (selector returned the same number). ✅</li>
+                </ol>
+            </div>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <FusionStateProvider initialState={{ items: [], theme: 'light', noise: 0 }}>
+                <App />
+            </FusionStateProvider>,
+        );
+
+        console.log(
+            '[demo] react-fusion-state v' + ReactFusionState.VERSION +
+            ' — exports:', Object.keys(ReactFusionState).sort().join(', '),
+        );
+    </script>
+</body>
+</html>

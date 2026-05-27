@@ -9,6 +9,9 @@
  * Useful for gating UI on storage hydration, e.g. avoiding a flicker
  * between default values and persisted values on first render.
  *
+ * Since v1.4 the implementation delegates to the store-bound hook
+ * (`store.useFusionHydrated`) for the nearest provider in the tree.
+ *
  * @returns `true` when initial load from storage is complete
  *
  * @example

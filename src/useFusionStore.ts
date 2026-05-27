@@ -1,7 +1,6 @@
-import {useCallback, useRef, useSyncExternalStore} from 'react';
-import {useFusionStaticAPI} from './FusionStateProvider';
 import {GlobalState} from './types';
 import {shallowEqual} from './utils';
+import {useDefaultStore} from './store/defaultStore';
 
 /**
  * Re-exported `shallowEqual` under the `shallow` name, matching the Zustand
@@ -34,61 +33,28 @@ export const shallow = shallowEqual;
  * Throws when used outside of a `FusionStateProvider` (same contract as
  * `useFusionState`).
  *
+ * Since v1.4 the implementation delegates to the store-bound hook returned
+ * by {@link createStore} for the nearest provider in the tree — identical
+ * behaviour, just routed through the multi-store layer.
+ *
  * @example
  * ```tsx
- * // Derived value — re-renders only when the total changes
  * const total = useFusionStore((s) => (s.cart as Item[]).reduce((sum, x) => sum + x.price, 0));
  *
- * // Multi-key selector with shallow equality
  * const { user, isAdmin } = useFusionStore(
  *   (s) => ({ user: s.user, isAdmin: s.user?.role === 'admin' }),
  *   shallow,
  * );
  * ```
- *
- * @param selector - Pure function mapping `GlobalState` to the value you want.
- * @param equalityFn - Optional equality check to decide whether the selected
- *   value has changed. Defaults to `Object.is`.
- * @returns The selected value, stable across re-renders if `equalityFn` says equal.
  */
 export function useFusionStore<T>(
   selector: (state: GlobalState) => T,
   equalityFn: (a: T, b: T) => boolean = Object.is,
 ): T {
-  // Reads the STATIC context — consumers of useFusionStore do NOT re-render
-  // when the regular state context updates. All re-renders are driven by
-  // `useSyncExternalStore` below, gated by `equalityFn`.
-  const {subscribeAll, getStateSnapshot} = useFusionStaticAPI();
-
-  // Live refs so getSnapshot reads the latest selector/equalityFn without
-  // forcing a re-subscription each time the user passes inline arrows.
-  const selectorRef = useRef(selector);
-  selectorRef.current = selector;
-  const equalityFnRef = useRef(equalityFn);
-  equalityFnRef.current = equalityFn;
-
-  // Cache the last selected value so `useSyncExternalStore` receives a stable
-  // reference across calls. React calls getSnapshot multiple times per render
-  // (and across renders) and requires successive calls to return the SAME
-  // reference when nothing has actually changed — otherwise we'd trigger an
-  // "infinite loop" warning.
-  const cacheRef = useRef<{value: T; hasValue: boolean}>({
-    value: undefined as unknown as T,
-    hasValue: false,
-  });
-
-  const getSnapshot = useCallback(() => {
-    const next = selectorRef.current(getStateSnapshot());
-    const cache = cacheRef.current;
-
-    if (cache.hasValue && equalityFnRef.current(cache.value, next)) {
-      return cache.value;
-    }
-
-    cache.value = next;
-    cache.hasValue = true;
-    return next;
-  }, [getStateSnapshot]);
-
-  return useSyncExternalStore(subscribeAll, getSnapshot, getSnapshot);
+  const store = useDefaultStore();
+  // See note in src/useFusionState.ts about the rules-of-hooks disable —
+  // `store.useFusionStore` is the canonical hook implementation closed over
+  // the store, called here as a hook from another hook.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return store.useFusionStore<T>(selector, equalityFn);
 }

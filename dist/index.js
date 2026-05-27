@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.autoDetectStorage = exports.createInMemoryAdapter = exports.createMobileStorageAdapter = exports.createRNStorageAdapter = exports.createWebStorageAdapter = exports.isSSREnvironment = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.AppStateProvider = exports.StateProvider = exports.GlobalStateProvider = exports.useAppState = exports.usePersistentState = exports.useSharedState = exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = exports.UserKeys = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createNamespacedKey = exports.createKey = exports.useGlobalState = exports.useFusionHydrated = exports.useFusionStateLog = exports.createAsyncStorageAdapter = exports.shallow = exports.useFusionStore = exports.FusionStateProvider = exports.useFusionState = void 0;
+exports.autoDetectStorage = exports.createInMemoryAdapter = exports.createMobileStorageAdapter = exports.createRNStorageAdapter = exports.createWebStorageAdapter = exports.isSSREnvironment = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.AppStateProvider = exports.StateProvider = exports.GlobalStateProvider = exports.useAppState = exports.usePersistentState = exports.useSharedState = exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = exports.UserKeys = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createNamespacedKey = exports.createKey = exports.useGlobalState = exports.useFusionHydrated = exports.useFusionStateLog = exports.createAsyncStorageAdapter = exports.createStore = exports.shallow = exports.useFusionStore = exports.FusionStateProvider = exports.useFusionState = void 0;
 // Core API - v1.0 Ultra Simple
 const useFusionState_1 = require("./useFusionState");
 Object.defineProperty(exports, "useFusionState", { enumerable: true, get: function () { return useFusionState_1.useFusionState; } });
@@ -11,6 +11,9 @@ const deprecation_1 = require("./utils/deprecation");
 var useFusionStore_1 = require("./useFusionStore");
 Object.defineProperty(exports, "useFusionStore", { enumerable: true, get: function () { return useFusionStore_1.useFusionStore; } });
 Object.defineProperty(exports, "shallow", { enumerable: true, get: function () { return useFusionStore_1.shallow; } });
+// v1.4 — Multi-store factory (headless + per-store React bindings)
+var createStore_1 = require("./store/createStore");
+Object.defineProperty(exports, "createStore", { enumerable: true, get: function () { return createStore_1.createStore; } });
 // React Native Support
 const asyncStorageAdapter_1 = require("./storage/asyncStorageAdapter");
 Object.defineProperty(exports, "createAsyncStorageAdapter", { enumerable: true, get: function () { return asyncStorageAdapter_1.createAsyncStorageAdapter; } });
