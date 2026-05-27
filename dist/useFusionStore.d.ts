@@ -29,21 +29,18 @@ export declare const shallow: (a: unknown, b: unknown) => boolean;
  * Throws when used outside of a `FusionStateProvider` (same contract as
  * `useFusionState`).
  *
+ * Since v1.4 the implementation delegates to the store-bound hook returned
+ * by {@link createStore} for the nearest provider in the tree — identical
+ * behaviour, just routed through the multi-store layer.
+ *
  * @example
  * ```tsx
- * // Derived value — re-renders only when the total changes
  * const total = useFusionStore((s) => (s.cart as Item[]).reduce((sum, x) => sum + x.price, 0));
  *
- * // Multi-key selector with shallow equality
  * const { user, isAdmin } = useFusionStore(
  *   (s) => ({ user: s.user, isAdmin: s.user?.role === 'admin' }),
  *   shallow,
  * );
  * ```
- *
- * @param selector - Pure function mapping `GlobalState` to the value you want.
- * @param equalityFn - Optional equality check to decide whether the selected
- *   value has changed. Defaults to `Object.is`.
- * @returns The selected value, stable across re-renders if `equalityFn` says equal.
  */
 export declare function useFusionStore<T>(selector: (state: GlobalState) => T, equalityFn?: (a: T, b: T) => boolean): T;

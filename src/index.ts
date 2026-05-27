@@ -8,6 +8,10 @@ export {useFusionState, FusionStateProvider};
 // v1.2 — Cross-key selectors (Zustand-style derived state)
 export {useFusionStore, shallow} from './useFusionStore';
 
+// v1.4 — Multi-store factory (headless + per-store React bindings)
+export {createStore} from './store/createStore';
+export type {Store, CreateStoreOptions, StoreProviderProps} from './store/types';
+
 // React Native Support
 import {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
 

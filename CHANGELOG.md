@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-05-27 - Multi-store (headless)
+
+### Added
+
+- **`createStore()` — multi-store factory** ([src/store/createStore.ts](src/store/createStore.ts)). Returns an autonomous store with two layers:
+  - **Headless layer** (`getState`, `setState`, `subscribe`, `subscribeKey`, `destroy`, `isHydrated`): plain JS, zero React imports. Usable from Web Workers, Node scripts, RSC, test files, event listeners — anywhere you need state without mounting a component.
+  - **React layer** (`Provider`, `useFusionState`, `useFusionStore`, `useFusionHydrated`): the four canonical hooks closed over the store via `createReactBindings()`. Each store gets its own copy bound exclusively to its state graph.
+  ```ts
+  import {createStore} from 'react-fusion-state';
+
+  const cartStore = createStore({
+    initialState: {items: []},
+    persistence: ['items'],
+    devTools: {name: 'cart'},
+  });
+
+  // React
+  <cartStore.Provider>
+    <Cart />
+  </cartStore.Provider>;
+  function Cart() {
+    const [items, setItems] = cartStore.useFusionState('items', []);
+  }
+
+  // Or headless
+  cartStore.getState();
+  cartStore.setState({items: [{id: 1}]});
+  const unsub = cartStore.subscribe(() => console.log(cartStore.getState()));
+  ```
+- **Per-store React Context** (`DefaultStoreContext`). Every `<store.Provider>` injects its store into a shared React Context; module-level hooks (`useFusionState`, `useFusionStore`, `useFusionHydrated`) resolve to the *nearest* provider in the tree — standard Context semantics, innermost wins for nested stores.
+- **`store.destroy()`**. Releases listener maps, flushes pending debounced writes, detaches DevTools. After `destroy()` the store turns into a silent no-op (`getState` still returns the last snapshot, `setState` does nothing). Essential for SSR per-request stores and HMR scenarios where one store is built per render and must not leak.
+- **Three new internal modules**, all pure JS:
+  - [src/store/createSubscriptionRegistry.ts](src/store/createSubscriptionRegistry.ts) — per-key + global subscription maps with batched notifications (reuses [src/utils/batch.ts](src/utils/batch.ts) for React 17 and React Native).
+  - [src/store/persistenceEngine.ts](src/store/persistenceEngine.ts) — sync hydration (web `localStorage`), async hydration (RN/AsyncStorage), debounced save, key filtering, deep-equality dedup, error callbacks. Lifecycle exposed via `startAsyncHydration(apply)` and `onHydratedChange(listener)` for non-React consumers.
+  - [src/store/devtoolsBridge.ts](src/store/devtoolsBridge.ts) — headless wrapper around the Redux DevTools `init`/`send` pair.
+- **`src/__tests__/createStore.test.ts`** — 28 headless tests, zero React mounted, covering state surface, subscribe, subscribeKey, multi-store isolation, persistence (sync + async + key filtering + error callbacks + skip-next-save), `destroy`, and update bail-out semantics.
+- **`src/__tests__/createStore.react.test.tsx`** — 10 React-bound tests covering Provider + bindings, selector re-render isolation, multi-store React isolation, nested-provider resolution, and the legacy `FusionStateProvider` end-to-end path.
+- **`benchmark/v14-headless-bench.js`** — re-runnable performance benchmark with budget-based pass/fail gating. Measures cold start (1 000 `setState`), hot setState (10 000 calls), selectors (10 000 evals) and memory per fully-populated store. Exits non-zero on regression, runnable in CI.
+
+### Changed
+
+- **`FusionStateProvider` shrunk from 333 → 105 lines.** It is now a thin wrapper that calls `createStore(props)` once on mount, injects the resulting store into `DefaultStoreContext`, and calls `store.destroy()` on unmount. All persistence / DevTools / subscription orchestration moved to the headless engines.
+- **`useFusionState`, `useFusionStore`, `useFusionHydrated` become 5-line delegations** to the store-bound hooks resolved via `useDefaultStore()`. Same signatures, same semantics, same error contracts — zero observable change for 1.3.x users.
+- **`useGlobalState()` is now synthesised from the store** each render. The `state` field is subscribed via `useSyncExternalStore(store.subscribe, store.getState, store.getState)` so callers still re-render on every change. The returned `setState` wraps the headless setter to preserve the legacy React-style *replace* semantics when called with a non-function value (the store-native shallow-merge would have been a breaking change for direct `useGlobalState` consumers).
+- **Bundle size: `8.15 KB` → `8.46 KB` gzipped** (+~310 B). Significantly smaller than the +1.5-2 KB estimated in the plan because the hooks lost more code in the refactor than the new engines added.
+
+### Performance (Node 22, headless, median of 7 runs)
+
+| Scenario | Result | Budget | Status |
+| --- | --- | --- | --- |
+| Cold start (1 000 `setState`) | ~104 ms | < 150 ms | ok |
+| Hot setState (10 000 calls) | ~1.5 ms | < 5 ms | ok |
+| Selectors (10 000 evals) | ~2.4 ms | < 5 ms | ok |
+| Memory per 1 000-key store | negligible (< GC noise) | < 500 KB | ok |
+
+Hot setState path is slightly **faster** than 1.3.0 because state mutation no longer round-trips through React's commit phase before notifying listeners — the engine batches sync via `unstable_batchedUpdates` (React 17 / RN) or relies on React 18 auto-batching. Re-run the benchmark any time with `node benchmark/v14-headless-bench.js`.
+
+### Notes
+
+- **Zero breaking change.** Every 1.3.x export still works exactly as before. The public-API snapshot test ([src/__tests__/public-api.test.ts](src/__tests__/public-api.test.ts)) gained exactly one entry (`createStore`); no removals, no renames. The 138 tests preserved from 1.3.x all pass, plus 38 new tests (28 headless + 10 React-bound) for a total of 176.
+- **Backward compat trick.** The legacy `FusionStateProvider` builds a *fresh anonymous store* on each mount sealed to its props — preserving the 1.x "props captured at mount, frozen for the lifetime of the provider" semantics. Switching between mounts (e.g. an SSR hot-reload tearing down the tree) gets a clean store every time.
+- **Provider aliases** (`GlobalStateProvider`, `StateProvider`, `AppStateProvider` from 1.3.0's deprecation enforcement) keep their runtime warnings intact and continue to wrap `FusionStateProvider` which now routes through `createStore`. The two layers compose cleanly.
+
 ## [1.3.0] - 2026-05-27 - Deprecation Enforcement
 
 ### Added

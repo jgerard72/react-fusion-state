@@ -9,20 +9,21 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
-![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~8.2 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
+![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~8.5 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
 
 **🎯 The simplest AND most performant React state management library.**
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🎉 **v1.3.0 — Deprecation enforcement (no breaking change)**
-- ⚠️ **Runtime warnings on every `@deprecated` alias** — `useSharedState`, `GlobalStateProvider`, `createWebStorageAdapter`, `AppKeys`, … each emits a one-time `console.warn` on first use with the replacement name and a link back to the [Migration to v2 (preview)](#-migration-to-v2-preview) section
-- 🔇 **One warning per alias, per session** — no log spam, no re-fire on subsequent calls or re-renders, no overhead beyond a `Set.has` lookup
-- 🧭 **14 legacy symbols** covered: 3 hooks + 3 providers + 6 storage adapters + `NoopStorageAdapter` + `AppKeys` / `UserKeys`
-- ✅ **Zero breaking change** — every export from 1.2.x still works exactly as before; the [public-API snapshot test](src/__tests__/public-api.test.ts) is unchanged. Tests grew from 116 → 137.
-- 📦 **~8.2 KB gzipped, zero dependencies** (+~610 B vs 1.2.1, from the 14 wrappers + shared `warnDeprecated` helper)
+### 🎉 **v1.4.0 — Multi-store (headless, Zustand-style)**
+- 🏗️ **New `createStore()` factory** — autonomous, framework-agnostic store. Use it inside React (`store.Provider` + `store.useFusionState` + `store.useFusionStore`) **or completely outside** (`store.getState()`, `store.setState({...})`, `store.subscribe(cb)`). [Jump to section](#-multi-store-with-createstore-v140)
+- 🔒 **Total isolation between stores** — instantiate as many as you want; mutating store A never notifies any listener on store B. Perfect for library authors, monorepos with feature stores, and Next.js App Router (one store per request).
+- 🧹 **`store.destroy()`** — releases all listeners, flushes pending writes, detaches DevTools. SSR-safe.
+- ⚡ **Slightly faster writes** — the new headless engine notifies listeners synchronously (batched via `unstable_batchedUpdates` / React 18 auto-batching), shaving one React-commit tick off every `setState`.
+- 🧪 **38 new tests** (28 zero-React headless + 10 React-bound). Tests grew from 138 → 176. The public-API snapshot test gained exactly one entry (`createStore`) — every other 1.3.x export still works identically.
+- 📦 **~8.5 KB gzipped, zero dependencies** (+~310 B vs 1.3.0 — refactor removed more code than the new engines added).
 
-> All v1.2.x features remain: [Selectors API (`useFusionStore`)](#-selectors--derived-state-v120), Provider refactor into composable hooks, public API snapshot lock, Redux DevTools integration.
+> All v1.2.x / v1.3.x features remain intact: [Selectors API (`useFusionStore`)](#-selectors--derived-state-v120), [runtime deprecation warnings](#-migration-to-v2-preview), Redux DevTools, public API snapshot lock.
 
 ---
 
@@ -165,7 +166,7 @@ const itemIds = useFusionStore(
 
 ### 🏆 **Performance Champion**
 - **99.9% fewer re-renders** than Redux/Zustand/Recoil — backed by `useSyncExternalStore` + per-key subscriptions
-- **~8.2 KB gzipped, zero dependencies** (vs 45 KB+ for Redux/Recoil)
+- **~8.5 KB gzipped, zero dependencies** (vs 45 KB+ for Redux/Recoil)
 - **Selectors with custom equality** (`useFusionStore` + `shallow`) for derived/multi-key reads with zero unrelated re-renders
 - [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) — Grade A+ performance
 
@@ -300,7 +301,7 @@ open demo/demo-persistence.html
 
 | Library | Bundle Size | Re-renders | Dependencies | Setup |
 |---------|-------------|------------|--------------|--------|
-| **React Fusion State** | **~8.2 KB** | **99.9% fewer** | **0** | **Zero** |
+| **React Fusion State** | **~8.5 KB** | **99.9% fewer** | **0** | **Zero** |
 | Redux Toolkit | 45KB+ | Many | 15+ | Complex |
 | Zustand | 8KB+ | Many | 2+ | Moderate |
 | Recoil | 120KB+ | Many | 10+ | Complex |
@@ -381,6 +382,106 @@ function OptimizedDashboard() {
   return <Stats active={activeUserCount} theme={theme} lang={language} />;
 }
 ```
+
+---
+
+## 🏗 Multi-store with `createStore()` (v1.4.0+)
+
+For the 90 % case, `<FusionStateProvider>` + `useFusionState` is all you need. But sometimes you want:
+
+- A **private store inside a library** that won't collide with the host app's keys.
+- **Per-feature stores** in a monorepo, with independent persistence configs.
+- A **per-request store** in Next.js App Router / SSR so server data doesn't leak between users.
+- To read or mutate state **outside React** — in a Web Worker, an event listener, an init script, a Node CLI.
+
+`createStore()` covers all four. It returns an autonomous store with two layers of API: a *headless* one (`getState`, `setState`, `subscribe`) that works anywhere, and a *React* one (`Provider`, `useFusionState`, `useFusionStore`, `useFusionHydrated`) bound to *this* store via closure.
+
+```ts
+import { createStore, shallow } from 'react-fusion-state';
+
+// Same options as <FusionStateProvider>: initialState, persistence, devTools, debug
+export const cartStore = createStore({
+  initialState: { items: [], total: 0 },
+  persistence: ['items'],          // localStorage key filtering
+  devTools: { name: 'cart' },      // separate Redux DevTools panel
+});
+
+// React
+function Cart() {
+  const [items, setItems] = cartStore.useFusionState('items', []);
+  const total = cartStore.useFusionStore(
+    s => (s.items as Item[]).reduce((sum, it) => sum + it.price, 0),
+  );
+  return <button onClick={() => setItems([...items, NEW_ITEM])}>{total}€</button>;
+}
+
+<cartStore.Provider>
+  <Cart />
+</cartStore.Provider>;
+
+// Headless — works without any Provider mounted, anywhere
+cartStore.getState();                         // { items: [], total: 0 }
+cartStore.setState({ items: [{ id: 1 }] });   // merge-style update
+cartStore.setState(prev => ({ ...prev, total: 99 })); // updater style
+const unsub = cartStore.subscribe(() => console.log(cartStore.getState()));
+cartStore.subscribeKey('items', () => console.log('items changed'));
+
+// Cleanup (essential for SSR per-request stores)
+cartStore.destroy(); // flush pending writes, release listeners, detach DevTools
+```
+
+### Multi-store isolation
+
+Mounting two stores in the same tree keeps state, persistence and re-renders **completely isolated**. Mutating `cartStore` never re-renders anything wired to `settingsStore`:
+
+```tsx
+const cartStore = createStore({ initialState: { items: [] }, persistence: ['items'] });
+const settingsStore = createStore({ initialState: { theme: 'light' }, persistence: ['theme'] });
+
+<cartStore.Provider>
+  <settingsStore.Provider>
+    <App />
+  </settingsStore.Provider>
+</cartStore.Provider>;
+```
+
+Module-level hooks (`useFusionState`, `useFusionStore`, `useFusionHydrated`) resolve to the **nearest** provider in the tree — standard React Context semantics. Use the store-bound hooks (`cartStore.useFusionState(...)`) when you want to be explicit about which store you target.
+
+### Next.js App Router / SSR (per-request store)
+
+Server Components require a *new store per request* — singletons would leak data between users. `createStore()` is the building block:
+
+```tsx
+// app/store-provider.tsx — runs once per request
+'use client';
+import { createStore, type Store } from 'react-fusion-state';
+import { useRef, useEffect } from 'react';
+
+export function StoreProvider({ children, initialState }) {
+  const storeRef = useRef<Store>();
+  if (!storeRef.current) {
+    storeRef.current = createStore({ initialState });
+  }
+  useEffect(() => () => storeRef.current?.destroy(), []);
+  return <storeRef.current.Provider>{children}</storeRef.current.Provider>;
+}
+```
+
+`destroy()` on unmount guarantees no listener map or pending debounced write survives the request.
+
+### When to use `createStore()` vs `FusionStateProvider`
+
+| Use case | `FusionStateProvider` (default) | `createStore()` |
+| --- | :-: | :-: |
+| Simple SPA, single state graph | ✔ | also works |
+| App built around React, no SSR | ✔ | also works |
+| Library author publishing on npm | — | ✔ (private namespace) |
+| Monorepo with isolated feature stores | — | ✔ |
+| Next.js App Router (per-request) | — | ✔ |
+| Read / mutate state from non-React code | — | ✔ |
+| Tests that bypass React entirely | — | ✔ |
+
+> **Backward compat:** `FusionStateProvider` is now a 5-line wrapper around `createStore()` — every 1.0-1.3 API still works exactly as before. The public-API snapshot gained one entry (`createStore`), nothing was removed or renamed.
 
 ---
 

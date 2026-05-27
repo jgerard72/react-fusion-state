@@ -3,6 +3,8 @@ import { useFusionState } from './useFusionState';
 import { FusionStateProvider } from './FusionStateProvider';
 export { useFusionState, FusionStateProvider };
 export { useFusionStore, shallow } from './useFusionStore';
+export { createStore } from './store/createStore';
+export type { Store, CreateStoreOptions, StoreProviderProps } from './store/types';
 import { createAsyncStorageAdapter } from './storage/asyncStorageAdapter';
 export { createAsyncStorageAdapter };
 export { useFusionStateLog } from './useFusionStateLog';

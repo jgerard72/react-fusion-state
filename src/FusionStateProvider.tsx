@@ -1,84 +1,30 @@
 import React, {
-  createContext,
   memo,
   ReactNode,
-  useCallback,
-  useContext,
   useEffect,
   useMemo,
-  useRef,
-  useState,
+  useSyncExternalStore,
 } from 'react';
 import {
-  FusionStateErrorMessages,
   GlobalFusionStateContextType,
   GlobalState,
   PersistenceConfig,
   SimplePersistenceConfig,
 } from './types';
-import {detectBestStorageAdapter} from './storage/autoDetect';
-import {DevToolsActions, DevToolsConfig} from './devtools';
-import {
-  loadSyncInitialState,
-  usePersistence,
-} from './hooks/usePersistence';
-import {useKeySubscriptions} from './hooks/useKeySubscriptions';
-import {useDevToolsBridge} from './hooks/useDevToolsBridge';
-
-const GlobalStateContext = createContext<
-  GlobalFusionStateContextType | undefined
->(undefined);
+import {DevToolsConfig} from './devtools';
+import {createStore} from './store/createStore';
+import {DefaultStoreContext, useDefaultStore} from './store/defaultStore';
 
 /**
- * Static (stable) slice of the provider API: only references that never
- * change for the lifetime of the provider. Consumers of this context do NOT
- * re-render on state changes — they only re-render when the provider itself
- * mounts/unmounts.
+ * Props for the {@link FusionStateProvider} component. Backward-compatible
+ * with every 1.x release: the four config fields below are captured at
+ * mount and frozen for the lifetime of the Provider — changing them later
+ * has no effect (remount the Provider to switch behaviour).
  *
- * Used internally by `useFusionStore` to subscribe to state changes via
- * `useSyncExternalStore` without paying the cost of a full context-driven
- * re-render on every state update.
- */
-interface FusionStaticContextType {
-  subscribeAll: (listener: () => void) => () => void;
-  getStateSnapshot: () => GlobalState;
-}
-
-const FusionStaticContext = createContext<FusionStaticContextType | undefined>(
-  undefined,
-);
-
-/**
- * Hook to access the global state context.
- *
- * @returns The global state context
- * @throws Error if used outside of a `FusionStateProvider`
- */
-export const useGlobalState = () => {
-  const context = useContext(GlobalStateContext);
-  if (!context) {
-    throw new Error(FusionStateErrorMessages.PROVIDER_MISSING);
-  }
-  return context;
-};
-
-/**
- * Internal hook that returns the static (stable) provider API for selector
- * subscriptions. Consumers of this hook do NOT re-render on state changes.
- *
- * @internal — used by `useFusionStore`; not part of the public API.
- * @throws Error if used outside of a `FusionStateProvider`
- */
-export const useFusionStaticAPI = (): FusionStaticContextType => {
-  const ctx = useContext(FusionStaticContext);
-  if (!ctx) {
-    throw new Error(FusionStateErrorMessages.PROVIDER_MISSING);
-  }
-  return ctx;
-};
-
-/**
- * Props for the {@link FusionStateProvider} component.
+ * Under the hood (since v1.4) the Provider just builds an anonymous
+ * {@link Store} via `createStore({...props})` and renders the store's own
+ * `Provider`. Users wanting access to the headless store API should call
+ * `createStore()` directly.
  */
 export interface FusionStateProviderProps {
   /** Child components that will have access to fusion state. */
@@ -93,9 +39,7 @@ export interface FusionStateProviderProps {
    * - `string[]`: persist only specified keys (recommended)
    * - `object`: detailed configuration
    *
-   * Note: this prop is captured at mount and frozen for the lifetime of the
-   * provider. Changing it after mount has no effect — unmount and remount
-   * the provider to switch persistence behavior.
+   * Captured at mount and frozen for the lifetime of the provider.
    */
   persistence?:
     | boolean
@@ -107,66 +51,24 @@ export interface FusionStateProviderProps {
 }
 
 /**
- * Normalizes various persistence configuration formats into a standard
- * {@link PersistenceConfig}.
- */
-function normalizePersistenceConfig(
-  config:
-    | boolean
-    | string[]
-    | SimplePersistenceConfig
-    | PersistenceConfig
-    | undefined,
-  debug = false,
-): PersistenceConfig | undefined {
-  if (!config) return undefined;
-
-  const defaultAdapter = detectBestStorageAdapter(debug);
-
-  if (typeof config === 'boolean') {
-    return {
-      adapter: defaultAdapter,
-      persistKeys: config ? true : false,
-      loadOnInit: true,
-      saveOnChange: true,
-    };
-  }
-
-  if (Array.isArray(config)) {
-    return {
-      adapter: defaultAdapter,
-      persistKeys: config,
-      loadOnInit: true,
-      saveOnChange: true,
-    };
-  }
-
-  if ('adapter' in config) {
-    return config as PersistenceConfig;
-  }
-
-  const simple = config as SimplePersistenceConfig;
-  return {
-    adapter: simple.adapter || defaultAdapter,
-    persistKeys: simple.persistKeys || false,
-    debounceTime: simple.debounce,
-    loadOnInit: true,
-    saveOnChange: true,
-    onLoadError: simple.onLoadError,
-    onSaveError: simple.onSaveError,
-  } as PersistenceConfig;
-}
-
-/**
  * Provider component for React Fusion State.
  *
- * Manages global state and provides access to all child components.
- * Supports persistence, debug logging, and Redux DevTools integration.
+ * Since v1.4 this is a thin (~30-line) wrapper around the headless
+ * {@link createStore} factory. Mounting `<FusionStateProvider {...props}>`
+ * is exactly equivalent to:
  *
- * Storage keys are namespaced under a fixed `fusion_state` prefix. If you
- * mount multiple `FusionStateProvider`s in the same app with persistence
- * enabled, they will share the same storage slot — typically you want a
- * single root provider.
+ * ```tsx
+ * const store = useMemo(() => createStore(props), []);
+ * useEffect(() => () => store.destroy(), [store]);
+ * return <store.Provider>{children}</store.Provider>;
+ * ```
+ *
+ * The store reference is exposed through the internal `DefaultStoreContext`
+ * so module-level hooks (`useFusionState`, `useFusionStore`, …) can find
+ * it. Storage keys are namespaced under the fixed `fusion_state` prefix —
+ * mounting multiple `FusionStateProvider`s with persistence will share the
+ * same storage slot. For full isolation, switch to `createStore()` and
+ * pass the store explicitly.
  *
  * @example
  * ```tsx
@@ -176,158 +78,89 @@ function normalizePersistenceConfig(
  * ```
  */
 export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
-  ({
-    children,
-    initialState = {},
-    debug = false,
-    persistence,
-    devTools = false,
-  }) => {
-    const normalizedPersistence = useMemo(
-      () => normalizePersistenceConfig(persistence, debug),
-      [persistence, debug],
-    );
-
-    // Sync hydration on web runs INSIDE the lazy initializer of the next
-    // `useState` call so the persisted value is available on the very first
-    // render. The error (if any) is captured here and reported post-mount
-    // by `usePersistence`.
-    const syncLoadResultRef = useRef<{
-      state: GlobalState;
-      error: Error | null;
-    } | null>(null);
-    const [state, setStateRaw] = useState<GlobalState>(() => {
-      const result = loadSyncInitialState(
-        normalizedPersistence,
-        initialState,
-        debug,
-      );
-      syncLoadResultRef.current = result;
-      return result.state;
-    });
-
-    const persistenceAPI = usePersistence(
-      normalizedPersistence,
-      setStateRaw,
-      syncLoadResultRef.current?.error ?? null,
-      debug,
-    );
-
-    const subscriptions = useKeySubscriptions(state, initialState);
-    const devToolsAPI = useDevToolsBridge(devTools, initialState);
-
-    // Pure setState — no side effects in the updater. Listener notification,
-    // persistence, debug logging and DevTools dispatch all run in the
-    // post-commit effect below (StrictMode-safe).
-    const setState = useCallback(
-      (updater: React.SetStateAction<GlobalState>) => {
-        setStateRaw(updater);
-      },
+  ({children, initialState = {}, debug = false, persistence, devTools = false}) => {
+    // Build a fresh store on mount, sealed to the props. Captured-once on
+    // purpose so that prop changes after mount don't trigger surprise
+    // resets (matches the documented 1.3.x semantics).
+    const store = useMemo(
+      () =>
+        createStore({
+          initialState,
+          debug,
+          persistence,
+          devTools,
+        }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [],
     );
 
-    // `initializingKeys` is mutated by `useFusionState` during its init
-    // effect to detect duplicate registrations of the same key.
-    const initializingKeysRef = useRef<Set<string>>(new Set());
-
-    // Post-commit orchestration: runs once per committed state change.
-    // Diffs the previous state against the new one and dispatches the four
-    // possible side effects (notify / log / devtools / persist).
-    const prevStateRef = useRef<GlobalState>(state);
-    useEffect(() => {
-      const prev = prevStateRef.current;
-      if (prev === state) return;
-      prevStateRef.current = state;
-
-      const seen = new Set<string>();
-      const changedKeys: string[] = [];
-      for (const k of Object.keys(prev)) {
-        seen.add(k);
-        if (prev[k] !== state[k]) changedKeys.push(k);
-      }
-      for (const k of Object.keys(state)) {
-        if (seen.has(k)) continue;
-        if (prev[k] !== state[k]) changedKeys.push(k);
-      }
-
-      if (changedKeys.length === 0) return;
-
-      // 1. Notify per-key subscribers, then all global selector subscribers.
-      changedKeys.forEach(subscriptions.notifyKey);
-      subscriptions.notifyAll();
-
-      // 2. Debug logging.
-      if (debug) {
-        console.log('[FusionState] State updated:', {
-          previous: prev,
-          next: state,
-          diff: Object.fromEntries(changedKeys.map(k => [k, state[k]])),
-        });
-      }
-
-      // 3. DevTools dispatch.
-      if (devToolsAPI.enabled) {
-        devToolsAPI.send(
-          DevToolsActions.SET_STATE,
-          state,
-          changedKeys.join(', '),
-          {
-            changed: changedKeys,
-            diff: Object.fromEntries(
-              changedKeys.map(k => [k, {from: prev[k], to: state[k]}]),
-            ),
-          },
-        );
-      }
-
-      // 4. Persistence — skipped on the hydration tick because the freshly
-      //    loaded snapshot is already what's in storage.
-      if (persistenceAPI.shouldSkipNextSave()) return;
-      persistenceAPI.save(state);
-    }, [state, subscriptions, debug, devToolsAPI, persistenceAPI]);
-
-    const value = useMemo(
-      () => ({
-        state,
-        setState,
-        initializingKeys: initializingKeysRef.current,
-        subscribeKey: subscriptions.subscribeKey,
-        getKeySnapshot: subscriptions.getKeySnapshot,
-        getServerSnapshot: subscriptions.getServerSnapshot,
-        subscribeAll: subscriptions.subscribeAll,
-        getStateSnapshot: subscriptions.getStateSnapshot,
-        isHydrated: persistenceAPI.isHydrated,
-      }),
-      [
-        state,
-        setState,
-        subscriptions.subscribeKey,
-        subscriptions.getKeySnapshot,
-        subscriptions.getServerSnapshot,
-        subscriptions.subscribeAll,
-        subscriptions.getStateSnapshot,
-        persistenceAPI.isHydrated,
-      ],
-    );
-
-    // Static value: only references that never change. Consumers of this
-    // context never re-render on state changes — they only see the stable
-    // subscribe/snapshot fns and drive their own re-renders via
-    // `useSyncExternalStore`. Crucial for `useFusionStore` performance.
-    const staticValue = useMemo<FusionStaticContextType>(
-      () => ({
-        subscribeAll: subscriptions.subscribeAll,
-        getStateSnapshot: subscriptions.getStateSnapshot,
-      }),
-      [subscriptions.subscribeAll, subscriptions.getStateSnapshot],
-    );
+    // Release subscriptions, pending debounced writes and DevTools
+    // connection when the Provider unmounts. Essential for SSR per-request
+    // stores and HMR scenarios.
+    useEffect(() => () => store.destroy(), [store]);
 
     return (
-      <FusionStaticContext.Provider value={staticValue}>
-        <GlobalStateContext.Provider value={value}>
-          {children}
-        </GlobalStateContext.Provider>
-      </FusionStaticContext.Provider>
+      <DefaultStoreContext.Provider value={store}>
+        {children}
+      </DefaultStoreContext.Provider>
     );
   },
 );
+FusionStateProvider.displayName = 'FusionStateProvider';
+
+/**
+ * Resolve the global state context for the nearest `FusionStateProvider` in
+ * the React tree. Public API kept since v1.0.
+ *
+ * Since v1.4 the returned object is synthesized from the underlying store
+ * each render — `state` is subscribed via `useSyncExternalStore` so callers
+ * still re-render on every change, just like the original.
+ *
+ * Note on `setState`: the synthesized setter always replaces the global
+ * state when called with a non-function value (matching React's
+ * `Dispatch<SetStateAction<T>>` semantics), even though `store.setState`
+ * shallow-merges partial objects natively. This preserves the strict 1.x
+ * contract for direct `useGlobalState()` callers.
+ *
+ * @throws Error if used outside of a `FusionStateProvider`.
+ */
+export const useGlobalState = (): GlobalFusionStateContextType => {
+  const store = useDefaultStore();
+
+  // Subscribe to the *global* listener set so any state mutation triggers a
+  // re-render — preserves the implicit "re-render on every change" contract
+  // of the legacy context.
+  const state = useSyncExternalStore(
+    store.subscribe,
+    store.getState,
+    store.getState,
+  );
+
+  return useMemo(
+    () => ({
+      state,
+      // Wrap the headless setter so passing a plain object replaces the
+      // whole state (legacy semantics) instead of merging it (the new
+      // store-native behaviour).
+      setState: ((value: GlobalState | ((prev: GlobalState) => GlobalState)) => {
+        store.setState(prev =>
+          typeof value === 'function'
+            ? (value as (p: GlobalState) => GlobalState)(prev)
+            : value,
+        );
+      }) as React.Dispatch<React.SetStateAction<GlobalState>>,
+      // Mirror the store's shared `initializingKeys` set so callers writing
+      // their own hooks on top of `useGlobalState` interact with the same
+      // duplicate-init guard the canonical hooks use.
+      initializingKeys: (store as unknown as {initializingKeys: Set<string>})
+        .initializingKeys,
+      subscribeKey: store.subscribeKey,
+      getKeySnapshot: (key: string) => store.getState()[key],
+      getServerSnapshot: undefined,
+      subscribeAll: store.subscribe,
+      getStateSnapshot: store.getState,
+      isHydrated: store.isHydrated,
+    }),
+    [state, store],
+  );
+};
