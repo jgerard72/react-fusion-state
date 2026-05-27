@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useDevToolsBridge = void 0;
+exports.useDevToolsBridge = useDevToolsBridge;
 const react_1 = require("react");
 const devtools_1 = require("../devtools");
 /**
@@ -50,5 +50,4 @@ function useDevToolsBridge(config, initialState) {
     }, [instance]);
     return { enabled, send };
 }
-exports.useDevToolsBridge = useDevToolsBridge;
 //# sourceMappingURL=useDevToolsBridge.js.map

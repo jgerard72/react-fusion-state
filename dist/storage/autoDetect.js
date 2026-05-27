@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.isSSREnvironment = void 0;
+exports.isSSREnvironment = isSSREnvironment;
+exports.detectBestStorageAdapter = detectBestStorageAdapter;
+exports.createMemoryStorageAdapter = createMemoryStorageAdapter;
 const storageAdapters_1 = require("./storageAdapters");
 const asyncStorageAdapter_1 = require("./asyncStorageAdapter");
 /**
@@ -23,7 +25,6 @@ function isSSREnvironment() {
     }
     return typeof window === 'undefined';
 }
-exports.isSSREnvironment = isSSREnvironment;
 /**
  * Cached adapter from the first detection pass. Detection is environment-driven
  * and the environment doesn't change for the lifetime of a JS context, so we
@@ -44,7 +45,6 @@ function detectBestStorageAdapter(debug = false) {
     cachedAdapter = resolveAdapter(debug);
     return cachedAdapter;
 }
-exports.detectBestStorageAdapter = detectBestStorageAdapter;
 function resolveAdapter(debug) {
     // SSR Detection first (prevents server crashes)
     if (isSSREnvironment()) {
@@ -158,5 +158,4 @@ function createMemoryStorageAdapter() {
         },
     };
 }
-exports.createMemoryStorageAdapter = createMemoryStorageAdapter;
 //# sourceMappingURL=autoDetect.js.map

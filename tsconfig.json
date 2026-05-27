@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
+    "lib": ["es2019", "dom"],
     "module": "commonjs",
     "jsx": "react",
     "declaration": true,
@@ -10,14 +11,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@core/*": ["src/*"],
-      "@examples/*": ["src/examples/*"],
-      "@storage/*": ["src/storage/*"],
-      "@tests/*": ["src/__tests__/*"]
-    }
+    "types": ["node", "jest"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

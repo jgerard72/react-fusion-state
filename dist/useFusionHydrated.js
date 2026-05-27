@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useFusionHydrated = void 0;
+exports.useFusionHydrated = useFusionHydrated;
 const defaultStore_1 = require("./store/defaultStore");
 /**
  * Hook to check if the initial hydration from persistence is complete.
@@ -37,5 +37,4 @@ function useFusionHydrated() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return store.useFusionHydrated();
 }
-exports.useFusionHydrated = useFusionHydrated;
 //# sourceMappingURL=useFusionHydrated.js.map

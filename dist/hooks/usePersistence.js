@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.usePersistence = exports.loadSyncInitialState = void 0;
+exports.loadSyncInitialState = loadSyncInitialState;
+exports.usePersistence = usePersistence;
 const react_1 = require("react");
 const types_1 = require("../types");
 const storageAdapters_1 = require("../storage/storageAdapters");
@@ -51,7 +52,6 @@ function loadSyncInitialState(config, initialState, debug = false) {
         return { state: initialState, error: errorObj };
     }
 }
-exports.loadSyncInitialState = loadSyncInitialState;
 /**
  * Hook that handles the async portion of the persistence lifecycle: async
  * hydration on mount (RN / AsyncStorage), reporting of any sync-load error
@@ -267,5 +267,4 @@ function usePersistence(config, setStateRaw, syncLoadError, debug = false) {
         shouldSkipNextSave,
     };
 }
-exports.usePersistence = usePersistence;
 //# sourceMappingURL=usePersistence.js.map

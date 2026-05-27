@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createStore = void 0;
+exports.createStore = createStore;
 const createSubscriptionRegistry_1 = require("./createSubscriptionRegistry");
 const persistenceEngine_1 = require("./persistenceEngine");
 const devtoolsBridge_1 = require("./devtoolsBridge");
@@ -183,5 +183,4 @@ function createStore(options = {}) {
     Promise.resolve().then(() => persistenceEngine.reportStartupError());
     return store;
 }
-exports.createStore = createStore;
 //# sourceMappingURL=createStore.js.map

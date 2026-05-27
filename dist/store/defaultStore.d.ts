@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { Store } from './types';
 /**
  * Single React Context that holds the *nearest* {@link Store} in the tree.

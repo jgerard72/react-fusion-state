@@ -71,7 +71,7 @@ export declare function useDevTools(): {
         actionCount: number;
         config: Required<DevToolsConfig>;
     } | null;
-    send: (actionType: string, state: GlobalState, key?: string | undefined, payload?: unknown) => void;
+    send: (actionType: string, state: GlobalState, key?: string, payload?: unknown) => void;
 };
 /**
  * Action types for DevTools

@@ -33,7 +33,7 @@ var ReactFusionState = (() => {
         FusionStateErrorMessages2["PERSISTENCE_READ_ERROR"] = "ReactFusionState Error: Failed to read state from storage: {0}";
         FusionStateErrorMessages2["PERSISTENCE_WRITE_ERROR"] = "ReactFusionState Error: Failed to write state to storage: {0}";
         FusionStateErrorMessages2["STORAGE_ADAPTER_MISSING"] = "ReactFusionState Error: Storage adapter is required for persistence configuration";
-      })(FusionStateErrorMessages = exports.FusionStateErrorMessages || (exports.FusionStateErrorMessages = {}));
+      })(FusionStateErrorMessages || (exports.FusionStateErrorMessages = FusionStateErrorMessages = {}));
       var FusionStateError = class extends Error {
         constructor(code, message, context) {
           super(message);
@@ -60,7 +60,8 @@ var ReactFusionState = (() => {
     "dist/store/defaultStore.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.useDefaultStore = exports.DefaultStoreContext = void 0;
+      exports.DefaultStoreContext = void 0;
+      exports.useDefaultStore = useDefaultStore;
       var react_1 = require_react();
       var types_1 = require_types();
       exports.DefaultStoreContext = (0, react_1.createContext)(void 0);
@@ -71,7 +72,6 @@ var ReactFusionState = (() => {
         }
         return store;
       }
-      exports.useDefaultStore = useDefaultStore;
     }
   });
 
@@ -80,13 +80,12 @@ var ReactFusionState = (() => {
     "dist/useFusionState.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.useFusionState = void 0;
+      exports.useFusionState = useFusionState;
       var defaultStore_1 = require_defaultStore();
       function useFusionState(keyInput, initialValue, options) {
         const store = (0, defaultStore_1.useDefaultStore)();
         return store.useFusionState(keyInput, initialValue, options);
       }
-      exports.useFusionState = useFusionState;
     }
   });
 
@@ -129,7 +128,7 @@ var ReactFusionState = (() => {
     "dist/store/createSubscriptionRegistry.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createSubscriptionRegistry = void 0;
+      exports.createSubscriptionRegistry = createSubscriptionRegistry;
       var batch_1 = require_batch();
       function createSubscriptionRegistry() {
         const perKey = /* @__PURE__ */ new Map();
@@ -181,7 +180,6 @@ var ReactFusionState = (() => {
         };
         return { subscribeKey, subscribe, notifyKeys, clear };
       }
-      exports.createSubscriptionRegistry = createSubscriptionRegistry;
     }
   });
 
@@ -193,7 +191,11 @@ var ReactFusionState = (() => {
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.deprecateObject = exports.deprecateComponent = exports.deprecate = exports.__resetDeprecationWarnings = exports.warnDeprecated = void 0;
+      exports.warnDeprecated = warnDeprecated;
+      exports.__resetDeprecationWarnings = __resetDeprecationWarnings;
+      exports.deprecate = deprecate;
+      exports.deprecateComponent = deprecateComponent;
+      exports.deprecateObject = deprecateObject;
       var react_1 = __importDefault(require_react());
       var MIGRATION_URL = "https://github.com/jgerard72/react-fusion-state#-migration-to-v2-preview";
       var emitted = /* @__PURE__ */ new Set();
@@ -203,11 +205,9 @@ var ReactFusionState = (() => {
         emitted.add(oldName);
         console.warn(`[FusionState] The ${kind} \`${oldName}\` is deprecated and will be removed in v2.0.0. Use \`${newName}\` instead \u2014 same signature, drop-in replacement. See ${MIGRATION_URL}`);
       }
-      exports.warnDeprecated = warnDeprecated;
       function __resetDeprecationWarnings() {
         emitted.clear();
       }
-      exports.__resetDeprecationWarnings = __resetDeprecationWarnings;
       function deprecate(fn, oldName, newName, kind = "function") {
         const wrapped = function(...args) {
           warnDeprecated(oldName, newName, kind);
@@ -219,7 +219,6 @@ var ReactFusionState = (() => {
         }
         return wrapped;
       }
-      exports.deprecate = deprecate;
       function deprecateComponent(Component, oldName, newName) {
         const Wrapped = (props) => {
           react_1.default.useEffect(() => {
@@ -230,7 +229,6 @@ var ReactFusionState = (() => {
         Wrapped.displayName = oldName;
         return Wrapped;
       }
-      exports.deprecateComponent = deprecateComponent;
       function deprecateObject(obj, oldName, newName) {
         return new Proxy(obj, {
           get(target, prop, receiver) {
@@ -241,7 +239,6 @@ var ReactFusionState = (() => {
           }
         });
       }
-      exports.deprecateObject = deprecateObject;
     }
   });
 
@@ -386,7 +383,7 @@ var ReactFusionState = (() => {
         });
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createAsyncStorageAdapter = void 0;
+      exports.createAsyncStorageAdapter = createAsyncStorageAdapter;
       function createAsyncStorageAdapter(AsyncStorage, debug = false) {
         return {
           getItem(key) {
@@ -425,7 +422,6 @@ var ReactFusionState = (() => {
           }
         };
       }
-      exports.createAsyncStorageAdapter = createAsyncStorageAdapter;
     }
   });
 
@@ -461,7 +457,9 @@ var ReactFusionState = (() => {
         });
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.isSSREnvironment = void 0;
+      exports.isSSREnvironment = isSSREnvironment;
+      exports.detectBestStorageAdapter = detectBestStorageAdapter;
+      exports.createMemoryStorageAdapter = createMemoryStorageAdapter;
       var storageAdapters_1 = require_storageAdapters();
       var asyncStorageAdapter_1 = require_asyncStorageAdapter();
       function isSSREnvironment() {
@@ -470,7 +468,6 @@ var ReactFusionState = (() => {
         }
         return typeof window === "undefined";
       }
-      exports.isSSREnvironment = isSSREnvironment;
       var cachedAdapter = null;
       function detectBestStorageAdapter(debug = false) {
         if (cachedAdapter)
@@ -478,7 +475,6 @@ var ReactFusionState = (() => {
         cachedAdapter = resolveAdapter(debug);
         return cachedAdapter;
       }
-      exports.detectBestStorageAdapter = detectBestStorageAdapter;
       function resolveAdapter(debug) {
         if (isSSREnvironment()) {
           if (debug) {
@@ -564,7 +560,6 @@ var ReactFusionState = (() => {
           }
         };
       }
-      exports.createMemoryStorageAdapter = createMemoryStorageAdapter;
     }
   });
 
@@ -573,7 +568,8 @@ var ReactFusionState = (() => {
     "dist/utils/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.debounce = exports.formatErrorMessage = void 0;
+      exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.formatErrorMessage = void 0;
+      exports.debounce = debounce;
       var formatErrorMessage = (message, ...values) => {
         return values.reduce((msg, value, index) => msg.replace(`{${index}}`, value), message);
       };
@@ -586,7 +582,6 @@ var ReactFusionState = (() => {
           timer = setTimeout(() => fn(...args), delay);
         };
       }
-      exports.debounce = debounce;
       var customIsEqual = (a, b) => {
         if (a === b)
           return true;
@@ -688,7 +683,9 @@ var ReactFusionState = (() => {
         });
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createPersistenceEngine = exports.loadSyncInitialState = exports.normalizePersistenceConfig = void 0;
+      exports.normalizePersistenceConfig = normalizePersistenceConfig;
+      exports.loadSyncInitialState = loadSyncInitialState;
+      exports.createPersistenceEngine = createPersistenceEngine;
       var types_1 = require_types();
       var storageAdapters_1 = require_storageAdapters();
       var autoDetect_1 = require_autoDetect();
@@ -728,7 +725,6 @@ var ReactFusionState = (() => {
           onSaveError: simple.onSaveError
         };
       }
-      exports.normalizePersistenceConfig = normalizePersistenceConfig;
       function loadSyncInitialState(config, initialState, debug = false) {
         if (!config)
           return { state: initialState, error: null };
@@ -756,7 +752,6 @@ var ReactFusionState = (() => {
           return { state: initialState, error: errorObj };
         }
       }
-      exports.loadSyncInitialState = loadSyncInitialState;
       function createPersistenceEngine(rawConfig, callerInitialState, debug = false) {
         var _a, _b, _c;
         const config = normalizePersistenceConfig(rawConfig, debug);
@@ -858,7 +853,7 @@ var ReactFusionState = (() => {
           (_a2 = cfg.onLoadError) === null || _a2 === void 0 ? void 0 : _a2.call(cfg, err, STORAGE_KEY);
         };
         const rawSave = (newState) => __awaiter(this, void 0, void 0, function* () {
-          var _d;
+          var _a2;
           if (!shouldSaveOnChange)
             return;
           const toSave = filterPersistKeysImpl(config, newState);
@@ -890,7 +885,7 @@ var ReactFusionState = (() => {
               console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR, String(error)));
             }
             const cfg = config;
-            (_d = cfg.onSaveError) === null || _d === void 0 ? void 0 : _d.call(cfg, errorObj, toSave);
+            (_a2 = cfg.onSaveError) === null || _a2 === void 0 ? void 0 : _a2.call(cfg, errorObj, toSave);
           }
         });
         const debouncedSave = debounceTime > 0 ? (0, utils_1.debounce)(rawSave, debounceTime) : rawSave;
@@ -922,7 +917,6 @@ var ReactFusionState = (() => {
           destroy
         };
       }
-      exports.createPersistenceEngine = createPersistenceEngine;
       function syncResultIsImmediatelyHydrated(config, adapter) {
         if (config.loadOnInit === false)
           return true;
@@ -962,7 +956,10 @@ var ReactFusionState = (() => {
     "dist/devtools.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = void 0;
+      exports.DevToolsActions = void 0;
+      exports.createDevTools = createDevTools;
+      exports.getDevTools = getDevTools;
+      exports.useDevTools = useDevTools;
       var FusionStateDevTools = class {
         constructor(config = {}) {
           var _a, _b;
@@ -1067,11 +1064,9 @@ var ReactFusionState = (() => {
         }
         return devToolsInstance;
       }
-      exports.createDevTools = createDevTools;
       function getDevTools() {
         return devToolsInstance;
       }
-      exports.getDevTools = getDevTools;
       function useDevTools() {
         var _a, _b, _c;
         const devtools = getDevTools();
@@ -1082,7 +1077,6 @@ var ReactFusionState = (() => {
           })
         };
       }
-      exports.useDevTools = useDevTools;
       exports.DevToolsActions = {
         INIT: "INIT",
         SET_STATE: "SET_STATE",
@@ -1099,7 +1093,7 @@ var ReactFusionState = (() => {
     "dist/store/devtoolsBridge.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createDevToolsBridge = void 0;
+      exports.createDevToolsBridge = createDevToolsBridge;
       var devtools_1 = require_devtools();
       function createDevToolsBridge(config) {
         var _a;
@@ -1130,7 +1124,6 @@ var ReactFusionState = (() => {
           }
         };
       }
-      exports.createDevToolsBridge = createDevToolsBridge;
     }
   });
 
@@ -1139,7 +1132,11 @@ var ReactFusionState = (() => {
     "dist/createKey.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.UserKeys = exports.createNamespacedKey = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createKey = void 0;
+      exports.UserKeys = exports.AppKeys = void 0;
+      exports.createKey = createKey;
+      exports.isTypedKey = isTypedKey;
+      exports.extractKeyName = extractKeyName;
+      exports.createNamespacedKey = createNamespacedKey;
       var deprecation_1 = require_deprecation();
       function createKey(key) {
         return {
@@ -1148,15 +1145,12 @@ var ReactFusionState = (() => {
           __brand: "FusionStateKey"
         };
       }
-      exports.createKey = createKey;
       function isTypedKey(value) {
         return value && typeof value === "object" && value.__brand === "FusionStateKey" && typeof value.key === "string";
       }
-      exports.isTypedKey = isTypedKey;
       function extractKeyName(keyOrString) {
         return isTypedKey(keyOrString) ? keyOrString.key : keyOrString;
       }
-      exports.extractKeyName = extractKeyName;
       exports.AppKeys = (0, deprecation_1.deprecateObject)({
         user: createKey("user"),
         cart: createKey("cart"),
@@ -1166,7 +1160,6 @@ var ReactFusionState = (() => {
       function createNamespacedKey(namespace, key) {
         return createKey(`${namespace}.${key}`);
       }
-      exports.createNamespacedKey = createNamespacedKey;
       exports.UserKeys = (0, deprecation_1.deprecateObject)({
         profile: createNamespacedKey("user", "profile"),
         preferences: createNamespacedKey("user", "preferences")
@@ -1196,17 +1189,27 @@ var ReactFusionState = (() => {
       }) : function(o, v) {
         o["default"] = v;
       });
-      var __importStar = exports && exports.__importStar || function(mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) {
-          for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-        }
-        __setModuleDefault(result, mod);
-        return result;
-      };
+      var __importStar = exports && exports.__importStar || /* @__PURE__ */ (function() {
+        var ownKeys = function(o) {
+          ownKeys = Object.getOwnPropertyNames || function(o2) {
+            var ar = [];
+            for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+            return ar;
+          };
+          return ownKeys(o);
+        };
+        return function(mod) {
+          if (mod && mod.__esModule) return mod;
+          var result = {};
+          if (mod != null) {
+            for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+          }
+          __setModuleDefault(result, mod);
+          return result;
+        };
+      })();
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createReactBindings = void 0;
+      exports.createReactBindings = createReactBindings;
       var react_1 = __importStar(require_react());
       var types_1 = require_types();
       var utils_1 = require_utils();
@@ -1289,7 +1292,6 @@ var ReactFusionState = (() => {
         }
         return { Provider, useFusionState, useFusionStore, useFusionHydrated };
       }
-      exports.createReactBindings = createReactBindings;
     }
   });
 
@@ -1298,7 +1300,7 @@ var ReactFusionState = (() => {
     "dist/store/createStore.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.createStore = void 0;
+      exports.createStore = createStore;
       var createSubscriptionRegistry_1 = require_createSubscriptionRegistry();
       var persistenceEngine_1 = require_persistenceEngine();
       var devtoolsBridge_1 = require_devtoolsBridge();
@@ -1389,7 +1391,6 @@ var ReactFusionState = (() => {
         Promise.resolve().then(() => persistenceEngine.reportStartupError());
         return store;
       }
-      exports.createStore = createStore;
     }
   });
 
@@ -1415,15 +1416,25 @@ var ReactFusionState = (() => {
       }) : function(o, v) {
         o["default"] = v;
       });
-      var __importStar = exports && exports.__importStar || function(mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) {
-          for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-        }
-        __setModuleDefault(result, mod);
-        return result;
-      };
+      var __importStar = exports && exports.__importStar || /* @__PURE__ */ (function() {
+        var ownKeys = function(o) {
+          ownKeys = Object.getOwnPropertyNames || function(o2) {
+            var ar = [];
+            for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+            return ar;
+          };
+          return ownKeys(o);
+        };
+        return function(mod) {
+          if (mod && mod.__esModule) return mod;
+          var result = {};
+          if (mod != null) {
+            for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+          }
+          __setModuleDefault(result, mod);
+          return result;
+        };
+      })();
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.useGlobalState = exports.FusionStateProvider = void 0;
       var react_1 = __importStar(require_react());
@@ -1476,7 +1487,8 @@ var ReactFusionState = (() => {
     "dist/useFusionStore.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.useFusionStore = exports.shallow = void 0;
+      exports.shallow = void 0;
+      exports.useFusionStore = useFusionStore;
       var utils_1 = require_utils();
       var defaultStore_1 = require_defaultStore();
       exports.shallow = utils_1.shallowEqual;
@@ -1484,7 +1496,6 @@ var ReactFusionState = (() => {
         const store = (0, defaultStore_1.useDefaultStore)();
         return store.useFusionStore(selector, equalityFn);
       }
-      exports.useFusionStore = useFusionStore;
     }
   });
 
@@ -1555,13 +1566,12 @@ var ReactFusionState = (() => {
     "dist/useFusionHydrated.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.useFusionHydrated = void 0;
+      exports.useFusionHydrated = useFusionHydrated;
       var defaultStore_1 = require_defaultStore();
       function useFusionHydrated() {
         const store = (0, defaultStore_1.useDefaultStore)();
         return store.useFusionHydrated();
       }
-      exports.useFusionHydrated = useFusionHydrated;
     }
   });
 

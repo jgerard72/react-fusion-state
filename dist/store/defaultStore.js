@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useDefaultStore = exports.DefaultStoreContext = void 0;
+exports.DefaultStoreContext = void 0;
+exports.useDefaultStore = useDefaultStore;
 const react_1 = require("react");
 const types_1 = require("../types");
 /**
@@ -36,5 +37,4 @@ function useDefaultStore() {
     }
     return store;
 }
-exports.useDefaultStore = useDefaultStore;
 //# sourceMappingURL=defaultStore.js.map
