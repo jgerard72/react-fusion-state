@@ -1340,4 +1340,4 @@ var ReactFusionState = (() => {
   });
   return require_index();
 })();
-ReactFusionState.VERSION = "1.1.1";
+ReactFusionState.VERSION = "1.1.3";

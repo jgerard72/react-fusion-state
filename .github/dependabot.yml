@@ -1,0 +1,47 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    commit-message:
+      prefix: chore
+      include: scope
+    labels:
+      - dependencies
+    groups:
+      jest:
+        patterns:
+          - jest
+          - ts-jest
+          - jest-environment-jsdom
+          - "@types/jest"
+          - "@testing-library/*"
+      types:
+        patterns:
+          - "@types/*"
+        exclude-patterns:
+          - "@types/jest"
+      tooling:
+        patterns:
+          - esbuild
+          - eslint
+          - prettier
+          - typescript
+          - tsconfig-paths*
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci
+    labels:
+      - dependencies
+      - github-actions

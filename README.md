@@ -1,9 +1,13 @@
 # React Fusion State
 
+[![CI](https://github.com/jgerard72/react-fusion-state/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jgerard72/react-fusion-state/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jgerard72/react-fusion-state/graph/badge.svg)](https://codecov.io/gh/jgerard72/react-fusion-state)
 [![npm version](https://badge.fury.io/js/react-fusion-state.svg)](https://badge.fury.io/js/react-fusion-state)
 [![Downloads](https://img.shields.io/npm/dm/react-fusion-state.svg)](https://npmjs.com/package/react-fusion-state)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/react-fusion-state?label=minzipped)](https://bundlephobia.com/package/react-fusion-state)
+[![Zero deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](https://www.npmjs.com/package/react-fusion-state?activeTab=dependencies)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
 ![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
 

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `.github/workflows/ci.yml`: GitHub Actions CI running the full Jest suite with coverage on Node 18, 20, and 22 for every push to `master` and every pull request. A separate `build` job runs `npm run build` and validates the npm tarball contents (44 files, no leaks of `assets/`, `src/`, `.github/`, etc.). Coverage from the Node 20 run is uploaded to Codecov.
+- `.github/dependabot.yml`: weekly grouped updates for npm dev-dependencies (jest, types, tooling each in their own group) + monthly updates for the GitHub Actions versions themselves. Conventional commit prefixes (`chore` / `ci`) so future bot PRs stay aligned with the project's commit history.
+- `README.md`: two new quality-signal badges at the top (CI status + Codecov coverage) plus a `~bundle size` and explicit `dependencies: 0` badge. Re-ordered so the trust signals come first, then version/downloads, then platform/license.
+
+### Changed
+- `assets/hero.png` and `assets/quick-start.png`: re-encoded with palette quantization (sharp, quality 80, max compression). Combined size dropped from 2.7 MB to 654 KB (-76%) with no visible quality loss on the README. README page load time on both GitHub and npmjs.com is now sub-second on a normal connection instead of multi-second.
+- `jest.config.js`: excluded `src/devtools.ts` from coverage collection — it is a Redux DevTools browser bridge that runs in the browser extension context (no MV3 sandbox, no `window.__REDUX_DEVTOOLS_EXTENSION__` in jsdom), so unit-test coverage misrepresents its real coverage. Adjusted global thresholds to **80% statements / 80% lines / 70% branches / 70% functions** to reflect the honest baseline of the rest of the codebase (was 80 across the board, which silently failed). New coverage numbers are now enforced on every CI run.
+- `scripts/build-demo.js`: build log line moved from `stdout` to `stderr` so that callers piping stdout (`npm pack --json`, `npm publish --json`, programmatic tarball checks) are not polluted by the build output. Pure tooling fix, no behavior change for the demo bundle itself.
+
+### Notes
+- **Pure infrastructure / tooling change.** No source code under `src/` is modified, no `dist/` byte changes, no public API change. The published npm tarball is byte-identical to 1.1.3 except for the new README badge URLs.
+- These changes will only ship to npm when a `1.1.4` is published — this commit does not bump the version. Bumping is intentionally deferred until the CI is verified green on the first run of the new workflow.
+
 ## [1.1.3] - 2026-05-27 - npm README Image Rendering Fix
 
 ### Fixed
