@@ -6,6 +6,7 @@ const useFusionState_1 = require("./useFusionState");
 Object.defineProperty(exports, "useFusionState", { enumerable: true, get: function () { return useFusionState_1.useFusionState; } });
 const FusionStateProvider_1 = require("./FusionStateProvider");
 Object.defineProperty(exports, "FusionStateProvider", { enumerable: true, get: function () { return FusionStateProvider_1.FusionStateProvider; } });
+const deprecation_1 = require("./utils/deprecation");
 // v1.2 — Cross-key selectors (Zustand-style derived state)
 var useFusionStore_1 = require("./useFusionStore");
 Object.defineProperty(exports, "useFusionStore", { enumerable: true, get: function () { return useFusionStore_1.useFusionStore; } });
@@ -32,18 +33,36 @@ Object.defineProperty(exports, "createDevTools", { enumerable: true, get: functi
 Object.defineProperty(exports, "getDevTools", { enumerable: true, get: function () { return devtools_1.getDevTools; } });
 Object.defineProperty(exports, "useDevTools", { enumerable: true, get: function () { return devtools_1.useDevTools; } });
 Object.defineProperty(exports, "DevToolsActions", { enumerable: true, get: function () { return devtools_1.DevToolsActions; } });
-/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
-exports.useSharedState = useFusionState_1.useFusionState;
-/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
-exports.usePersistentState = useFusionState_1.useFusionState;
-/** @deprecated Use {@link useFusionState} instead. Will be removed in v2. */
-exports.useAppState = useFusionState_1.useFusionState;
-/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
-exports.GlobalStateProvider = FusionStateProvider_1.FusionStateProvider;
-/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
-exports.StateProvider = FusionStateProvider_1.FusionStateProvider;
-/** @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2. */
-exports.AppStateProvider = FusionStateProvider_1.FusionStateProvider;
+/**
+ * @deprecated Use {@link useFusionState} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.useSharedState = (0, deprecation_1.deprecate)(useFusionState_1.useFusionState, 'useSharedState', 'useFusionState', 'hook');
+/**
+ * @deprecated Use {@link useFusionState} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.usePersistentState = (0, deprecation_1.deprecate)(useFusionState_1.useFusionState, 'usePersistentState', 'useFusionState', 'hook');
+/**
+ * @deprecated Use {@link useFusionState} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.useAppState = (0, deprecation_1.deprecate)(useFusionState_1.useFusionState, 'useAppState', 'useFusionState', 'hook');
+/**
+ * @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first mount (since v1.3.0).
+ */
+exports.GlobalStateProvider = (0, deprecation_1.deprecateComponent)(FusionStateProvider_1.FusionStateProvider, 'GlobalStateProvider', 'FusionStateProvider');
+/**
+ * @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first mount (since v1.3.0).
+ */
+exports.StateProvider = (0, deprecation_1.deprecateComponent)(FusionStateProvider_1.FusionStateProvider, 'StateProvider', 'FusionStateProvider');
+/**
+ * @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first mount (since v1.3.0).
+ */
+exports.AppStateProvider = (0, deprecation_1.deprecateComponent)(FusionStateProvider_1.FusionStateProvider, 'AppStateProvider', 'FusionStateProvider');
 var types_1 = require("./types");
 Object.defineProperty(exports, "FusionStateErrorMessages", { enumerable: true, get: function () { return types_1.FusionStateErrorMessages; } });
 Object.defineProperty(exports, "FusionStateError", { enumerable: true, get: function () { return types_1.FusionStateError; } });
@@ -62,14 +81,29 @@ var autoDetect_2 = require("./storage/autoDetect");
 Object.defineProperty(exports, "detectBestStorageAdapter", { enumerable: true, get: function () { return autoDetect_2.detectBestStorageAdapter; } });
 Object.defineProperty(exports, "createMemoryStorageAdapter", { enumerable: true, get: function () { return autoDetect_2.createMemoryStorageAdapter; } });
 Object.defineProperty(exports, "isSSREnvironment", { enumerable: true, get: function () { return autoDetect_2.isSSREnvironment; } });
-/** @deprecated Use {@link createLocalStorageAdapter} instead. Will be removed in v2. */
-exports.createWebStorageAdapter = storageAdapters_1.createLocalStorageAdapter;
-/** @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2. */
-exports.createRNStorageAdapter = asyncStorageAdapter_1.createAsyncStorageAdapter;
-/** @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2. */
-exports.createMobileStorageAdapter = asyncStorageAdapter_1.createAsyncStorageAdapter;
-/** @deprecated Use {@link createMemoryStorageAdapter} instead. Will be removed in v2. */
-exports.createInMemoryAdapter = autoDetect_1.createMemoryStorageAdapter;
-/** @deprecated Use {@link detectBestStorageAdapter} instead. Will be removed in v2. */
-exports.autoDetectStorage = autoDetect_1.detectBestStorageAdapter;
+/**
+ * @deprecated Use {@link createLocalStorageAdapter} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.createWebStorageAdapter = (0, deprecation_1.deprecate)(storageAdapters_1.createLocalStorageAdapter, 'createWebStorageAdapter', 'createLocalStorageAdapter');
+/**
+ * @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.createRNStorageAdapter = (0, deprecation_1.deprecate)(asyncStorageAdapter_1.createAsyncStorageAdapter, 'createRNStorageAdapter', 'createAsyncStorageAdapter');
+/**
+ * @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.createMobileStorageAdapter = (0, deprecation_1.deprecate)(asyncStorageAdapter_1.createAsyncStorageAdapter, 'createMobileStorageAdapter', 'createAsyncStorageAdapter');
+/**
+ * @deprecated Use {@link createMemoryStorageAdapter} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.createInMemoryAdapter = (0, deprecation_1.deprecate)(autoDetect_1.createMemoryStorageAdapter, 'createInMemoryAdapter', 'createMemoryStorageAdapter');
+/**
+ * @deprecated Use {@link detectBestStorageAdapter} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
+ */
+exports.autoDetectStorage = (0, deprecation_1.deprecate)(autoDetect_1.detectBestStorageAdapter, 'autoDetectStorage', 'detectBestStorageAdapter');
 //# sourceMappingURL=index.js.map

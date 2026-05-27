@@ -55,6 +55,66 @@ var ReactFusionState = (() => {
     }
   });
 
+  // dist/utils/deprecation.js
+  var require_deprecation = __commonJS({
+    "dist/utils/deprecation.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.deprecateObject = exports.deprecateComponent = exports.deprecate = exports.__resetDeprecationWarnings = exports.warnDeprecated = void 0;
+      var react_1 = __importDefault(require_react());
+      var MIGRATION_URL = "https://github.com/jgerard72/react-fusion-state#-migration-to-v2-preview";
+      var emitted = /* @__PURE__ */ new Set();
+      function warnDeprecated(oldName, newName, kind = "export") {
+        if (emitted.has(oldName))
+          return;
+        emitted.add(oldName);
+        console.warn(`[FusionState] The ${kind} \`${oldName}\` is deprecated and will be removed in v2.0.0. Use \`${newName}\` instead \u2014 same signature, drop-in replacement. See ${MIGRATION_URL}`);
+      }
+      exports.warnDeprecated = warnDeprecated;
+      function __resetDeprecationWarnings() {
+        emitted.clear();
+      }
+      exports.__resetDeprecationWarnings = __resetDeprecationWarnings;
+      function deprecate(fn, oldName, newName, kind = "function") {
+        const wrapped = function(...args) {
+          warnDeprecated(oldName, newName, kind);
+          return fn.apply(this, args);
+        };
+        try {
+          Object.defineProperty(wrapped, "name", { value: oldName, configurable: true });
+        } catch (_a) {
+        }
+        return wrapped;
+      }
+      exports.deprecate = deprecate;
+      function deprecateComponent(Component, oldName, newName) {
+        const Wrapped = (props) => {
+          react_1.default.useEffect(() => {
+            warnDeprecated(oldName, newName, "component");
+          }, []);
+          return react_1.default.createElement(Component, props);
+        };
+        Wrapped.displayName = oldName;
+        return Wrapped;
+      }
+      exports.deprecateComponent = deprecateComponent;
+      function deprecateObject(obj, oldName, newName) {
+        return new Proxy(obj, {
+          get(target, prop, receiver) {
+            if (typeof prop !== "symbol") {
+              warnDeprecated(oldName, newName, "export");
+            }
+            return Reflect.get(target, prop, receiver);
+          }
+        });
+      }
+      exports.deprecateObject = deprecateObject;
+    }
+  });
+
   // dist/storage/storageAdapters.js
   var require_storageAdapters = __commonJS({
     "dist/storage/storageAdapters.js"(exports) {
@@ -159,7 +219,8 @@ var ReactFusionState = (() => {
         };
       };
       exports.createLocalStorageAdapter = createLocalStorageAdapter;
-      exports.NoopStorageAdapter = exports.createNoopStorageAdapter;
+      var deprecation_1 = require_deprecation();
+      exports.NoopStorageAdapter = (0, deprecation_1.deprecate)(exports.createNoopStorageAdapter, "NoopStorageAdapter", "createNoopStorageAdapter");
     }
   });
 
@@ -1184,6 +1245,7 @@ var ReactFusionState = (() => {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.UserKeys = exports.createNamespacedKey = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createKey = void 0;
+      var deprecation_1 = require_deprecation();
       function createKey(key) {
         return {
           __type: void 0,
@@ -1200,20 +1262,20 @@ var ReactFusionState = (() => {
         return isTypedKey(keyOrString) ? keyOrString.key : keyOrString;
       }
       exports.extractKeyName = extractKeyName;
-      exports.AppKeys = {
+      exports.AppKeys = (0, deprecation_1.deprecateObject)({
         user: createKey("user"),
         cart: createKey("cart"),
         theme: createKey("theme"),
         settings: createKey("settings")
-      };
+      }, "AppKeys", "createKey");
       function createNamespacedKey(namespace, key) {
         return createKey(`${namespace}.${key}`);
       }
       exports.createNamespacedKey = createNamespacedKey;
-      exports.UserKeys = {
+      exports.UserKeys = (0, deprecation_1.deprecateObject)({
         profile: createNamespacedKey("user", "profile"),
         preferences: createNamespacedKey("user", "preferences")
-      };
+      }, "UserKeys", "createNamespacedKey");
     }
   });
 
@@ -1396,6 +1458,7 @@ var ReactFusionState = (() => {
       Object.defineProperty(exports, "FusionStateProvider", { enumerable: true, get: function() {
         return FusionStateProvider_1.FusionStateProvider;
       } });
+      var deprecation_1 = require_deprecation();
       var useFusionStore_1 = require_useFusionStore();
       Object.defineProperty(exports, "useFusionStore", { enumerable: true, get: function() {
         return useFusionStore_1.useFusionStore;
@@ -1451,12 +1514,12 @@ var ReactFusionState = (() => {
       Object.defineProperty(exports, "DevToolsActions", { enumerable: true, get: function() {
         return devtools_1.DevToolsActions;
       } });
-      exports.useSharedState = useFusionState_1.useFusionState;
-      exports.usePersistentState = useFusionState_1.useFusionState;
-      exports.useAppState = useFusionState_1.useFusionState;
-      exports.GlobalStateProvider = FusionStateProvider_1.FusionStateProvider;
-      exports.StateProvider = FusionStateProvider_1.FusionStateProvider;
-      exports.AppStateProvider = FusionStateProvider_1.FusionStateProvider;
+      exports.useSharedState = (0, deprecation_1.deprecate)(useFusionState_1.useFusionState, "useSharedState", "useFusionState", "hook");
+      exports.usePersistentState = (0, deprecation_1.deprecate)(useFusionState_1.useFusionState, "usePersistentState", "useFusionState", "hook");
+      exports.useAppState = (0, deprecation_1.deprecate)(useFusionState_1.useFusionState, "useAppState", "useFusionState", "hook");
+      exports.GlobalStateProvider = (0, deprecation_1.deprecateComponent)(FusionStateProvider_1.FusionStateProvider, "GlobalStateProvider", "FusionStateProvider");
+      exports.StateProvider = (0, deprecation_1.deprecateComponent)(FusionStateProvider_1.FusionStateProvider, "StateProvider", "FusionStateProvider");
+      exports.AppStateProvider = (0, deprecation_1.deprecateComponent)(FusionStateProvider_1.FusionStateProvider, "AppStateProvider", "FusionStateProvider");
       var types_1 = require_types();
       Object.defineProperty(exports, "FusionStateErrorMessages", { enumerable: true, get: function() {
         return types_1.FusionStateErrorMessages;
@@ -1499,13 +1562,13 @@ var ReactFusionState = (() => {
       Object.defineProperty(exports, "isSSREnvironment", { enumerable: true, get: function() {
         return autoDetect_2.isSSREnvironment;
       } });
-      exports.createWebStorageAdapter = storageAdapters_1.createLocalStorageAdapter;
-      exports.createRNStorageAdapter = asyncStorageAdapter_1.createAsyncStorageAdapter;
-      exports.createMobileStorageAdapter = asyncStorageAdapter_1.createAsyncStorageAdapter;
-      exports.createInMemoryAdapter = autoDetect_1.createMemoryStorageAdapter;
-      exports.autoDetectStorage = autoDetect_1.detectBestStorageAdapter;
+      exports.createWebStorageAdapter = (0, deprecation_1.deprecate)(storageAdapters_1.createLocalStorageAdapter, "createWebStorageAdapter", "createLocalStorageAdapter");
+      exports.createRNStorageAdapter = (0, deprecation_1.deprecate)(asyncStorageAdapter_1.createAsyncStorageAdapter, "createRNStorageAdapter", "createAsyncStorageAdapter");
+      exports.createMobileStorageAdapter = (0, deprecation_1.deprecate)(asyncStorageAdapter_1.createAsyncStorageAdapter, "createMobileStorageAdapter", "createAsyncStorageAdapter");
+      exports.createInMemoryAdapter = (0, deprecation_1.deprecate)(autoDetect_1.createMemoryStorageAdapter, "createInMemoryAdapter", "createMemoryStorageAdapter");
+      exports.autoDetectStorage = (0, deprecation_1.deprecate)(autoDetect_1.detectBestStorageAdapter, "autoDetectStorage", "detectBestStorageAdapter");
     }
   });
   return require_index();
 })();
-ReactFusionState.VERSION = "1.2.1";
+ReactFusionState.VERSION = "1.3.0";

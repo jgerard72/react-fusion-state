@@ -40,6 +40,7 @@ export declare function extractKeyName(keyOrString: string | TypedKey): string;
  *
  * @deprecated Provided as a documentation example only. Define your own
  * typed keys with {@link createKey} in your application code. Will be removed in v2.
+ * Emits a one-time `console.warn` on first property access (since v1.3.0).
  */
 export declare const AppKeys: {
     readonly user: TypedKey<{
@@ -75,6 +76,7 @@ export declare function createNamespacedKey<T = unknown>(namespace: string, key:
  * @deprecated Provided as a documentation example only. Define your own
  * typed keys with {@link createNamespacedKey} in your application code.
  * Will be removed in v2.
+ * Emits a one-time `console.warn` on first property access (since v1.3.0).
  */
 export declare const UserKeys: {
     readonly profile: TypedKey<{

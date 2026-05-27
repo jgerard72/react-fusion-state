@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserKeys = exports.createNamespacedKey = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createKey = void 0;
+const deprecation_1 = require("./utils/deprecation");
 /**
  * Creates a typed key for useFusionState with automatic type inference
  *
@@ -48,13 +49,14 @@ exports.extractKeyName = extractKeyName;
  *
  * @deprecated Provided as a documentation example only. Define your own
  * typed keys with {@link createKey} in your application code. Will be removed in v2.
+ * Emits a one-time `console.warn` on first property access (since v1.3.0).
  */
-exports.AppKeys = {
+exports.AppKeys = (0, deprecation_1.deprecateObject)({
     user: createKey('user'),
     cart: createKey('cart'),
     theme: createKey('theme'),
     settings: createKey('settings'),
-};
+}, 'AppKeys', 'createKey');
 /**
  * Creates a namespaced typed key to avoid naming collisions
  * @template T - The type of the state value
@@ -72,9 +74,10 @@ exports.createNamespacedKey = createNamespacedKey;
  * @deprecated Provided as a documentation example only. Define your own
  * typed keys with {@link createNamespacedKey} in your application code.
  * Will be removed in v2.
+ * Emits a one-time `console.warn` on first property access (since v1.3.0).
  */
-exports.UserKeys = {
+exports.UserKeys = (0, deprecation_1.deprecateObject)({
     profile: createNamespacedKey('user', 'profile'),
     preferences: createNamespacedKey('user', 'preferences'),
-};
+}, 'UserKeys', 'createNamespacedKey');
 //# sourceMappingURL=createKey.js.map
