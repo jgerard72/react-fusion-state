@@ -18,6 +18,5 @@ node_modules/
 tsconfig*.json
 jest.config.js
 .prettierrc*
-.eslintrc*
 benchmark/
 demo/
