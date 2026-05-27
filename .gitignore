@@ -19,9 +19,6 @@ coverage/
 # Dependency directories
 jspm_packages/
 
-# Optional eslint cache
-.eslintcache
-
 # Temporary folders
 tmp/
 temp/
