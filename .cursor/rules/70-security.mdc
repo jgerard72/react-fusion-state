@@ -1,0 +1,25 @@
+---
+description: Security review for storage adapters and debug logs
+globs:
+  - "src/storage/**/*.{ts,tsx}"
+  - "src/FusionStateProvider.tsx"
+  - "src/devtools.ts"
+  - "src/utils/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+rules:
+  - name: Aucun appel réseau
+    description: `react-fusion-state` ne fait jamais d'appel réseau et ne doit jamais en faire. Refuser toute proposition d'ajout de fetch, XHR, WebSocket ou télémétrie distante.
+
+  - name: Debug logs opt-in
+    description: Le flag `debug` du Provider imprime les diffs de state et les payloads sauvegardés en storage. Ces logs peuvent contenir des données utilisateur sensibles. Le flag doit rester opt-in (jamais `true` par défaut) et la doc doit avertir de ne pas l'activer en production.
+
+  - name: Pas de leak via messages d'erreur
+    description: Les messages d'erreur (`FusionStateError`, `PersistenceError`, `formatErrorMessage`) ne doivent jamais inclure de valeurs de state arbitraires qui pourraient leaker aux utilisateurs finaux via une UI d'erreur. Inclure le nom de la clé est OK, la valeur ne l'est pas.
+
+  - name: Persistance d'arbitraire
+    description: Les adaptateurs de storage persistent ce que l'utilisateur leur donne. Ne jamais logger, transmettre ailleurs ou inspecter le contenu au-delà du strict nécessaire (parse JSON, comparaison d'égalité).
+
+  - name: SSR hydration mismatches
+    description: Toujours supposer que client et serveur peuvent diverger au premier render. Ne pas embarquer de données stockées côté serveur dans le HTML initial sans validation explicite (risque de leak de session).
