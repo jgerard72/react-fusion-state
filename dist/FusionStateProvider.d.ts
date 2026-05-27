@@ -1,21 +1,44 @@
 import React, { ReactNode } from 'react';
-import { GlobalState, GlobalFusionStateContextType, PersistenceConfig, SimplePersistenceConfig } from './types';
+import { GlobalFusionStateContextType, GlobalState, PersistenceConfig, SimplePersistenceConfig } from './types';
 import { DevToolsConfig } from './devtools';
 /**
- * Hook to access the global state context
+ * Static (stable) slice of the provider API: only references that never
+ * change for the lifetime of the provider. Consumers of this context do NOT
+ * re-render on state changes — they only re-render when the provider itself
+ * mounts/unmounts.
+ *
+ * Used internally by `useFusionStore` to subscribe to state changes via
+ * `useSyncExternalStore` without paying the cost of a full context-driven
+ * re-render on every state update.
+ */
+interface FusionStaticContextType {
+    subscribeAll: (listener: () => void) => () => void;
+    getStateSnapshot: () => GlobalState;
+}
+/**
+ * Hook to access the global state context.
+ *
  * @returns The global state context
- * @throws Error if used outside of a FusionStateProvider
+ * @throws Error if used outside of a `FusionStateProvider`
  */
 export declare const useGlobalState: () => GlobalFusionStateContextType;
 /**
- * Props for the FusionStateProvider component
+ * Internal hook that returns the static (stable) provider API for selector
+ * subscriptions. Consumers of this hook do NOT re-render on state changes.
+ *
+ * @internal — used by `useFusionStore`; not part of the public API.
+ * @throws Error if used outside of a `FusionStateProvider`
+ */
+export declare const useFusionStaticAPI: () => FusionStaticContextType;
+/**
+ * Props for the {@link FusionStateProvider} component.
  */
 export interface FusionStateProviderProps {
-    /** Child components that will have access to fusion state */
+    /** Child components that will have access to fusion state. */
     children: ReactNode;
-    /** Initial state values to set when the provider mounts */
+    /** Initial state values to set when the provider mounts. */
     initialState?: GlobalState;
-    /** Enable debug logging to console */
+    /** Enable debug logging to console. */
     debug?: boolean;
     /**
      * Persistence configuration:
@@ -28,7 +51,7 @@ export interface FusionStateProviderProps {
      * the provider to switch persistence behavior.
      */
     persistence?: boolean | string[] | SimplePersistenceConfig | PersistenceConfig;
-    /** DevTools configuration for Redux DevTools integration */
+    /** DevTools configuration for Redux DevTools integration. */
     devTools?: boolean | DevToolsConfig;
 }
 /**
@@ -50,3 +73,4 @@ export interface FusionStateProviderProps {
  * ```
  */
 export declare const FusionStateProvider: React.FC<FusionStateProviderProps>;
+export {};

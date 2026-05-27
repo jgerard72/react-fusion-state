@@ -4,6 +4,9 @@ import {FusionStateProvider} from './FusionStateProvider';
 
 export {useFusionState, FusionStateProvider};
 
+// v1.2 — Cross-key selectors (Zustand-style derived state)
+export {useFusionStore, shallow} from './useFusionStore';
+
 // React Native Support
 import {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
 

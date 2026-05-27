@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-27 - Selectors API & Provider Refactor
+
+### Added
+
+- **`useFusionStore(selector, equalityFn?)`** — new Zustand-style cross-key selector hook. Pass a pure function that maps the full `GlobalState` to any derived value (computed totals, filtered lists, joined fields, etc.) and the component will only re-render when the *selected* value changes — never when unrelated keys change. Default equality is `Object.is`; pass `shallow` for object/array selectors that recreate references on each call.
+  ```tsx
+  const total = useFusionStore((s) => (s.cart as Item[]).reduce((n, x) => n + x.price, 0));
+  const { user, isAdmin } = useFusionStore(
+    (s) => ({ user: s.user, isAdmin: s.user?.role === 'admin' }),
+    shallow,
+  );
+  ```
+- **`shallow`** — re-exported `shallowEqual` under the Zustand-friendly name for use as the `equalityFn` argument to `useFusionStore`.
+- **Static context** (`FusionStaticContext`, internal) — second React context exposing only stable references (`subscribeAll`, `getStateSnapshot`). `useFusionStore` consumers read from this context exclusively, so they never re-render on full-state context updates; the only re-renders are driven by `useSyncExternalStore` and gated by `equalityFn`. This is what gives selectors their "zero unrelated re-renders" guarantee.
+- **`subscribeAll` and `getStateSnapshot`** on `GlobalFusionStateContextType` — optional fields for backward compatibility with custom mocks. The Provider always sets them; consumers of older context mocks remain unaffected.
+- **Public API surface test** (`src/__tests__/public-api.test.ts`) — inline snapshot locking all 41 exported symbols. Any accidental removal or rename fails CI loudly; intentional additions just require updating the snapshot.
+
+### Changed
+
+- **Provider refactor: 615 → 277 lines (-55%).** `FusionStateProvider.tsx` was split into three composable hooks living in `src/hooks/`:
+  - **`usePersistence(config, setStateRaw, syncLoadError, debug)`** (with a pure `loadSyncInitialState` helper) — handles sync hydration (web `localStorage`), async hydration (RN / AsyncStorage), debounced save with key filtering and deep-equality dedup, and `onLoadError` / `onSaveError` callbacks.
+  - **`useKeySubscriptions(state, initialState)`** — owns the per-key `Map<key, Set<listener>>` registry plus the new global listener set used by selectors, with `batch()` around all notifications for cross-platform React batching.
+  - **`useDevToolsBridge(config, initialState)`** — wraps the Redux DevTools singleton bootstrap, one-shot `INIT` dispatch, and post-commit `send` calls; becomes a no-op when the extension isn't present (jsdom, production with `devOnly`, etc.).
+
+  The Provider itself is now a thin orchestrator: it composes the three hooks and runs the post-commit `useEffect` that diffs the committed state to dispatch per-key notifications → global notification → debug log → DevTools → persistence save. Zero public API change, zero behavior change, all 74 pre-existing tests pass without modification.
+
+### Notes
+
+- **Pure refactor + additive selector API.** No breaking change. Every export from 1.1.x still works identically — see the new `public-api.test.ts` snapshot for the locked surface.
+- **Tests: 74 (1.1.4) → 116 (1.2.0).** 27 new unit tests for the three extracted hooks, 8 new tests for `useFusionStore` (selector correctness, re-render gating with both `Object.is` and `shallow`, parent-isolation, throw-outside-Provider, stable-reference guarantee), 7 new tests for the public API snapshot.
+- **Why a second context.** `useGlobalState()` reads the regular context that changes on every state update, so any consumer re-renders on every commit. That's fine for `useFusionState` (which then runs its per-key cheap path), but it would defeat the whole point of selectors. The static context isolates the stable `subscribeAll` / `getStateSnapshot` references so selector consumers never pay for unrelated state changes — only `useSyncExternalStore` decides when to re-render.
+
 ## [1.1.4] - 2026-05-27 - CI, Quality Signals & README Optimization
 
 ### Added

@@ -21,6 +21,18 @@ export interface GlobalFusionStateContextType {
     /** Optional: server snapshot getter for SSR environments. */
     getServerSnapshot?: (key: string) => unknown;
     /**
+     * Subscribe to ANY state change (used by `useFusionStore` selectors).
+     * Returns an unsubscribe function. Optional for backward compatibility
+     * with custom mocks of this context.
+     */
+    subscribeAll?: (listener: () => void) => () => void;
+    /**
+     * Get a snapshot of the full state object. Used by `useFusionStore` to
+     * apply selector functions. Optional for backward compatibility with
+     * custom mocks of this context.
+     */
+    getStateSnapshot?: () => GlobalState;
+    /**
      * `true` once the initial hydration from persistence has completed
      * (or `true` immediately if no async hydration is needed). Optional for
      * backward compatibility with custom mocks of this context.

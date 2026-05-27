@@ -96,6 +96,69 @@ function UserProfile() {
 
 ---
 
+## 🎯 Selectors & Derived State (v1.2.0+)
+
+Beyond `useFusionState` for per-key access, **`useFusionStore(selector)`** lets you compute *derived* values from the whole store and **re-render only when the selected value changes** — never when unrelated keys move.
+
+### Why selectors
+
+```jsx
+import { useFusionStore } from 'react-fusion-state';
+
+function CartTotal() {
+  // Only re-renders when the total changes — not every time `user`, `theme`,
+  // or any other unrelated key updates.
+  const total = useFusionStore(
+    (state) => (state.cart ?? []).reduce((sum, item) => sum + item.price, 0)
+  );
+  return <strong>${total.toFixed(2)}</strong>;
+}
+```
+
+### Multi-key selectors with `shallow`
+
+When your selector returns an object/array (recreated on each call), pass `shallow` as the second argument so equality is checked at one level of depth:
+
+```jsx
+import { useFusionStore, shallow } from 'react-fusion-state';
+
+function UserBadge() {
+  const { name, isAdmin } = useFusionStore(
+    (state) => ({
+      name: state.user?.name ?? 'Guest',
+      isAdmin: state.user?.role === 'admin',
+    }),
+    shallow,
+  );
+
+  return <span>{name} {isAdmin && '👑'}</span>;
+}
+```
+
+### When to use what
+
+| Need | Use |
+|------|-----|
+| Read & write **one key** | `useFusionState('key', initial)` |
+| Read a **derived value** (computed / filtered / joined) | `useFusionStore((s) => …)` |
+| Read **multiple keys** as one object | `useFusionStore((s) => ({ a: s.a, b: s.b }), shallow)` |
+| **Subscribe** to changes without writing | `useFusionStore((s) => s.someKey)` |
+
+### Custom equality functions
+
+You can pass any `(prev, next) => boolean` as the second argument:
+
+```jsx
+const itemIds = useFusionStore(
+  (state) => state.items.map((i) => i.id),
+  (a, b) => a.length === b.length && a.every((id, i) => id === b[i]),
+);
+```
+
+**Performance note** — `useFusionStore` uses a separate React context that **never re-renders on state changes**. All re-renders are driven by `useSyncExternalStore` and gated by your equality function. That's why a `useFusionStore` consumer can sit next to a `useFusionState('frequent-key', …)` mutator and stay completely idle as long as its selected value doesn't change.
+
+---
+
 ## ⭐ Why React Fusion State?
 
 ### 🏆 **Performance Champion**
