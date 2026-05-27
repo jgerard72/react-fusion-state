@@ -9,21 +9,20 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
-![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7.5 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
+![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~8.2 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
 
 **🎯 The simplest AND most performant React state management library.**
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🎉 **v1.2.0 — Selectors API & Provider refactor**
-- 🎯 **New `useFusionStore(selector, equalityFn?)` hook** — Zustand-style derived state: subscribe to any computed value across the store and re-render *only* when the selected value changes
-- 🧩 **`shallow` exported** — drop-in equality fn for multi-key object selectors
-- 🏗️ **Provider refactor** — `FusionStateProvider` split into 3 composable hooks (`usePersistence`, `useKeySubscriptions`, `useDevToolsBridge`); 615 → 277 lines (−55 %), zero behavior change
-- 🛡️ **Public-API snapshot lock** — any accidental removal or rename of an exported symbol now fails CI loudly
-- ✅ **Zero breaking change** — every 1.1.x export still works identically; tests grew from 74 → 116
-- 📦 **~7.5 KB gzipped, zero dependencies**
+### 🎉 **v1.3.0 — Deprecation enforcement (no breaking change)**
+- ⚠️ **Runtime warnings on every `@deprecated` alias** — `useSharedState`, `GlobalStateProvider`, `createWebStorageAdapter`, `AppKeys`, … each emits a one-time `console.warn` on first use with the replacement name and a link back to the [Migration to v2 (preview)](#-migration-to-v2-preview) section
+- 🔇 **One warning per alias, per session** — no log spam, no re-fire on subsequent calls or re-renders, no overhead beyond a `Set.has` lookup
+- 🧭 **14 legacy symbols** covered: 3 hooks + 3 providers + 6 storage adapters + `NoopStorageAdapter` + `AppKeys` / `UserKeys`
+- ✅ **Zero breaking change** — every export from 1.2.x still works exactly as before; the [public-API snapshot test](src/__tests__/public-api.test.ts) is unchanged. Tests grew from 116 → 137.
+- 📦 **~8.2 KB gzipped, zero dependencies** (+~610 B vs 1.2.1, from the 14 wrappers + shared `warnDeprecated` helper)
 
-> Looking at upgrading from 1.0.x or 1.1.x? Jump straight to the [Migration to v2 (preview)](#-migration-to-v2-preview) section for the deprecation list — v1.2.0 stays 100 % backward compatible with all of it.
+> All v1.2.x features remain: [Selectors API (`useFusionStore`)](#-selectors--derived-state-v120), Provider refactor into composable hooks, public API snapshot lock, Redux DevTools integration.
 
 ---
 
@@ -166,7 +165,7 @@ const itemIds = useFusionStore(
 
 ### 🏆 **Performance Champion**
 - **99.9% fewer re-renders** than Redux/Zustand/Recoil — backed by `useSyncExternalStore` + per-key subscriptions
-- **~7.5 KB gzipped, zero dependencies** (vs 45 KB+ for Redux/Recoil)
+- **~8.2 KB gzipped, zero dependencies** (vs 45 KB+ for Redux/Recoil)
 - **Selectors with custom equality** (`useFusionStore` + `shallow`) for derived/multi-key reads with zero unrelated re-renders
 - [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) — Grade A+ performance
 
@@ -301,7 +300,7 @@ open demo/demo-persistence.html
 
 | Library | Bundle Size | Re-renders | Dependencies | Setup |
 |---------|-------------|------------|--------------|--------|
-| **React Fusion State** | **~7.5 KB** | **99.9% fewer** | **0** | **Zero** |
+| **React Fusion State** | **~8.2 KB** | **99.9% fewer** | **0** | **Zero** |
 | Redux Toolkit | 45KB+ | Many | 15+ | Complex |
 | Zustand | 8KB+ | Many | 2+ | Moderate |
 | Recoil | 120KB+ | Many | 10+ | Complex |
@@ -388,6 +387,12 @@ function OptimizedDashboard() {
 ## 🗺 Migration to v2 (preview)
 
 The legacy aliases below are marked `@deprecated` since v1.1 and still work in every 1.x release — your IDE will just show them with a strikethrough. **All of them will be removed in v2.0.0.** Use the tables below to migrate ahead of time.
+
+> **Since v1.3.0** — each deprecated alias also emits a single `console.warn` on first use, pointing at the replacement name and back to this section. One warning per alias, per session — no log spam, no overhead beyond a `Set.has` lookup. The warning fires in **both development and production** builds because the people most at risk of being caught off-guard by v2.0.0 are production users who never opened the IDE warning. Example:
+>
+> ```
+> [FusionState] The hook `useSharedState` is deprecated and will be removed in v2.0.0. Use `useFusionState` instead — same signature, drop-in replacement. See https://github.com/jgerard72/react-fusion-state#-migration-to-v2-preview
+> ```
 
 ### Hooks
 

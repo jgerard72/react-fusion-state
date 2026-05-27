@@ -97,8 +97,10 @@ const createLocalStorageAdapter = (debug = false) => {
     };
 };
 exports.createLocalStorageAdapter = createLocalStorageAdapter;
+const deprecation_1 = require("../utils/deprecation");
 /**
  * @deprecated Use {@link createNoopStorageAdapter} instead. Will be removed in v2.
+ * Emits a one-time `console.warn` on first call (since v1.3.0).
  */
-exports.NoopStorageAdapter = exports.createNoopStorageAdapter;
+exports.NoopStorageAdapter = (0, deprecation_1.deprecate)(exports.createNoopStorageAdapter, 'NoopStorageAdapter', 'createNoopStorageAdapter');
 //# sourceMappingURL=storageAdapters.js.map

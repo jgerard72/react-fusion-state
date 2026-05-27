@@ -1,3 +1,5 @@
+import {deprecateObject} from './utils/deprecation';
+
 /**
  * Typed key system for React Fusion State
  * Provides automatic type inference while maintaining backward compatibility
@@ -59,13 +61,18 @@ export function extractKeyName(keyOrString: string | TypedKey): string {
  *
  * @deprecated Provided as a documentation example only. Define your own
  * typed keys with {@link createKey} in your application code. Will be removed in v2.
+ * Emits a one-time `console.warn` on first property access (since v1.3.0).
  */
-export const AppKeys = {
-  user: createKey<{id: number; name: string; email: string} | null>('user'),
-  cart: createKey<Array<{id: number; quantity: number}>>('cart'),
-  theme: createKey<'light' | 'dark'>('theme'),
-  settings: createKey<{notifications: boolean; language: string}>('settings'),
-} as const;
+export const AppKeys = deprecateObject(
+  {
+    user: createKey<{id: number; name: string; email: string} | null>('user'),
+    cart: createKey<Array<{id: number; quantity: number}>>('cart'),
+    theme: createKey<'light' | 'dark'>('theme'),
+    settings: createKey<{notifications: boolean; language: string}>('settings'),
+  } as const,
+  'AppKeys',
+  'createKey',
+);
 
 /**
  * Utility type to extract the type from a TypedKey
@@ -92,14 +99,19 @@ export function createNamespacedKey<T = unknown>(
  * @deprecated Provided as a documentation example only. Define your own
  * typed keys with {@link createNamespacedKey} in your application code.
  * Will be removed in v2.
+ * Emits a one-time `console.warn` on first property access (since v1.3.0).
  */
-export const UserKeys = {
-  profile: createNamespacedKey<{name: string; avatar: string}>(
-    'user',
-    'profile',
-  ),
-  preferences: createNamespacedKey<{theme: string; lang: string}>(
-    'user',
-    'preferences',
-  ),
-} as const;
+export const UserKeys = deprecateObject(
+  {
+    profile: createNamespacedKey<{name: string; avatar: string}>(
+      'user',
+      'profile',
+    ),
+    preferences: createNamespacedKey<{theme: string; lang: string}>(
+      'user',
+      'preferences',
+    ),
+  } as const,
+  'UserKeys',
+  'createNamespacedKey',
+);

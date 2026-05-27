@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-27 - Deprecation Enforcement
+
+### Added
+
+- **Runtime deprecation warnings** on every legacy alias. The first time a deprecated symbol is used in a session, a single `console.warn` fires with the new name and a link back to the [Migration to v2 (preview)](https://github.com/jgerard72/react-fusion-state#-migration-to-v2-preview) section. Subsequent uses of the same alias are silent — one warning per alias per session, no log spam.
+  ```
+  [FusionState] The hook `useSharedState` is deprecated and will be removed in v2.0.0. Use `useFusionState` instead — same signature, drop-in replacement. See https://github.com/jgerard72/react-fusion-state#-migration-to-v2-preview
+  ```
+- **New internal helper `src/utils/deprecation.ts`** exposing three wrapper primitives — `deprecate(fn, oldName, newName, kind?)` for plain functions / factories / hooks, `deprecateComponent(Component, oldName, newName)` for React components (warning fires once on mount inside a `useEffect`), and `deprecateObject(obj, oldName, newName)` for example key objects (`Proxy` `get` trap, ignores Symbol-keyed lookups so framework internals stay silent). Plus `warnDeprecated(oldName, newName, kind?)` for ad-hoc use and `__resetDeprecationWarnings()` exposed for tests only.
+- **`src/__tests__/deprecation.test.tsx`** — 21 new tests covering every deprecated symbol: each alias still works functionally, fires exactly one warning per session even when called many times, and the warning message contains the alias name + replacement name + `v2.0.0` removal target + migration URL. Also asserts that warnings *do* refire after `__resetDeprecationWarnings()`.
+
+### Deprecated (now with runtime warnings)
+
+14 symbols, all still 100 % functional — only difference vs 1.2.x is the one-shot `console.warn` on first use:
+
+| Deprecated alias | Recommended replacement |
+| --- | --- |
+| `useSharedState` | `useFusionState` |
+| `usePersistentState` | `useFusionState` |
+| `useAppState` | `useFusionState` |
+| `GlobalStateProvider` | `FusionStateProvider` |
+| `StateProvider` | `FusionStateProvider` |
+| `AppStateProvider` | `FusionStateProvider` |
+| `createWebStorageAdapter` | `createLocalStorageAdapter` |
+| `createRNStorageAdapter` | `createAsyncStorageAdapter` |
+| `createMobileStorageAdapter` | `createAsyncStorageAdapter` |
+| `createInMemoryAdapter` | `createMemoryStorageAdapter` |
+| `autoDetectStorage` | `detectBestStorageAdapter` |
+| `NoopStorageAdapter` | `createNoopStorageAdapter` |
+| `AppKeys` (example object) | `createKey` |
+| `UserKeys` (example object) | `createNamespacedKey` |
+
+### Changed
+
+- **Bundle size: `7.54 KB` → `8.15 KB` gzipped** (+~610 B), measured with the same `esbuild --minify` + `gzip` pipeline used since 1.2.1, with `react` / `react-dom` / `react-native` as externals. The growth comes from the 14 wrapper functions plus the shared `warnDeprecated` helper. README mentions of `~7.5 KB` updated to `~8.2 KB`.
+
+### Notes
+
+- **Zero breaking change.** Every export from 1.1.x and 1.2.x still works. The public-API snapshot test (`src/__tests__/public-api.test.ts`) is unchanged — same 41 exports, same shape.
+- **Warnings fire in both development and production builds.** Production users are the ones most likely to be on a stale alias when v2.0.0 drops; gating the warning on `NODE_ENV` would defeat the migration goal. A single warning per session is acceptable noise.
+- **Provider aliases lose strict referential equality with `FusionStateProvider`.** They were already aliases (`GlobalStateProvider === FusionStateProvider` was `true` in 1.2.x) — now the wrapper is a tiny FC that mounts a `useEffect` + delegates. The wrapped `FusionStateProvider` inside still benefits from its `React.memo`, so re-render behavior is unchanged in practice. `displayName` on each wrapper is set to the alias name so React DevTools shows what the user actually wrote.
+
 ## [1.2.1] - 2026-05-27 - Docs alignment with v1.2.0
 
 ### Changed
