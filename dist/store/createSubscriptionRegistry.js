@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSubscriptionRegistry = void 0;
+exports.createSubscriptionRegistry = createSubscriptionRegistry;
 const batch_1 = require("../utils/batch");
 /**
  * Plain JS subscription registry — the headless equivalent of
@@ -71,5 +71,4 @@ function createSubscriptionRegistry() {
     };
     return { subscribeKey, subscribe, notifyKeys, clear };
 }
-exports.createSubscriptionRegistry = createSubscriptionRegistry;
 //# sourceMappingURL=createSubscriptionRegistry.js.map

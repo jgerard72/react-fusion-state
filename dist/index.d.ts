@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { useFusionState } from './useFusionState';
 import { FusionStateProvider } from './FusionStateProvider';
 export { useFusionState, FusionStateProvider };

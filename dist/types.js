@@ -10,7 +10,7 @@ var FusionStateErrorMessages;
     FusionStateErrorMessages["PERSISTENCE_READ_ERROR"] = "ReactFusionState Error: Failed to read state from storage: {0}";
     FusionStateErrorMessages["PERSISTENCE_WRITE_ERROR"] = "ReactFusionState Error: Failed to write state to storage: {0}";
     FusionStateErrorMessages["STORAGE_ADAPTER_MISSING"] = "ReactFusionState Error: Storage adapter is required for persistence configuration";
-})(FusionStateErrorMessages = exports.FusionStateErrorMessages || (exports.FusionStateErrorMessages = {}));
+})(FusionStateErrorMessages || (exports.FusionStateErrorMessages = FusionStateErrorMessages = {}));
 /** Specific error types for React Fusion State */
 class FusionStateError extends Error {
     constructor(code, message, context) {

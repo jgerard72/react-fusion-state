@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useKeySubscriptions = void 0;
+exports.useKeySubscriptions = useKeySubscriptions;
 const react_1 = require("react");
 const batch_1 = require("../utils/batch");
 /**
@@ -80,5 +80,4 @@ function useKeySubscriptions(state, initialState) {
         getStateSnapshot,
     };
 }
-exports.useKeySubscriptions = useKeySubscriptions;
 //# sourceMappingURL=useKeySubscriptions.js.map

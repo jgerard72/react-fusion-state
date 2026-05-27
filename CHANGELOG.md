@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (build infra — no consumer-visible API change)
+
+- **Bumped `typescript` devDep from `^4.0.0` (was 4.9.5 installed) to `^6.0.3`.** Build pipeline now runs on TS 6.0.3. Closes [#14](https://github.com/jgerard72/react-fusion-state/issues/14).
+- **`tsconfig.json`** additions to satisfy TS 6 stricter defaults: `lib: ["es2019", "dom"]` (TS 6 no longer includes ES2017+ libs implicitly from `target: es6`), `types: ["node", "jest"]` (TS 6 no longer auto-loads from `@types/*` when `types` is unset for the relevant files), `ignoreDeprecations: "6.0"` (silences the warning about `moduleResolution: "node"` being renamed to `"node10"` and slated for removal in TS 7 — kept as-is for now to avoid the invasive switch to `node16`/`bundler`).
+- **`tsconfig.json`** removals: dead config — `baseUrl` and the `paths` aliases (`@/`, `@core/`, `@examples/`, `@storage/`, `@tests/`) were never referenced anywhere in `src/`.
+- **`tsconfig-build.json`** addition: explicit `rootDir: "./src"` (TS 6 now requires this when `outDir` is used).
+- **`dist/**/*.d.ts`** diff: the only consumer-visible change is the removal of three redundant `/// <reference types="react" />` triple-slash directives that TS 4 used to auto-inject. TS 6 resolves the React types through regular imports — the surface signature of every public export is byte-equivalent.
+- **`dist/**/*.js`** diff: very minor downlevel-transform differences (net -1 LOC across 13 files) from TS 6's improved emit. No behavior change.
+- **Tests**: 197 passing, 1 skipped — same as 1.4.0.
+
 ## [1.4.0] - 2026-05-27 - Multi-store (headless)
 
 ### Added

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useFusionStore = exports.shallow = void 0;
+exports.shallow = void 0;
+exports.useFusionStore = useFusionStore;
 const utils_1 = require("./utils");
 const defaultStore_1 = require("./store/defaultStore");
 /**
@@ -55,5 +56,4 @@ function useFusionStore(selector, equalityFn = Object.is) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return store.useFusionStore(selector, equalityFn);
 }
-exports.useFusionStore = useFusionStore;
 //# sourceMappingURL=useFusionStore.js.map

@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPersistenceEngine = exports.loadSyncInitialState = exports.normalizePersistenceConfig = void 0;
+exports.normalizePersistenceConfig = normalizePersistenceConfig;
+exports.loadSyncInitialState = loadSyncInitialState;
+exports.createPersistenceEngine = createPersistenceEngine;
 const types_1 = require("../types");
 const storageAdapters_1 = require("../storage/storageAdapters");
 const autoDetect_1 = require("../storage/autoDetect");
@@ -59,7 +61,6 @@ function normalizePersistenceConfig(config, debug = false) {
         onSaveError: simple.onSaveError,
     };
 }
-exports.normalizePersistenceConfig = normalizePersistenceConfig;
 /**
  * Pure helper for synchronous hydration. Used both by the headless store
  * (at construction time) and conceptually by anyone wanting to pre-load
@@ -93,7 +94,6 @@ function loadSyncInitialState(config, initialState, debug = false) {
         return { state: initialState, error: errorObj };
     }
 }
-exports.loadSyncInitialState = loadSyncInitialState;
 /**
  * Build a {@link PersistenceEngine}. Pure JS — never imports React.
  *
@@ -212,7 +212,7 @@ function createPersistenceEngine(rawConfig, callerInitialState, debug = false) {
         (_a = cfg.onLoadError) === null || _a === void 0 ? void 0 : _a.call(cfg, err, STORAGE_KEY);
     };
     const rawSave = (newState) => __awaiter(this, void 0, void 0, function* () {
-        var _d;
+        var _a;
         if (!shouldSaveOnChange)
             return;
         const toSave = filterPersistKeysImpl(config, newState);
@@ -249,7 +249,7 @@ function createPersistenceEngine(rawConfig, callerInitialState, debug = false) {
                 console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR, String(error)));
             }
             const cfg = config;
-            (_d = cfg.onSaveError) === null || _d === void 0 ? void 0 : _d.call(cfg, errorObj, toSave);
+            (_a = cfg.onSaveError) === null || _a === void 0 ? void 0 : _a.call(cfg, errorObj, toSave);
         }
     });
     const debouncedSave = debounceTime > 0 ? (0, utils_1.debounce)(rawSave, debounceTime) : rawSave;
@@ -285,7 +285,6 @@ function createPersistenceEngine(rawConfig, callerInitialState, debug = false) {
         destroy,
     };
 }
-exports.createPersistenceEngine = createPersistenceEngine;
 /**
  * Mirror of the post-sync-hydration `computeInitialHydrated` logic from the
  * legacy hook: on web with a `getItemSync`-capable adapter, hydration is

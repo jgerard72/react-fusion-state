@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import { GlobalState, PersistenceConfig } from '../types';
 /**
  * Result of {@link loadSyncInitialState}.

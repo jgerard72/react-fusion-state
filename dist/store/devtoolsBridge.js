@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDevToolsBridge = void 0;
+exports.createDevToolsBridge = createDevToolsBridge;
 const devtools_1 = require("../devtools");
 /**
  * Build a {@link DevToolsBridge}. Pure JS. Honours the same `boolean | DevToolsConfig`
@@ -37,5 +37,4 @@ function createDevToolsBridge(config) {
         },
     };
 }
-exports.createDevToolsBridge = createDevToolsBridge;
 //# sourceMappingURL=devtoolsBridge.js.map

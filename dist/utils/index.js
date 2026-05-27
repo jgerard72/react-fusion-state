@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.debounce = exports.formatErrorMessage = void 0;
+exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.formatErrorMessage = void 0;
+exports.debounce = debounce;
 /**
  * Format error messages - simplified version
  */
@@ -19,7 +20,6 @@ function debounce(fn, delay) {
         timer = setTimeout(() => fn(...args), delay);
     };
 }
-exports.debounce = debounce;
 /**
  * Custom lightweight deep equality check
  * Optimized for React Fusion State use cases - replaces lodash.isequal

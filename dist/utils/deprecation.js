@@ -3,7 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deprecateObject = exports.deprecateComponent = exports.deprecate = exports.__resetDeprecationWarnings = exports.warnDeprecated = void 0;
+exports.warnDeprecated = warnDeprecated;
+exports.__resetDeprecationWarnings = __resetDeprecationWarnings;
+exports.deprecate = deprecate;
+exports.deprecateComponent = deprecateComponent;
+exports.deprecateObject = deprecateObject;
 const react_1 = __importDefault(require("react"));
 /**
  * Runtime deprecation warning system for legacy aliases.
@@ -41,7 +45,6 @@ function warnDeprecated(oldName, newName, kind = 'export') {
     console.warn(`[FusionState] The ${kind} \`${oldName}\` is deprecated and will be removed in v2.0.0. ` +
         `Use \`${newName}\` instead — same signature, drop-in replacement. See ${MIGRATION_URL}`);
 }
-exports.warnDeprecated = warnDeprecated;
 /**
  * Reset the internal emitted-warnings set. Test-only helper, exported so
  * `__tests__/deprecation.test.tsx` can assert "fires exactly once per
@@ -52,7 +55,6 @@ exports.warnDeprecated = warnDeprecated;
 function __resetDeprecationWarnings() {
     emitted.clear();
 }
-exports.__resetDeprecationWarnings = __resetDeprecationWarnings;
 /**
  * Wrap a plain function so the first call emits the deprecation warning and
  * subsequent calls pass through unchanged.
@@ -76,7 +78,6 @@ function deprecate(fn, oldName, newName, kind = 'function') {
     }
     return wrapped;
 }
-exports.deprecate = deprecate;
 /**
  * Wrap a React component so the deprecation warning fires once on first
  * mount, then renders the underlying component transparently.
@@ -99,7 +100,6 @@ function deprecateComponent(Component, oldName, newName) {
     Wrapped.displayName = oldName;
     return Wrapped;
 }
-exports.deprecateComponent = deprecateComponent;
 /**
  * Wrap an object so any property read fires the deprecation warning.
  *
@@ -122,5 +122,4 @@ function deprecateObject(obj, oldName, newName) {
         },
     });
 }
-exports.deprecateObject = deprecateObject;
 //# sourceMappingURL=deprecation.js.map

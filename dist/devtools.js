@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = void 0;
+exports.DevToolsActions = void 0;
+exports.createDevTools = createDevTools;
+exports.getDevTools = getDevTools;
+exports.useDevTools = useDevTools;
 class FusionStateDevTools {
     constructor(config = {}) {
         var _a, _b;
@@ -120,12 +123,10 @@ function createDevTools(config) {
     }
     return devToolsInstance;
 }
-exports.createDevTools = createDevTools;
 /** Obtenir l'instance actuelle des DevTools */
 function getDevTools() {
     return devToolsInstance;
 }
-exports.getDevTools = getDevTools;
 /**
  * Hook React pour utiliser les DevTools dans les composants
  * ✅ PERFORMANCE: Ne fait rien en production si devOnly=true
@@ -139,7 +140,6 @@ function useDevTools() {
         send: (_c = devtools === null || devtools === void 0 ? void 0 : devtools.send.bind(devtools)) !== null && _c !== void 0 ? _c : (() => { }),
     };
 }
-exports.useDevTools = useDevTools;
 /**
  * Action types for DevTools
  * Helps standardize messages

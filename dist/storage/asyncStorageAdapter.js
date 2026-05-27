@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAsyncStorageAdapter = void 0;
+exports.createAsyncStorageAdapter = createAsyncStorageAdapter;
 /**
  * Creates an AsyncStorage adapter for React Native
  *
@@ -70,5 +70,4 @@ function createAsyncStorageAdapter(AsyncStorage, debug = false) {
         },
     };
 }
-exports.createAsyncStorageAdapter = createAsyncStorageAdapter;
 //# sourceMappingURL=asyncStorageAdapter.js.map
