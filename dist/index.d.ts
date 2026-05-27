@@ -1,6 +1,7 @@
 import { useFusionState } from './useFusionState';
 import { FusionStateProvider } from './FusionStateProvider';
 export { useFusionState, FusionStateProvider };
+export { useFusionStore, shallow } from './useFusionStore';
 import { createAsyncStorageAdapter } from './storage/asyncStorageAdapter';
 export { createAsyncStorageAdapter };
 export { useFusionStateLog } from './useFusionStateLog';

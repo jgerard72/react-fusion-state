@@ -377,94 +377,6 @@ var ReactFusionState = (() => {
     }
   });
 
-  // dist/utils/index.js
-  var require_utils = __commonJS({
-    "dist/utils/index.js"(exports) {
-      "use strict";
-      Object.defineProperty(exports, "__esModule", { value: true });
-      exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.debounce = exports.formatErrorMessage = void 0;
-      var formatErrorMessage = (message, ...values) => {
-        return values.reduce((msg, value, index) => msg.replace(`{${index}}`, value), message);
-      };
-      exports.formatErrorMessage = formatErrorMessage;
-      function debounce(fn, delay) {
-        let timer = null;
-        return (...args) => {
-          if (timer)
-            clearTimeout(timer);
-          timer = setTimeout(() => fn(...args), delay);
-        };
-      }
-      exports.debounce = debounce;
-      var customIsEqual = (a, b) => {
-        if (a === b)
-          return true;
-        if (a == null || b == null)
-          return a === b;
-        if (typeof a !== typeof b)
-          return false;
-        if (typeof a !== "object")
-          return false;
-        if (Array.isArray(a)) {
-          if (!Array.isArray(b) || a.length !== b.length)
-            return false;
-          for (let i = 0; i < a.length; i++) {
-            if (!(0, exports.customIsEqual)(a[i], b[i]))
-              return false;
-          }
-          return true;
-        }
-        if (Array.isArray(b))
-          return false;
-        const keysA = Object.keys(a);
-        const keysB = Object.keys(b);
-        if (keysA.length !== keysB.length)
-          return false;
-        for (const key of keysA) {
-          if (!keysB.includes(key))
-            return false;
-          if (!(0, exports.customIsEqual)(a[key], b[key]))
-            return false;
-        }
-        return true;
-      };
-      exports.customIsEqual = customIsEqual;
-      var shallowEqual = (a, b) => {
-        if (a === b)
-          return true;
-        if (a == null || b == null)
-          return a === b;
-        if (typeof a !== typeof b)
-          return false;
-        if (typeof a !== "object")
-          return false;
-        if (Array.isArray(a)) {
-          if (!Array.isArray(b) || a.length !== b.length)
-            return false;
-          for (let i = 0; i < a.length; i++) {
-            if (a[i] !== b[i])
-              return false;
-          }
-          return true;
-        }
-        if (Array.isArray(b))
-          return false;
-        const keysA = Object.keys(a);
-        const keysB = Object.keys(b);
-        if (keysA.length !== keysB.length)
-          return false;
-        for (const key of keysA) {
-          if (!keysB.includes(key) || a[key] !== b[key]) {
-            return false;
-          }
-        }
-        return true;
-      };
-      exports.shallowEqual = shallowEqual;
-      exports.simpleDeepEqual = exports.customIsEqual;
-    }
-  });
-
   // dist/devtools.js
   var require_devtools = __commonJS({
     "dist/devtools.js"(exports) {
@@ -602,6 +514,341 @@ var ReactFusionState = (() => {
     }
   });
 
+  // dist/utils/index.js
+  var require_utils = __commonJS({
+    "dist/utils/index.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.simpleDeepEqual = exports.shallowEqual = exports.customIsEqual = exports.debounce = exports.formatErrorMessage = void 0;
+      var formatErrorMessage = (message, ...values) => {
+        return values.reduce((msg, value, index) => msg.replace(`{${index}}`, value), message);
+      };
+      exports.formatErrorMessage = formatErrorMessage;
+      function debounce(fn, delay) {
+        let timer = null;
+        return (...args) => {
+          if (timer)
+            clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), delay);
+        };
+      }
+      exports.debounce = debounce;
+      var customIsEqual = (a, b) => {
+        if (a === b)
+          return true;
+        if (a == null || b == null)
+          return a === b;
+        if (typeof a !== typeof b)
+          return false;
+        if (typeof a !== "object")
+          return false;
+        if (Array.isArray(a)) {
+          if (!Array.isArray(b) || a.length !== b.length)
+            return false;
+          for (let i = 0; i < a.length; i++) {
+            if (!(0, exports.customIsEqual)(a[i], b[i]))
+              return false;
+          }
+          return true;
+        }
+        if (Array.isArray(b))
+          return false;
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
+        if (keysA.length !== keysB.length)
+          return false;
+        for (const key of keysA) {
+          if (!keysB.includes(key))
+            return false;
+          if (!(0, exports.customIsEqual)(a[key], b[key]))
+            return false;
+        }
+        return true;
+      };
+      exports.customIsEqual = customIsEqual;
+      var shallowEqual = (a, b) => {
+        if (a === b)
+          return true;
+        if (a == null || b == null)
+          return a === b;
+        if (typeof a !== typeof b)
+          return false;
+        if (typeof a !== "object")
+          return false;
+        if (Array.isArray(a)) {
+          if (!Array.isArray(b) || a.length !== b.length)
+            return false;
+          for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i])
+              return false;
+          }
+          return true;
+        }
+        if (Array.isArray(b))
+          return false;
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
+        if (keysA.length !== keysB.length)
+          return false;
+        for (const key of keysA) {
+          if (!keysB.includes(key) || a[key] !== b[key]) {
+            return false;
+          }
+        }
+        return true;
+      };
+      exports.shallowEqual = shallowEqual;
+      exports.simpleDeepEqual = exports.customIsEqual;
+    }
+  });
+
+  // dist/hooks/usePersistence.js
+  var require_usePersistence = __commonJS({
+    "dist/hooks/usePersistence.js"(exports) {
+      "use strict";
+      var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
+        function adopt(value) {
+          return value instanceof P ? value : new P(function(resolve) {
+            resolve(value);
+          });
+        }
+        return new (P || (P = Promise))(function(resolve, reject) {
+          function fulfilled(value) {
+            try {
+              step(generator.next(value));
+            } catch (e) {
+              reject(e);
+            }
+          }
+          function rejected(value) {
+            try {
+              step(generator["throw"](value));
+            } catch (e) {
+              reject(e);
+            }
+          }
+          function step(result) {
+            result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+          }
+          step((generator = generator.apply(thisArg, _arguments || [])).next());
+        });
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.usePersistence = exports.loadSyncInitialState = void 0;
+      var react_1 = require_react();
+      var types_1 = require_types();
+      var storageAdapters_1 = require_storageAdapters();
+      var utils_1 = require_utils();
+      var STORAGE_KEY = "fusion_state_all";
+      function loadSyncInitialState(config, initialState, debug = false) {
+        if (!config)
+          return { state: initialState, error: null };
+        if (config.loadOnInit === false)
+          return { state: initialState, error: null };
+        if (typeof window === "undefined")
+          return { state: initialState, error: null };
+        const adapter = config.adapter;
+        if (!(adapter === null || adapter === void 0 ? void 0 : adapter.getItemSync))
+          return { state: initialState, error: null };
+        try {
+          const item = adapter.getItemSync(STORAGE_KEY);
+          if (!item)
+            return { state: initialState, error: null };
+          const parsed = JSON.parse(item);
+          if (debug) {
+            console.log("[FusionState] Loaded state synchronously:", parsed);
+          }
+          return { state: Object.assign(Object.assign({}, initialState), parsed), error: null };
+        } catch (error) {
+          const errorObj = error instanceof Error ? error : new Error(String(error));
+          if (debug) {
+            console.warn("[FusionState] Synchronous load failed, will try async:", error);
+          }
+          return { state: initialState, error: errorObj };
+        }
+      }
+      exports.loadSyncInitialState = loadSyncInitialState;
+      function usePersistence(config, setStateRaw, syncLoadError, debug = false) {
+        var _a, _b, _c, _d, _e, _f;
+        const configRef = (0, react_1.useRef)(config);
+        const storageAdapter = (0, react_1.useMemo)(() => {
+          var _a2;
+          return ((_a2 = configRef.current) === null || _a2 === void 0 ? void 0 : _a2.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)();
+        }, []);
+        const shouldLoadOnInit = (_b = (_a = configRef.current) === null || _a === void 0 ? void 0 : _a.loadOnInit) !== null && _b !== void 0 ? _b : true;
+        const shouldSaveOnChange = (_d = (_c = configRef.current) === null || _c === void 0 ? void 0 : _c.saveOnChange) !== null && _d !== void 0 ? _d : true;
+        const debounceTime = (_f = (_e = configRef.current) === null || _e === void 0 ? void 0 : _e.debounceTime) !== null && _f !== void 0 ? _f : 0;
+        const computeInitialHydrated = () => {
+          if (!configRef.current)
+            return true;
+          if (!shouldLoadOnInit || !storageAdapter)
+            return true;
+          if (typeof window !== "undefined") {
+            const extended = storageAdapter;
+            if (extended.getItemSync)
+              return true;
+          }
+          return false;
+        };
+        const [isHydrated, setIsHydrated] = (0, react_1.useState)(computeInitialHydrated);
+        const isHydratedRef = (0, react_1.useRef)(isHydrated);
+        const prevPersistedRef = (0, react_1.useRef)({});
+        const skipPersistOnceRef = (0, react_1.useRef)(false);
+        const isInitialLoadDoneRef = (0, react_1.useRef)(false);
+        const syncErrorRef = (0, react_1.useRef)(syncLoadError);
+        (0, react_1.useEffect)(() => {
+          var _a2;
+          const err = syncErrorRef.current;
+          if (!err)
+            return;
+          if (debug) {
+            console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(err)));
+          }
+          const cfg = configRef.current;
+          (_a2 = cfg === null || cfg === void 0 ? void 0 : cfg.onLoadError) === null || _a2 === void 0 ? void 0 : _a2.call(cfg, err, STORAGE_KEY);
+          syncErrorRef.current = null;
+        }, []);
+        (0, react_1.useEffect)(() => {
+          const markHydrated = () => {
+            isInitialLoadDoneRef.current = true;
+            if (!isHydratedRef.current) {
+              isHydratedRef.current = true;
+              setIsHydrated(true);
+            }
+          };
+          if (!shouldLoadOnInit || !storageAdapter || isInitialLoadDoneRef.current) {
+            isInitialLoadDoneRef.current = true;
+            return;
+          }
+          if (typeof window !== "undefined") {
+            const extended = storageAdapter;
+            if (extended.getItemSync) {
+              markHydrated();
+              return;
+            }
+          }
+          const load = () => __awaiter(this, void 0, void 0, function* () {
+            var _a2;
+            try {
+              const raw = yield storageAdapter.getItem(STORAGE_KEY);
+              if (raw) {
+                const stored = JSON.parse(raw);
+                prevPersistedRef.current = Object.assign({}, stored);
+                skipPersistOnceRef.current = true;
+                setStateRaw((prev) => {
+                  const merged = Object.assign(Object.assign({}, prev), stored);
+                  if (debug) {
+                    console.log("[FusionState] Loaded state from storage (async):", stored);
+                    console.log("[FusionState] Merged state:", merged);
+                  }
+                  return merged;
+                });
+              } else if (debug) {
+                console.log("[FusionState] No stored data found");
+              }
+              markHydrated();
+            } catch (error) {
+              const errorObj = error instanceof Error ? error : new Error(String(error));
+              if (debug) {
+                console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(error)));
+              }
+              const cfg = configRef.current;
+              (_a2 = cfg === null || cfg === void 0 ? void 0 : cfg.onLoadError) === null || _a2 === void 0 ? void 0 : _a2.call(cfg, errorObj, STORAGE_KEY);
+              markHydrated();
+            }
+          });
+          load();
+        }, [storageAdapter, shouldLoadOnInit, debug, setStateRaw]);
+        const filterPersistKeys = (0, react_1.useCallback)((newState) => {
+          var _a2;
+          const persistKeys = (_a2 = configRef.current) === null || _a2 === void 0 ? void 0 : _a2.persistKeys;
+          if (!persistKeys)
+            return {};
+          if (persistKeys === true)
+            return Object.assign({}, newState);
+          const filtered = {};
+          if (Array.isArray(persistKeys)) {
+            persistKeys.forEach((key) => {
+              if (key in newState)
+                filtered[key] = newState[key];
+            });
+          } else if (typeof persistKeys === "function") {
+            const filterFn = persistKeys;
+            Object.keys(newState).forEach((key) => {
+              if (filterFn(key, newState[key]))
+                filtered[key] = newState[key];
+            });
+          }
+          return filtered;
+        }, []);
+        const save = (0, react_1.useMemo)(() => {
+          const rawSave = (newState) => __awaiter(this, void 0, void 0, function* () {
+            var _a2;
+            if (!storageAdapter || !shouldSaveOnChange)
+              return;
+            const toSave = filterPersistKeys(newState);
+            if (Object.keys(toSave).length === 0)
+              return;
+            try {
+              const changed = !(0, utils_1.simpleDeepEqual)(toSave, prevPersistedRef.current);
+              if (!changed) {
+                if (debug) {
+                  console.log("[FusionState] No changes detected, skipping save");
+                }
+                return;
+              }
+              const cfg = configRef.current;
+              const customSaveCallback = cfg && "customSaveCallback" in cfg ? (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                cfg.customSaveCallback
+              ) : void 0;
+              if (typeof customSaveCallback === "function") {
+                yield customSaveCallback(toSave, storageAdapter, "fusion_state");
+              } else {
+                yield storageAdapter.setItem(STORAGE_KEY, JSON.stringify(toSave));
+              }
+              prevPersistedRef.current = Object.assign({}, toSave);
+              if (debug) {
+                console.log("[FusionState] Saved state to storage:", toSave);
+              }
+            } catch (error) {
+              const errorObj = error instanceof Error ? error : new Error(String(error));
+              if (debug) {
+                console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR, String(error)));
+              }
+              const cfg = configRef.current;
+              (_a2 = cfg === null || cfg === void 0 ? void 0 : cfg.onSaveError) === null || _a2 === void 0 ? void 0 : _a2.call(cfg, errorObj, toSave);
+            }
+          });
+          return debounceTime > 0 ? (0, utils_1.debounce)(rawSave, debounceTime) : rawSave;
+        }, [
+          storageAdapter,
+          shouldSaveOnChange,
+          debounceTime,
+          debug,
+          filterPersistKeys
+        ]);
+        const shouldSkipNextSave = (0, react_1.useCallback)(() => {
+          if (skipPersistOnceRef.current) {
+            skipPersistOnceRef.current = false;
+            return true;
+          }
+          return false;
+        }, []);
+        return {
+          isHydrated,
+          save: (state) => {
+            if (!shouldSaveOnChange)
+              return;
+            save(state);
+          },
+          shouldSkipNextSave
+        };
+      }
+      exports.usePersistence = usePersistence;
+    }
+  });
+
   // dist/utils/batch.js
   var require_batch = __commonJS({
     "dist/utils/batch.js"(exports) {
@@ -636,6 +883,120 @@ var ReactFusionState = (() => {
     }
   });
 
+  // dist/hooks/useKeySubscriptions.js
+  var require_useKeySubscriptions = __commonJS({
+    "dist/hooks/useKeySubscriptions.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.useKeySubscriptions = void 0;
+      var react_1 = require_react();
+      var batch_1 = require_batch();
+      function useKeySubscriptions(state, initialState) {
+        const listenersRef = (0, react_1.useRef)(/* @__PURE__ */ new Map());
+        const globalListenersRef = (0, react_1.useRef)(/* @__PURE__ */ new Set());
+        const stateRef = (0, react_1.useRef)(state);
+        stateRef.current = state;
+        const initialStateRef = (0, react_1.useRef)(initialState);
+        initialStateRef.current = initialState;
+        const subscribeKey = (0, react_1.useCallback)((key, listener) => {
+          let set = listenersRef.current.get(key);
+          if (!set) {
+            set = /* @__PURE__ */ new Set();
+            listenersRef.current.set(key, set);
+          }
+          set.add(listener);
+          return () => {
+            set.delete(listener);
+            if (set.size === 0) {
+              listenersRef.current.delete(key);
+            }
+          };
+        }, []);
+        const notifyKey = (0, react_1.useCallback)((key) => {
+          const listeners = listenersRef.current.get(key);
+          if (listeners && listeners.size > 0) {
+            (0, batch_1.batch)(() => {
+              listeners.forEach((l) => l());
+            });
+          }
+        }, []);
+        const getKeySnapshot = (0, react_1.useCallback)((key) => {
+          const current = stateRef.current;
+          return key in current ? current[key] : void 0;
+        }, []);
+        const getServerSnapshot = (0, react_1.useCallback)((key) => {
+          const initial = initialStateRef.current;
+          return key in initial ? initial[key] : void 0;
+        }, []);
+        const subscribeAll = (0, react_1.useCallback)((listener) => {
+          globalListenersRef.current.add(listener);
+          return () => {
+            globalListenersRef.current.delete(listener);
+          };
+        }, []);
+        const notifyAll = (0, react_1.useCallback)(() => {
+          if (globalListenersRef.current.size === 0)
+            return;
+          (0, batch_1.batch)(() => {
+            globalListenersRef.current.forEach((l) => l());
+          });
+        }, []);
+        const getStateSnapshot = (0, react_1.useCallback)(() => stateRef.current, []);
+        return {
+          subscribeKey,
+          notifyKey,
+          getKeySnapshot,
+          getServerSnapshot,
+          subscribeAll,
+          notifyAll,
+          getStateSnapshot
+        };
+      }
+      exports.useKeySubscriptions = useKeySubscriptions;
+    }
+  });
+
+  // dist/hooks/useDevToolsBridge.js
+  var require_useDevToolsBridge = __commonJS({
+    "dist/hooks/useDevToolsBridge.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.useDevToolsBridge = void 0;
+      var react_1 = require_react();
+      var devtools_1 = require_devtools();
+      function useDevToolsBridge(config, initialState) {
+        var _a;
+        const instance = (0, react_1.useMemo)(() => {
+          var _a2;
+          if (!config)
+            return null;
+          const resolved = typeof config === "boolean" ? { name: "FusionState", devOnly: true } : Object.assign(Object.assign({}, config), { devOnly: (_a2 = config.devOnly) !== null && _a2 !== void 0 ? _a2 : true });
+          return (0, devtools_1.createDevTools)(resolved);
+        }, [config]);
+        (0, react_1.useEffect)(() => {
+          if (!(instance === null || instance === void 0 ? void 0 : instance.enabled))
+            return;
+          instance.init(initialState);
+          instance.send(devtools_1.DevToolsActions.INIT, initialState, void 0, {
+            initialState
+          });
+        }, [instance]);
+        const enabled = (_a = instance === null || instance === void 0 ? void 0 : instance.enabled) !== null && _a !== void 0 ? _a : false;
+        const send = (0, react_1.useMemo)(() => {
+          if (!(instance === null || instance === void 0 ? void 0 : instance.enabled)) {
+            return () => {
+            };
+          }
+          return (actionType, state, key, payload) => {
+            instance.send(actionType, state, key, payload);
+          };
+        }, [instance]);
+        return { enabled, send };
+      }
+      exports.useDevToolsBridge = useDevToolsBridge;
+    }
+  });
+
   // dist/FusionStateProvider.js
   var require_FusionStateProvider = __commonJS({
     "dist/FusionStateProvider.js"(exports) {
@@ -667,43 +1028,17 @@ var ReactFusionState = (() => {
         __setModuleDefault(result, mod);
         return result;
       };
-      var __awaiter = exports && exports.__awaiter || function(thisArg, _arguments, P, generator) {
-        function adopt(value) {
-          return value instanceof P ? value : new P(function(resolve) {
-            resolve(value);
-          });
-        }
-        return new (P || (P = Promise))(function(resolve, reject) {
-          function fulfilled(value) {
-            try {
-              step(generator.next(value));
-            } catch (e) {
-              reject(e);
-            }
-          }
-          function rejected(value) {
-            try {
-              step(generator["throw"](value));
-            } catch (e) {
-              reject(e);
-            }
-          }
-          function step(result) {
-            result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-          }
-          step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-      };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.FusionStateProvider = exports.useGlobalState = void 0;
+      exports.FusionStateProvider = exports.useFusionStaticAPI = exports.useGlobalState = void 0;
       var react_1 = __importStar(require_react());
       var types_1 = require_types();
-      var storageAdapters_1 = require_storageAdapters();
       var autoDetect_1 = require_autoDetect();
-      var utils_1 = require_utils();
       var devtools_1 = require_devtools();
-      var batch_1 = require_batch();
+      var usePersistence_1 = require_usePersistence();
+      var useKeySubscriptions_1 = require_useKeySubscriptions();
+      var useDevToolsBridge_1 = require_useDevToolsBridge();
       var GlobalStateContext = (0, react_1.createContext)(void 0);
+      var FusionStaticContext = (0, react_1.createContext)(void 0);
       var useGlobalState = () => {
         const context = (0, react_1.useContext)(GlobalStateContext);
         if (!context) {
@@ -712,6 +1047,14 @@ var ReactFusionState = (() => {
         return context;
       };
       exports.useGlobalState = useGlobalState;
+      var useFusionStaticAPI = () => {
+        const ctx = (0, react_1.useContext)(FusionStaticContext);
+        if (!ctx) {
+          throw new Error(types_1.FusionStateErrorMessages.PROVIDER_MISSING);
+        }
+        return ctx;
+      };
+      exports.useFusionStaticAPI = useFusionStaticAPI;
       function normalizePersistenceConfig(config, debug = false) {
         if (!config)
           return void 0;
@@ -747,242 +1090,22 @@ var ReactFusionState = (() => {
         };
       }
       exports.FusionStateProvider = (0, react_1.memo)(({ children, initialState = {}, debug = false, persistence, devTools = false }) => {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b;
         const normalizedPersistence = (0, react_1.useMemo)(() => normalizePersistenceConfig(persistence, debug), [persistence, debug]);
-        const devToolsInstance = (0, react_1.useMemo)(() => {
-          var _a2;
-          if (!devTools)
-            return null;
-          const config = typeof devTools === "boolean" ? { name: "FusionState", devOnly: true } : Object.assign(Object.assign({}, devTools), { devOnly: (_a2 = devTools.devOnly) !== null && _a2 !== void 0 ? _a2 : true });
-          return (0, devtools_1.createDevTools)(config);
-        }, [devTools]);
-        const persistenceRef = (0, react_1.useRef)(normalizedPersistence);
-        const storageAdapter = (0, react_1.useMemo)(() => {
-          var _a2;
-          return ((_a2 = persistenceRef.current) === null || _a2 === void 0 ? void 0 : _a2.adapter) || (0, storageAdapters_1.createNoopStorageAdapter)();
-        }, []);
-        const keyPrefix = "fusion_state";
-        const shouldLoadOnInit = (_b = (_a = persistenceRef.current) === null || _a === void 0 ? void 0 : _a.loadOnInit) !== null && _b !== void 0 ? _b : true;
-        const shouldSaveOnChange = (_d = (_c = persistenceRef.current) === null || _c === void 0 ? void 0 : _c.saveOnChange) !== null && _d !== void 0 ? _d : true;
-        const debounceTime = (_f = (_e = persistenceRef.current) === null || _e === void 0 ? void 0 : _e.debounceTime) !== null && _f !== void 0 ? _f : 0;
-        const syncLoadErrorRef = (0, react_1.useRef)(null);
+        const syncLoadResultRef = (0, react_1.useRef)(null);
         const [state, setStateRaw] = (0, react_1.useState)(() => {
-          if (shouldLoadOnInit && storageAdapter && typeof window !== "undefined") {
-            try {
-              const extendedAdapter = storageAdapter;
-              if (extendedAdapter.getItemSync) {
-                const item = extendedAdapter.getItemSync(`${keyPrefix}_all`);
-                if (item) {
-                  const storedData = JSON.parse(item);
-                  if (debug) {
-                    console.log("[FusionState] Loaded state synchronously:", storedData);
-                  }
-                  return Object.assign(Object.assign({}, initialState), storedData);
-                }
-              }
-            } catch (error) {
-              const errorObj = error instanceof Error ? error : new Error(String(error));
-              syncLoadErrorRef.current = errorObj;
-              if (debug) {
-                console.warn("[FusionState] Synchronous load failed, will try async:", error);
-              }
-            }
-          }
-          return initialState;
+          const result = (0, usePersistence_1.loadSyncInitialState)(normalizedPersistence, initialState, debug);
+          syncLoadResultRef.current = result;
+          return result.state;
         });
-        const computeInitialHydrated = () => {
-          if (!persistenceRef.current)
-            return true;
-          if (!shouldLoadOnInit || !storageAdapter)
-            return true;
-          if (typeof window !== "undefined") {
-            const extendedAdapter = storageAdapter;
-            if (extendedAdapter.getItemSync)
-              return true;
-          }
-          return false;
-        };
-        const [isHydrated, setIsHydrated] = (0, react_1.useState)(computeInitialHydrated);
-        const isHydratedRef = (0, react_1.useRef)(isHydrated);
-        (0, react_1.useEffect)(() => {
-          if (devToolsInstance === null || devToolsInstance === void 0 ? void 0 : devToolsInstance.enabled) {
-            devToolsInstance.init(state);
-            devToolsInstance.send(devtools_1.DevToolsActions.INIT, state, void 0, {
-              initialState
-            });
-          }
-        }, [devToolsInstance]);
-        const initializingKeys = (0, react_1.useRef)(/* @__PURE__ */ new Set());
-        const isInitialLoadDone = (0, react_1.useRef)(false);
-        const prevPersistedState = (0, react_1.useRef)({});
-        const prevStateRef = (0, react_1.useRef)(state);
-        const skipPersistOnceRef = (0, react_1.useRef)(false);
-        (0, react_1.useEffect)(() => {
-          if (syncLoadErrorRef.current) {
-            if (debug) {
-              console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(syncLoadErrorRef.current)));
-            }
-            const config = persistenceRef.current;
-            if (config === null || config === void 0 ? void 0 : config.onLoadError) {
-              config.onLoadError(syncLoadErrorRef.current, `${keyPrefix}_all`);
-            }
-            syncLoadErrorRef.current = null;
-          }
-        }, []);
-        (0, react_1.useEffect)(() => {
-          const markHydrated = () => {
-            isInitialLoadDone.current = true;
-            if (!isHydratedRef.current) {
-              isHydratedRef.current = true;
-              setIsHydrated(true);
-            }
-          };
-          if (shouldLoadOnInit && !isInitialLoadDone.current && storageAdapter) {
-            const loadStateFromStorage = () => __awaiter(void 0, void 0, void 0, function* () {
-              try {
-                const storedDataRaw = yield storageAdapter.getItem(`${keyPrefix}_all`);
-                if (storedDataRaw) {
-                  const storedData = JSON.parse(storedDataRaw);
-                  prevPersistedState.current = Object.assign({}, storedData);
-                  skipPersistOnceRef.current = true;
-                  setStateRaw((prevState) => {
-                    const mergedState = Object.assign(Object.assign({}, prevState), storedData);
-                    if (debug) {
-                      console.log("[FusionState] Loaded state from storage (async):", storedData);
-                      console.log("[FusionState] Merged state:", mergedState);
-                    }
-                    return mergedState;
-                  });
-                }
-                markHydrated();
-                if (debug && !storedDataRaw) {
-                  console.log("[FusionState] No stored data found");
-                }
-              } catch (error) {
-                const errorObj = error instanceof Error ? error : new Error(String(error));
-                if (debug) {
-                  console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_READ_ERROR, String(error)));
-                }
-                const config = persistenceRef.current;
-                if (config === null || config === void 0 ? void 0 : config.onLoadError) {
-                  config.onLoadError(errorObj, `${keyPrefix}_all`);
-                }
-                markHydrated();
-              }
-            });
-            loadStateFromStorage();
-          } else {
-            isInitialLoadDone.current = true;
-          }
-        }, [storageAdapter, keyPrefix, shouldLoadOnInit, debug]);
-        const filterPersistKeys = (0, react_1.useMemo)(() => {
-          return (newState) => {
-            var _a2;
-            const persistKeys = (_a2 = persistenceRef.current) === null || _a2 === void 0 ? void 0 : _a2.persistKeys;
-            if (!persistKeys)
-              return {};
-            if (persistKeys === true)
-              return Object.assign({}, newState);
-            const filteredState = {};
-            if (Array.isArray(persistKeys)) {
-              persistKeys.forEach((key) => {
-                if (key in newState) {
-                  filteredState[key] = newState[key];
-                }
-              });
-            } else if (typeof persistKeys === "function") {
-              Object.keys(newState).forEach((key) => {
-                const filterFn = persistKeys;
-                if (filterFn(key, newState[key])) {
-                  filteredState[key] = newState[key];
-                }
-              });
-            }
-            return filteredState;
-          };
-        }, []);
-        const saveStateToStorage = (0, react_1.useMemo)(() => {
-          const save = (newState) => __awaiter(void 0, void 0, void 0, function* () {
-            if (!storageAdapter || !shouldSaveOnChange)
-              return;
-            const stateToSave = filterPersistKeys(newState);
-            if (Object.keys(stateToSave).length === 0)
-              return;
-            try {
-              const hasChanged = !(0, utils_1.simpleDeepEqual)(stateToSave, prevPersistedState.current);
-              if (!hasChanged) {
-                if (debug) {
-                  console.log("[FusionState] No changes detected, skipping save");
-                }
-                return;
-              }
-              const persistenceConfig = persistenceRef.current;
-              if (persistenceConfig) {
-                const customSaveCallback = "customSaveCallback" in persistenceConfig ? persistenceConfig.customSaveCallback : void 0;
-                if (customSaveCallback && typeof customSaveCallback === "function") {
-                  yield customSaveCallback(stateToSave, storageAdapter, keyPrefix);
-                } else {
-                  yield storageAdapter.setItem(`${keyPrefix}_all`, JSON.stringify(stateToSave));
-                }
-              } else {
-                yield storageAdapter.setItem(`${keyPrefix}_all`, JSON.stringify(stateToSave));
-              }
-              prevPersistedState.current = Object.assign({}, stateToSave);
-              if (debug) {
-                console.log("[FusionState] Saved state to storage:", stateToSave);
-              }
-            } catch (error) {
-              const errorObj = error instanceof Error ? error : new Error(String(error));
-              if (debug) {
-                console.error((0, utils_1.formatErrorMessage)(types_1.FusionStateErrorMessages.PERSISTENCE_WRITE_ERROR, String(error)));
-              }
-              const config = persistenceRef.current;
-              if (config === null || config === void 0 ? void 0 : config.onSaveError) {
-                config.onSaveError(errorObj, stateToSave);
-              }
-            }
-          });
-          return debounceTime > 0 ? (0, utils_1.debounce)(save, debounceTime) : save;
-        }, [
-          storageAdapter,
-          keyPrefix,
-          shouldSaveOnChange,
-          debug,
-          debounceTime,
-          filterPersistKeys
-        ]);
-        const keyListenersRef = (0, react_1.useRef)(/* @__PURE__ */ new Map());
-        const subscribeKey = (0, react_1.useCallback)((key, listener) => {
-          let set = keyListenersRef.current.get(key);
-          if (!set) {
-            set = /* @__PURE__ */ new Set();
-            keyListenersRef.current.set(key, set);
-          }
-          set.add(listener);
-          return () => {
-            set.delete(listener);
-            if (set.size === 0) {
-              keyListenersRef.current.delete(key);
-            }
-          };
-        }, []);
-        const notifyKey = (0, react_1.useCallback)((key) => {
-          const listeners = keyListenersRef.current.get(key);
-          if (listeners) {
-            (0, batch_1.batch)(() => {
-              listeners.forEach((l) => l());
-            });
-          }
-        }, []);
-        const getKeySnapshot = (0, react_1.useCallback)((key) => {
-          return key in state ? state[key] : void 0;
-        }, [state]);
-        const getServerSnapshot = (0, react_1.useCallback)((key) => {
-          return key in initialState ? initialState[key] : void 0;
-        }, [initialState]);
+        const persistenceAPI = (0, usePersistence_1.usePersistence)(normalizedPersistence, setStateRaw, (_b = (_a = syncLoadResultRef.current) === null || _a === void 0 ? void 0 : _a.error) !== null && _b !== void 0 ? _b : null, debug);
+        const subscriptions = (0, useKeySubscriptions_1.useKeySubscriptions)(state, initialState);
+        const devToolsAPI = (0, useDevToolsBridge_1.useDevToolsBridge)(devTools, initialState);
         const setState = (0, react_1.useCallback)((updater) => {
           setStateRaw(updater);
         }, []);
+        const initializingKeysRef = (0, react_1.useRef)(/* @__PURE__ */ new Set());
+        const prevStateRef = (0, react_1.useRef)(state);
         (0, react_1.useEffect)(() => {
           const prev = prevStateRef.current;
           if (prev === state)
@@ -1003,7 +1126,8 @@ var ReactFusionState = (() => {
           }
           if (changedKeys.length === 0)
             return;
-          changedKeys.forEach(notifyKey);
+          changedKeys.forEach(subscriptions.notifyKey);
+          subscriptions.notifyAll();
           if (debug) {
             console.log("[FusionState] State updated:", {
               previous: prev,
@@ -1011,44 +1135,45 @@ var ReactFusionState = (() => {
               diff: Object.fromEntries(changedKeys.map((k) => [k, state[k]]))
             });
           }
-          if (devToolsInstance === null || devToolsInstance === void 0 ? void 0 : devToolsInstance.enabled) {
-            devToolsInstance.send(devtools_1.DevToolsActions.SET_STATE, state, changedKeys.join(", "), {
+          if (devToolsAPI.enabled) {
+            devToolsAPI.send(devtools_1.DevToolsActions.SET_STATE, state, changedKeys.join(", "), {
               changed: changedKeys,
               diff: Object.fromEntries(changedKeys.map((k) => [k, { from: prev[k], to: state[k] }]))
             });
           }
-          if (skipPersistOnceRef.current) {
-            skipPersistOnceRef.current = false;
+          if (persistenceAPI.shouldSkipNextSave())
             return;
-          }
-          if (shouldSaveOnChange) {
-            saveStateToStorage(state);
-          }
-        }, [
-          state,
-          notifyKey,
-          debug,
-          devToolsInstance,
-          shouldSaveOnChange,
-          saveStateToStorage
-        ]);
+          persistenceAPI.save(state);
+        }, [state, subscriptions, debug, devToolsAPI, persistenceAPI]);
         const value = (0, react_1.useMemo)(() => ({
           state,
           setState,
-          initializingKeys: initializingKeys.current,
-          subscribeKey,
-          getKeySnapshot,
-          getServerSnapshot,
-          isHydrated
+          initializingKeys: initializingKeysRef.current,
+          subscribeKey: subscriptions.subscribeKey,
+          getKeySnapshot: subscriptions.getKeySnapshot,
+          getServerSnapshot: subscriptions.getServerSnapshot,
+          subscribeAll: subscriptions.subscribeAll,
+          getStateSnapshot: subscriptions.getStateSnapshot,
+          isHydrated: persistenceAPI.isHydrated
         }), [
           state,
           setState,
-          subscribeKey,
-          getKeySnapshot,
-          getServerSnapshot,
-          isHydrated
+          subscriptions.subscribeKey,
+          subscriptions.getKeySnapshot,
+          subscriptions.getServerSnapshot,
+          subscriptions.subscribeAll,
+          subscriptions.getStateSnapshot,
+          persistenceAPI.isHydrated
         ]);
-        return react_1.default.createElement(GlobalStateContext.Provider, { value }, children);
+        const staticValue = (0, react_1.useMemo)(() => ({
+          subscribeAll: subscriptions.subscribeAll,
+          getStateSnapshot: subscriptions.getStateSnapshot
+        }), [subscriptions.subscribeAll, subscriptions.getStateSnapshot]);
+        return react_1.default.createElement(
+          FusionStaticContext.Provider,
+          { value: staticValue },
+          react_1.default.createElement(GlobalStateContext.Provider, { value }, children)
+        );
       });
     }
   });
@@ -1145,6 +1270,42 @@ var ReactFusionState = (() => {
     }
   });
 
+  // dist/useFusionStore.js
+  var require_useFusionStore = __commonJS({
+    "dist/useFusionStore.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.useFusionStore = exports.shallow = void 0;
+      var react_1 = require_react();
+      var FusionStateProvider_1 = require_FusionStateProvider();
+      var utils_1 = require_utils();
+      exports.shallow = utils_1.shallowEqual;
+      function useFusionStore(selector, equalityFn = Object.is) {
+        const { subscribeAll, getStateSnapshot } = (0, FusionStateProvider_1.useFusionStaticAPI)();
+        const selectorRef = (0, react_1.useRef)(selector);
+        selectorRef.current = selector;
+        const equalityFnRef = (0, react_1.useRef)(equalityFn);
+        equalityFnRef.current = equalityFn;
+        const cacheRef = (0, react_1.useRef)({
+          value: void 0,
+          hasValue: false
+        });
+        const getSnapshot = (0, react_1.useCallback)(() => {
+          const next = selectorRef.current(getStateSnapshot());
+          const cache = cacheRef.current;
+          if (cache.hasValue && equalityFnRef.current(cache.value, next)) {
+            return cache.value;
+          }
+          cache.value = next;
+          cache.hasValue = true;
+          return next;
+        }, [getStateSnapshot]);
+        return (0, react_1.useSyncExternalStore)(subscribeAll, getSnapshot, getSnapshot);
+      }
+      exports.useFusionStore = useFusionStore;
+    }
+  });
+
   // dist/useFusionStateLog.js
   var require_useFusionStateLog = __commonJS({
     "dist/useFusionStateLog.js"(exports) {
@@ -1226,7 +1387,7 @@ var ReactFusionState = (() => {
   var require_index = __commonJS({
     "dist/index.js"(exports) {
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.autoDetectStorage = exports.createInMemoryAdapter = exports.createMobileStorageAdapter = exports.createRNStorageAdapter = exports.createWebStorageAdapter = exports.isSSREnvironment = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.AppStateProvider = exports.StateProvider = exports.GlobalStateProvider = exports.useAppState = exports.usePersistentState = exports.useSharedState = exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = exports.UserKeys = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createNamespacedKey = exports.createKey = exports.useGlobalState = exports.useFusionHydrated = exports.useFusionStateLog = exports.createAsyncStorageAdapter = exports.FusionStateProvider = exports.useFusionState = void 0;
+      exports.autoDetectStorage = exports.createInMemoryAdapter = exports.createMobileStorageAdapter = exports.createRNStorageAdapter = exports.createWebStorageAdapter = exports.isSSREnvironment = exports.createMemoryStorageAdapter = exports.detectBestStorageAdapter = exports.NoopStorageAdapter = exports.createLocalStorageAdapter = exports.createNoopStorageAdapter = exports.simpleDeepEqual = exports.debounce = exports.formatErrorMessage = exports.PersistenceError = exports.FusionStateError = exports.FusionStateErrorMessages = exports.AppStateProvider = exports.StateProvider = exports.GlobalStateProvider = exports.useAppState = exports.usePersistentState = exports.useSharedState = exports.DevToolsActions = exports.useDevTools = exports.getDevTools = exports.createDevTools = exports.UserKeys = exports.AppKeys = exports.extractKeyName = exports.isTypedKey = exports.createNamespacedKey = exports.createKey = exports.useGlobalState = exports.useFusionHydrated = exports.useFusionStateLog = exports.createAsyncStorageAdapter = exports.shallow = exports.useFusionStore = exports.FusionStateProvider = exports.useFusionState = void 0;
       var useFusionState_1 = require_useFusionState();
       Object.defineProperty(exports, "useFusionState", { enumerable: true, get: function() {
         return useFusionState_1.useFusionState;
@@ -1234,6 +1395,13 @@ var ReactFusionState = (() => {
       var FusionStateProvider_1 = require_FusionStateProvider();
       Object.defineProperty(exports, "FusionStateProvider", { enumerable: true, get: function() {
         return FusionStateProvider_1.FusionStateProvider;
+      } });
+      var useFusionStore_1 = require_useFusionStore();
+      Object.defineProperty(exports, "useFusionStore", { enumerable: true, get: function() {
+        return useFusionStore_1.useFusionStore;
+      } });
+      Object.defineProperty(exports, "shallow", { enumerable: true, get: function() {
+        return useFusionStore_1.shallow;
       } });
       var asyncStorageAdapter_1 = require_asyncStorageAdapter();
       Object.defineProperty(exports, "createAsyncStorageAdapter", { enumerable: true, get: function() {
@@ -1340,4 +1508,4 @@ var ReactFusionState = (() => {
   });
   return require_index();
 })();
-ReactFusionState.VERSION = "1.1.3";
+ReactFusionState.VERSION = "1.2.0";
