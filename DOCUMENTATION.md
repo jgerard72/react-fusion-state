@@ -1,8 +1,19 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 1.4.1  
+**Version:** 1.4.2  
 **Author:** Jacques GERARD  
 **License:** MIT
+
+## 🎉 **What's New in v1.4.2**
+
+### 🎨 **Banners refresh & docs harmonization (no API change)**
+- **`assets/hero.png`** and **`assets/quick-start.png`** regenerated for the v1.4 era (sober dark + cyan style, `createStore()` shown in `quick-start`). Compressed via `scripts/compress-assets.js` — **2.6 MB → 181 KB (-93%)** combined.
+- **"0 runtime deps"** wording harmonized across all user-facing docs (`README.md`, `demo/README.md`, `GETTING_STARTED.md`, `src/PLATFORM_COMPATIBILITY.md`, `PERFORMANCE_BENCHMARK_RESULTS.md`) replacing the looser "zero dependencies" / "no peer deps" claim that had crept into some surfaces.
+- **`PLATFORM_COMPATIBILITY.md`** version pin bumped from the stale `v1.0.0` to `v1.4.2`.
+
+See [CHANGELOG.md#142](CHANGELOG.md#142---2026-05-27---banners-refresh--docs-harmonization) for the full entry.
+
+---
 
 ## 🎉 **What's New in v1.4.1**
 

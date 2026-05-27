@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
-![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~8.5 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
+![react-fusion-state — three steps to global state: wrap your app with FusionStateProvider, read and write any key with useFusionState, run the same code across Browser, React Native and SSR with auto-detected adapters (localStorage, AsyncStorage, in-memory). 0 runtime deps, ~8.5 KB min+gzip, React 18+ / StrictMode safe, TypeScript-first.](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
 
 **🎯 The simplest AND most performant React state management library.**
 
@@ -17,14 +17,16 @@
 
 ### 🎉 **v1.4.0 — Multi-store (headless, Zustand-style)**
 
-> 📚 **v1.4.1 patch** added a [secure storage cookbook](#-custom-storage-adapters-secure-storage-mmkv-) (Expo SecureStore / react-native-keychain / EncryptedStorage) and modernized the dev stack (Jest 30, TypeScript 6.0.3, 0 vulnerabilities). See [CHANGELOG](CHANGELOG.md#141---2026-05-27---docs-cookbook--dependency-modernization).
+> 📚 **v1.4.1 patch** added a [secure storage cookbook](#-custom-storage-adapters-secure-storage-mmkv-) (Expo SecureStore / react-native-keychain / EncryptedStorage) and modernized the dev stack (Jest 30, TypeScript 6.0.3, 0 vulnerabilities). Tests bumped from 176 → 197. See [CHANGELOG](CHANGELOG.md#141---2026-05-27---docs-cookbook--dependency-modernization).
+>
+> 🎨 **v1.4.2 patch** refreshed the README banners (`hero.png` 3-step tutorial + `quick-start.png` feature grid) for the v1.4 era and harmonized the "0 runtime deps" wording across user-facing docs. No API change. See [CHANGELOG](CHANGELOG.md#142---2026-05-27---banners-refresh--docs-harmonization).
 
 - 🏗️ **New `createStore()` factory** — autonomous, framework-agnostic store. Use it inside React (`store.Provider` + `store.useFusionState` + `store.useFusionStore`) **or completely outside** (`store.getState()`, `store.setState({...})`, `store.subscribe(cb)`). [Jump to section](#-multi-store-with-createstore-v140)
 - 🔒 **Total isolation between stores** — instantiate as many as you want; mutating store A never notifies any listener on store B. Perfect for library authors, monorepos with feature stores, and Next.js App Router (one store per request).
 - 🧹 **`store.destroy()`** — releases all listeners, flushes pending writes, detaches DevTools. SSR-safe.
 - ⚡ **Slightly faster writes** — the new headless engine notifies listeners synchronously (batched via `unstable_batchedUpdates` / React 18 auto-batching), shaving one React-commit tick off every `setState`.
 - 🧪 **38 new tests** (28 zero-React headless + 10 React-bound). Tests grew from 138 → 176. The public-API snapshot test gained exactly one entry (`createStore`) — every other 1.3.x export still works identically.
-- 📦 **~8.5 KB gzipped, zero dependencies** (+~310 B vs 1.3.0 — refactor removed more code than the new engines added).
+- 📦 **~8.5 KB gzipped, 0 runtime deps** (+~310 B vs 1.3.0 — refactor removed more code than the new engines added).
 
 > All v1.2.x / v1.3.x features remain intact: [Selectors API (`useFusionStore`)](#-selectors--derived-state-v120), [runtime deprecation warnings](#-migration-to-v2-preview), Redux DevTools, public API snapshot lock.
 
@@ -39,7 +41,7 @@ npm install react-fusion-state
 
 ### Basic Usage
 
-![Three steps to use react-fusion-state: wrap your app with FusionStateProvider, use the useFusionState hook, and persist state automatically across Browser, React Native and SSR](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/quick-start.png)
+![react-fusion-state at a glance: 0 runtime deps (React stays a peer dep), TypeScript-first with full inference, built-in persistence (localStorage + AsyncStorage), custom storage adapters (Keychain, SecureStore, MMKV...), headless createStore() usable outside React (Node, SSR, Workers), fine-grained per-key subscriptions, ~8.5 KB min+gzip. Code snippet shows the createStore() API.](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/quick-start.png)
 
 ```jsx
 import { FusionStateProvider, useFusionState } from 'react-fusion-state';
@@ -169,7 +171,7 @@ const itemIds = useFusionStore(
 
 ### 🏆 **Performance Champion**
 - **99.9% fewer re-renders** than Redux/Zustand/Recoil — backed by `useSyncExternalStore` + per-key subscriptions
-- **~8.5 KB gzipped, zero dependencies** (vs 45 KB+ for Redux/Recoil)
+- **~8.5 KB gzipped, 0 runtime deps** (vs 45 KB+ for Redux/Recoil)
 - **Selectors with custom equality** (`useFusionStore` + `shallow`) for derived/multi-key reads with zero unrelated re-renders
 - [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) — Grade A+ performance
 

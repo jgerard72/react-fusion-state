@@ -1,6 +1,6 @@
-# 🚀 Platform Compatibility Guide v1.0.0
+# 🚀 Platform Compatibility Guide v1.4.2
 
-React Fusion State v1.0.0 targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **zero dependencies** and ultra-simple API.
+React Fusion State v1.4.2 targets **React 18+** and works seamlessly across **React.js**, **React Native**, and **Expo** applications with **0 runtime deps** and ultra-simple API.
 
 ## ✅ Platform Support Matrix
 
