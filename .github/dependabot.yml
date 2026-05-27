@@ -37,12 +37,12 @@ updates:
       # Hold off major bumps that require manual migration passes.
       # Tracked as dedicated tech-debt issues; flip these off once each
       # migration has landed on a separate branch with green CI.
-      - dependency-name: "jest"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@types/jest"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "jest-environment-jsdom"
-        update-types: ["version-update:semver-major"]
+      # (Jest stack migration: #12 landed -> ignores removed.)
+      # (ESLint cleanup: #13 landed -> ignore removed.)
+      # (TypeScript 4 -> 6 migration: #14 landed; the typescript ignore
+      # is kept conservatively in case a future TS 7 surfaces an issue;
+      # flip off in a one-line follow-up PR once 6.x is proven stable in
+      # production usage.)
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
 

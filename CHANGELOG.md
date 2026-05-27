@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed (build infra — no consumer-visible API change)
 
+- **Bumped Jest stack from 29 → 30.** `jest@^30.4.2`, `jest-environment-jsdom@^30.4.1`, `@types/jest@^30.0.0`. `ts-jest@^29.4.11` kept (its peerDeps explicitly support `jest: ^29.0.0 || ^30.0.0`). Closes [#12](https://github.com/jgerard72/react-fusion-state/issues/12).
+- **`src/__tests__/autodetect.ssr.test.ts`**: replaced the `delete (global as any).window` hack (no longer honored by `jest-environment-jsdom@30`) with a per-file `/** @jest-environment node */` docblock pragma. The test now runs in a real Node env — semantically correct since the file's purpose is SSR detection.
+- **`jest.config.js`**: removed the dead `moduleNameMapper` entries (`@/`, `@core/`, `@storage/`, `@examples/`, `@tests/`) — confirmed 0 usages across `src/` (including `__tests__/` and `examples/`).
+- **`.github/dependabot.yml`**: removed the `jest`, `@types/jest`, `jest-environment-jsdom` entries from the `ignore:` major-bump block (migrations have landed).
+- **`npm audit fix`**: bumped a transitive `picomatch@2.3.1` (ReDoS, high) to a patched version. Final audit: **0 vulnerabilities** (down from 9 at the start of this cleanup sprint).
 - **Bumped `typescript` devDep from `^4.0.0` (was 4.9.5 installed) to `^6.0.3`.** Build pipeline now runs on TS 6.0.3. Closes [#14](https://github.com/jgerard72/react-fusion-state/issues/14).
 - **`tsconfig.json`** additions to satisfy TS 6 stricter defaults: `lib: ["es2019", "dom"]` (TS 6 no longer includes ES2017+ libs implicitly from `target: es6`), `types: ["node", "jest"]` (TS 6 no longer auto-loads from `@types/*` when `types` is unset for the relevant files), `ignoreDeprecations: "6.0"` (silences the warning about `moduleResolution: "node"` being renamed to `"node10"` and slated for removal in TS 7 — kept as-is for now to avoid the invasive switch to `node16`/`bundler`).
 - **`tsconfig.json`** removals: dead config — `baseUrl` and the `paths` aliases (`@/`, `@core/`, `@examples/`, `@storage/`, `@tests/`) were never referenced anywhere in `src/`.
