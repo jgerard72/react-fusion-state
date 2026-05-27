@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/jgerard72/react-fusion-state/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jgerard72/react-fusion-state/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/jgerard72/react-fusion-state/graph/badge.svg)](https://codecov.io/gh/jgerard72/react-fusion-state)
-[![npm version](https://badge.fury.io/js/react-fusion-state.svg)](https://badge.fury.io/js/react-fusion-state)
+[![npm version](https://img.shields.io/npm/v/react-fusion-state.svg)](https://www.npmjs.com/package/react-fusion-state)
 [![Downloads](https://img.shields.io/npm/dm/react-fusion-state.svg)](https://npmjs.com/package/react-fusion-state)
 [![Bundle size](https://img.shields.io/bundlephobia/minzip/react-fusion-state?label=minzipped)](https://bundlephobia.com/package/react-fusion-state)
 [![Zero deps](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](https://www.npmjs.com/package/react-fusion-state?activeTab=dependencies)
@@ -100,7 +100,7 @@ function UserProfile() {
 
 ### 🏆 **Performance Champion**
 - **99.9% fewer re-renders** than Redux/Zustand/Recoil
-- **~7 KB gzipped, zero dependencies** (vs 45KB+ for Redux/Recoil)
+- **~6.4 KB gzipped, zero dependencies** (vs 45KB+ for Redux/Recoil)
 - **Zero dependencies** - no bloat, maximum speed
 - [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) - Grade A+ performance
 
@@ -201,7 +201,7 @@ open demo/demo-persistence.html
 
 | Library | Bundle Size | Re-renders | Dependencies | Setup |
 |---------|-------------|------------|--------------|--------|
-| **React Fusion State** | **~7 KB** | **99.9% fewer** | **0** | **Zero** |
+| **React Fusion State** | **~6.4 KB** | **99.9% fewer** | **0** | **Zero** |
 | Redux Toolkit | 45KB+ | Many | 15+ | Complex |
 | Zustand | 8KB+ | Many | 2+ | Moderate |
 | Recoil | 120KB+ | Many | 10+ | Complex |
