@@ -9,20 +9,21 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 
-![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
+![react-fusion-state — Simple, performant React state management with zero dependencies, built-in persistence, TypeScript inference, and ~7.5 KB gzipped](https://raw.githubusercontent.com/jgerard72/react-fusion-state/master/assets/hero.png)
 
 **🎯 The simplest AND most performant React state management library.**
 
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
-### 🎉 **v1.1.1 - Cleanup, Migration & Honest Bundle Size**
-- 🧹 **Deprecation pass** - Legacy aliases (`useSharedState`, `GlobalStateProvider`, `createWebStorageAdapter`, …) are now marked `@deprecated` and will be removed in v2.0.0
-- 🗺️ **Migration guide** - New [Migration to v2 (preview)](#-migration-to-v2-preview) section listing every old → new name mapping
-- 📚 **Docs cleaned up** - Removed promotion of deprecated aliases in `DOCUMENTATION.md`
-- ✅ **100% backward compatible** - Zero breaking changes; every 1.0.x export still works identically
-- 🎯 **Ultra-simple API** - Just `useFusionState` and `FusionStateProvider` - nothing else needed!
-- 🚀 **Object.is() priority equality** - Optimal performance for all value types
-- 🎯 **Batched notifications** - Cross-platform performance optimization
+### 🎉 **v1.2.0 — Selectors API & Provider refactor**
+- 🎯 **New `useFusionStore(selector, equalityFn?)` hook** — Zustand-style derived state: subscribe to any computed value across the store and re-render *only* when the selected value changes
+- 🧩 **`shallow` exported** — drop-in equality fn for multi-key object selectors
+- 🏗️ **Provider refactor** — `FusionStateProvider` split into 3 composable hooks (`usePersistence`, `useKeySubscriptions`, `useDevToolsBridge`); 615 → 277 lines (−55 %), zero behavior change
+- 🛡️ **Public-API snapshot lock** — any accidental removal or rename of an exported symbol now fails CI loudly
+- ✅ **Zero breaking change** — every 1.1.x export still works identically; tests grew from 74 → 116
+- 📦 **~7.5 KB gzipped, zero dependencies**
+
+> Looking at upgrading from 1.0.x or 1.1.x? Jump straight to the [Migration to v2 (preview)](#-migration-to-v2-preview) section for the deprecation list — v1.2.0 stays 100 % backward compatible with all of it.
 
 ---
 
@@ -69,7 +70,7 @@ function Counter() {
 
 ### 🚀 Performance Options
 
-For optimal performance with large objects, use the `shallow` option:
+For optimal performance with large object values stored under a single key, use the `shallow` option on `useFusionState`:
 
 ```jsx
 function UserProfile() {
@@ -78,8 +79,8 @@ function UserProfile() {
     email: 'john@example.com',
     preferences: { theme: 'dark' }
   }, { shallow: true }); // ← Only compares top-level properties
-  
-  // This won't re-render if user object reference changes but content is the same
+
+  // Skips the commit if `setUser(...)` is called with a shallow-equal object.
   return <div>{user.name}</div>;
 }
 ```
@@ -93,6 +94,8 @@ function UserProfile() {
 - ✅ Nested objects that change frequently
 - ✅ Small objects (< 10 properties)
 - ✅ When you need precise change detection
+
+> Need to derive a value across **several** keys (totals, joined fields, filtered lists)? Use [`useFusionStore`](#-selectors--derived-state-v120) instead — it re-renders only when the *selected* value changes, never when unrelated keys move.
 
 ---
 
@@ -162,16 +165,17 @@ const itemIds = useFusionStore(
 ## ⭐ Why React Fusion State?
 
 ### 🏆 **Performance Champion**
-- **99.9% fewer re-renders** than Redux/Zustand/Recoil
-- **~6.4 KB gzipped, zero dependencies** (vs 45KB+ for Redux/Recoil)
-- **Zero dependencies** - no bloat, maximum speed
-- [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) - Grade A+ performance
+- **99.9% fewer re-renders** than Redux/Zustand/Recoil — backed by `useSyncExternalStore` + per-key subscriptions
+- **~7.5 KB gzipped, zero dependencies** (vs 45 KB+ for Redux/Recoil)
+- **Selectors with custom equality** (`useFusionStore` + `shallow`) for derived/multi-key reads with zero unrelated re-renders
+- [**Benchmark proven**](PERFORMANCE_BENCHMARK_RESULTS.md) — Grade A+ performance
 
 ### 🎯 **Developer Experience**
-- **Zero configuration** - works out of the box
-- **Automatic persistence** - localStorage/AsyncStorage built-in
-- **Full TypeScript support** - complete type inference
-- **React 18+ optimized** - built for modern React
+- **Zero configuration** — works out of the box
+- **Automatic persistence** — localStorage / AsyncStorage built-in
+- **Full TypeScript support** — complete type inference
+- **React 18+ optimized** — built on `useSyncExternalStore`
+- **Redux DevTools integration** — opt in with `<FusionStateProvider devTools>`
 
 ### 🌍 **Universal Compatibility**
 - ✅ **React Web** (Create React App, Next.js, Vite)
@@ -192,6 +196,23 @@ const [user, setUser] = useFusionState('user', { name: '', email: '' });
 const [user] = useFusionState('user'); // Same state, automatically synced
 ```
 
+### 🎯 **Cross-Key Selectors (v1.2.0+)**
+```jsx
+import { useFusionStore, shallow } from 'react-fusion-state';
+
+// Derived value — re-renders only when the total changes
+const total = useFusionStore(
+  (state) => (state.cart ?? []).reduce((sum, x) => sum + x.price, 0),
+);
+
+// Multi-key read with shallow equality
+const { user, isAdmin } = useFusionStore(
+  (state) => ({ user: state.user, isAdmin: state.user?.role === 'admin' }),
+  shallow,
+);
+```
+See the [Selectors & Derived State](#-selectors--derived-state-v120) section for the full guide.
+
 ### 💾 **Built-in Persistence**
 ```jsx
 // Granular persistence (RECOMMENDED)
@@ -201,11 +222,15 @@ const [user] = useFusionState('user'); // Same state, automatically synced
 <FusionStateProvider persistence={true}>
 
 // Advanced persistence configuration
-<FusionStateProvider persistence={{
-  persistKeys: ['user', 'cart'],
-  debounce: 1000, // Save after 1s of inactivity
-  keyPrefix: 'myApp'   // Namespace your storage
-}}>
+<FusionStateProvider
+  persistence={{
+    persistKeys: ['user', 'cart'],
+    debounce: 1000,         // Save after 1s of inactivity
+    onLoadError: (err) => console.warn('hydration failed', err),
+    onSaveError: (err) => console.warn('save failed', err),
+    // adapter: customAdapter,  // (optional) override the auto-detected adapter
+  }}
+>
 ```
 
 ### 🎯 **Optimized Re-renders**
@@ -213,13 +238,25 @@ const [user] = useFusionState('user'); // Same state, automatically synced
 // Only components using 'counter' re-render when it changes
 const [counter] = useFusionState('counter', 0);
 
-// Other components remain untouched - 99.9% fewer re-renders!
+// Other components remain untouched — 99.9% fewer re-renders!
 ```
 
-### 🔍 **Debug Mode**
+### 🔍 **Debug Mode & DevTools**
 ```jsx
-const [state, setState] = useFusionState('debug-key', {}, { debug: true });
-// See all state changes in console
+// Provider-level debug: logs every state change diff in the console
+<FusionStateProvider debug>
+  <App />
+</FusionStateProvider>
+
+// Redux DevTools integration (browser extension required)
+<FusionStateProvider devTools>
+  <App />
+</FusionStateProvider>
+
+// Or with a custom name / config
+<FusionStateProvider devTools={{ name: 'MyAppState', maxAge: 100 }}>
+  <App />
+</FusionStateProvider>
 ```
 
 ---
@@ -264,7 +301,7 @@ open demo/demo-persistence.html
 
 | Library | Bundle Size | Re-renders | Dependencies | Setup |
 |---------|-------------|------------|--------------|--------|
-| **React Fusion State** | **~6.4 KB** | **99.9% fewer** | **0** | **Zero** |
+| **React Fusion State** | **~7.5 KB** | **99.9% fewer** | **0** | **Zero** |
 | Redux Toolkit | 45KB+ | Many | 15+ | Complex |
 | Zustand | 8KB+ | Many | 2+ | Moderate |
 | Recoil | 120KB+ | Many | 10+ | Complex |
@@ -309,35 +346,48 @@ function UserProfile() {
 }
 ```
 
-### Advanced Performance (v1.0+)
+### Advanced Performance Patterns
 ```jsx
-function OptimizedComponent() {
-  // Automatic Object.is() equality + intelligent fallbacks
-  const [data, setData] = useFusionState('data', {
-    users: [],
-    settings: {}
-  });
+import { useFusionState, useFusionStore, shallow } from 'react-fusion-state';
 
-  // Shallow comparison for large objects (when you know structure is flat)
-  const [preferences, setPreferences] = useFusionState('prefs', {
+function OptimizedDashboard() {
+  // Deep-equality dedup by default — setData with an equivalent object is a no-op.
+  const [data, setData] = useFusionState('data', { users: [], settings: {} });
+
+  // Shallow comparison for flat objects.
+  const [prefs, setPrefs] = useFusionState('prefs', {
     theme: 'light',
-    language: 'en'
+    language: 'en',
   }, { shallow: true });
 
-  // Updates are automatically batched across components!
+  // Cross-key derived value: only re-renders when the metric flips.
+  const activeUserCount = useFusionStore(
+    (s) => (s.data?.users ?? []).filter((u) => u.active).length,
+  );
+
+  // Multi-key reads in one shot, with shallow equality.
+  const { theme, language } = useFusionStore(
+    (s) => ({ theme: s.prefs?.theme, language: s.prefs?.language }),
+    shallow,
+  );
+
+  // Updates are batched cross-platform (React DOM + React Native) via the
+  // internal `batch()` wrapper around notification dispatch.
   const handleUpdate = () => {
-    setData({...data, users: newUsers});     // Batched
-    setPreferences({...preferences, theme: 'dark'}); // Batched
-    // Both updates happen in single render cycle ✨
+    setData({ ...data, users: newUsers });
+    setPrefs({ ...prefs, theme: 'dark' });
+    // Both updates committed in a single render cycle.
   };
+
+  return <Stats active={activeUserCount} theme={theme} lang={language} />;
 }
 ```
 
 ---
 
-## 🗺️ Migration to v2 (preview)
+## 🗺 Migration to v2 (preview)
 
-v1.1.x marks every legacy alias as `@deprecated`. They still work — your IDE will just show them with a strikethrough. **All of them will be removed in v2.0.0.** Use the table below to migrate ahead of time.
+The legacy aliases below are marked `@deprecated` since v1.1 and still work in every 1.x release — your IDE will just show them with a strikethrough. **All of them will be removed in v2.0.0.** Use the tables below to migrate ahead of time.
 
 ### Hooks
 
