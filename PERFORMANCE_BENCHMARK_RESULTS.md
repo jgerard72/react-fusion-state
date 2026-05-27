@@ -1,9 +1,11 @@
 # 🏆 Performance Benchmark Results
 
-**React Fusion State v1.0.0 vs Redux Toolkit vs Zustand vs Recoil**
+**React Fusion State v1.4.1 vs Redux Toolkit vs Zustand vs Recoil**
 
-*Comprehensive performance testing conducted on Node.js v18.19.0*  
-*Updated with ultra-simple API, Object.is optimization, and React 18+ compatibility*
+*Comprehensive performance testing conducted on Node.js v18.19.0 (revalidated on Node 22 for v1.4.0)*  
+*Updated with ultra-simple API, headless multi-store (`createStore()`), and React 18+ compatibility*
+
+> **Note:** the numerical results below were measured at v1.0.0. Per-release performance numbers (cold start, hot setState, selectors, memory) live in each version's [CHANGELOG entry](CHANGELOG.md) — see the v1.4.0 "Performance (Node 22, headless, median of 7 runs)" table for the latest measured budgets, which the v1.4.x CI gates against.
 
 ---
 
@@ -230,13 +232,13 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 ## 🎯 **Conclusion**
 
-**React Fusion State v1.0.0 is the CLEAR WINNER** with:
+**React Fusion State v1.4.1 is the CLEAR WINNER** with:
 
 ✅ **Superior Performance** - 100% efficiency vs 15% for Redux  
 ✅ **Object.is Optimization** - Fastest possible equality comparison with intelligent fallbacks  
 ✅ **Cross-Platform Batching** - Automatic batched updates for React DOM and React Native  
 ✅ **Persistence Support** - Built-in cross-platform persistence  
-✅ **Lightweight & Zero Deps** - ~7 KB gzipped vs 42.7 KB for Redux (with 5+ deps)  
+✅ **Lightweight & Zero Deps** - ~8.5 KB gzipped vs 42.7 KB for Redux (with 5+ deps)  
 ✅ **Best Developer Experience** - 1 line setup vs 18+ for Redux  
 ✅ **Unique Features** - Only library with smart object comparison  
 ✅ **Perfect Scores** - Grade A+ across all metrics  
@@ -269,7 +271,7 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 | Library | Bundle (gzipped) | Load Time (3G) | Load Time (4G) |
 |---------|------------------|----------------|----------------|
-| **React Fusion State** | **~7 KB** | **~210 ms** | **~105 ms** |
+| **React Fusion State** | **~8.5 KB** | **~255 ms** | **~130 ms** |
 | Zustand | 3.2 KB | ~95 ms | ~48 ms |
 | Recoil | 24.1 KB | ~720 ms | ~360 ms |
 | Redux Toolkit | 42.7 KB | ~1.28 s | ~640 ms |
@@ -278,4 +280,4 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 ---
 
-*Benchmark conducted: September 2025 | Node.js v18.19.0 | React Fusion State v1.0.0*
+*Benchmark conducted: September 2025 | Node.js v18.19.0 | React Fusion State v1.0.0. Revalidated on Node 22 for v1.4.0 — see [CHANGELOG.md](CHANGELOG.md) for per-release perf budgets enforced by CI.*

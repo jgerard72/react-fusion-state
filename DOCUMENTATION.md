@@ -1,25 +1,28 @@
 # 📚 React Fusion State - Complete Documentation
 
-**Version:** 1.1.1  
+**Version:** 1.4.1  
 **Author:** Jacques GERARD  
 **License:** MIT
 
-## 🎉 **What's New in v1.0.0 - STABLE RELEASE**
+## 🎉 **What's New in v1.4.1**
 
-### 🚀 **Major Performance Upgrade**
-- **Granular Persistence by Default:** Choose exactly which state keys to persist
-- **Object.is() Priority:** Optimal equality comparison for all value types
-- **Batched Updates:** Cross-platform `unstable_batchedUpdates` for better performance
-- **Unified Architecture:** Cleaner persistence logic, single initialization effect
-- **SSR Enhanced:** Proper server snapshots for robust hydration
+### 📚 **Documentation — Secure storage cookbook**
+- **New top-level [Custom Storage Adapters](./README.md#-custom-storage-adapters-secure-storage-mmkv-) section in README** with 4 ready-to-copy mobile recipes (Expo SecureStore, react-native-encrypted-storage, react-native-keychain with biometrics, and the split-sensitive / non-sensitive multi-store pattern on top of `createStore()`).
+- **`SECURITY.md`** rewritten with a concrete threat model per default backend + 6 actionable best practices instead of vague advice.
+- **`PLATFORM_COMPATIBILITY.md`** gained a `Secure storage` column and a dedicated section pointing to the cookbook.
 
-### 🔄 **New Hooks**
-- **`useFusionHydrated()`:** Track hydration status (perfect for React Native + AsyncStorage)
+### 🛠️ **Dependency modernization (no consumer-visible API change)**
+- **Jest 30** migration (`jest@^30.4.2`, `jest-environment-jsdom@^30.4.1`, `@types/jest@^30.0.0`). Closes [#12](https://github.com/jgerard72/react-fusion-state/issues/12).
+- **TypeScript 6.0.3** migration with stricter `tsconfig` defaults. Closes [#14](https://github.com/jgerard72/react-fusion-state/issues/14).
+- **`npm audit fix`** removed a transitive `picomatch` ReDoS (high) — final audit: **0 vulnerabilities** (down from 9).
+- **Tests**: 197 passing, 1 skipped — same baseline as 1.4.0.
 
-### 🏗️ **Architecture Improvements**
-- **Centralized Persistence:** All persistence logic moved to Provider level
-- **Cross-Platform Types:** Better TypeScript support for web + React Native
-- **Batched Notifications:** Automatic update batching reduces re-renders
+> ### Headline features still active from v1.4.0 (Multi-store)
+> - **`createStore()` factory** — autonomous headless + React-bound store. Two API layers: `getState`/`setState`/`subscribe`/`destroy` usable anywhere, plus `Provider`/`useFusionState`/`useFusionStore`/`useFusionHydrated` bound to the store via closure.
+> - **Total isolation between stores** — mutating store A never notifies any listener on store B. Use it for library private namespaces, per-feature stores in monorepos, or per-request Next.js App Router stores.
+> - **Backward compat** — `FusionStateProvider` is now a 5-line wrapper around `createStore()`. Every 1.0-1.3 API still works exactly as before.
+>
+> See [CHANGELOG.md](CHANGELOG.md) for full per-release history (selectors v1.2.0, deprecation warnings v1.3.0, multi-store v1.4.0).
 
 ---
 
@@ -29,7 +32,7 @@
 2. [🎛️ Core API](#️-core-api)
 3. [💾 Persistence](#-persistence)
 4. [🔑 Per-Key Persistence](#-per-key-persistence) ⭐ **NEW**
-5. [⚡ Performance Options](#-performance-options) ⭐ **v1.0.0**
+5. [⚡ Performance Options](#-performance-options)
 6. [🌐 Platform Support](#-platform-support)
 6. [🔧 Advanced Configuration](#-advanced-configuration)
 7. [🛠️ Development Setup](#️-development-setup)

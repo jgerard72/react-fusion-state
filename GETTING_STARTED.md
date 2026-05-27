@@ -1,8 +1,8 @@
-# 🚀 Getting Started - React Fusion State v1.1.1
+# 🚀 Getting Started - React Fusion State v1.4.1
 
 **New to the project?** This guide will get you up and running in 5 minutes!
 
-**🎯 React Fusion State v1.1.1:** Zero dependencies, maximum performance state management with ultra-simple API, granular persistence, Object.is optimization and batched updates.
+**🎯 React Fusion State v1.4.1:** Zero dependencies, maximum performance state management with ultra-simple API, granular persistence, multi-store factory (`createStore()`), pluggable secure storage adapters, and batched updates.
 
 ---
 

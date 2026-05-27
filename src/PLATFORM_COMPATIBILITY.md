@@ -4,12 +4,12 @@ React Fusion State v1.0.0 targets **React 18+** and works seamlessly across **Re
 
 ## ✅ Platform Support Matrix
 
-| Platform | Status | Storage | Sync Loading | Error Callbacks |
-|----------|--------|---------|--------------|-----------------|
-| **React.js (Web)** | ✅ Full (React 18+) | localStorage | ✅ Yes | ✅ Yes |
-| **React Native** | ✅ Full | AsyncStorage | ❌ Async only | ✅ Yes |
-| **Expo** | ✅ Full | AsyncStorage | ❌ Async only | ✅ Yes |
-| **Next.js (SSR)** | ✅ Full | Memory/localStorage | ✅ Yes | ✅ Yes |
+| Platform | Status | Default storage | Secure storage | Sync Loading | Error Callbacks |
+|----------|--------|-----------------|----------------|--------------|-----------------|
+| **React.js (Web)** | ✅ Full (React 18+) | localStorage | ⚠️ Web Crypto in user-land | ✅ Yes | ✅ Yes |
+| **React Native** | ✅ Full | AsyncStorage | ✅ via custom adapter ([recipes](#-secure-storage-mobile)) | ❌ Async only | ✅ Yes |
+| **Expo** | ✅ Full | AsyncStorage | ✅ via `expo-secure-store` ([recipe](#-secure-storage-mobile)) | ❌ Async only | ✅ Yes |
+| **Next.js (SSR)** | ✅ Full | Memory/localStorage | n/a | ✅ Yes | ✅ Yes |
 
 ---
 
@@ -138,6 +138,36 @@ export default function App() {
   );
 }
 ```
+
+---
+
+## 🔐 Secure Storage (mobile)
+
+The default adapters (`AsyncStorage` on RN/Expo, `localStorage` on web) **do not encrypt at rest**. For auth tokens, refresh tokens, PII or anything that must survive a `chrome://settings` / `adb shell run-as` inspection, plug in a secure backend through the `StorageAdapter` contract.
+
+### ✅ Supported via custom adapters
+
+| Library | Stack | Backend | Biometrics | Notes |
+|---------|-------|---------|------------|-------|
+| `expo-secure-store` | Expo | iOS Keychain + Android EncryptedSharedPreferences | ❌ | ~2 KB / value, restricted key charset |
+| `react-native-encrypted-storage` | Bare RN | iOS Keychain + Android EncryptedSharedPreferences | ❌ | API already aligned on AsyncStorage |
+| `react-native-keychain` | Bare RN / Expo | iOS Keychain + Android Keystore | ✅ | Per-key biometric prompts |
+| `react-native-mmkv` (with encryption key) | Bare RN | Encrypted MMKV | ❌ | Fastest option, sync API |
+
+### 📖 Ready-to-copy recipes
+
+The 4 mobile recipes (Expo SecureStore wrapper, EncryptedStorage one-liner, Keychain wrapper with biometrics, and the **split-sensitive-/-non-sensitive multi-store pattern**) live in the main README:
+
+→ [**Custom Storage Adapters**](../README.md#-custom-storage-adapters-secure-storage-mmkv-)
+
+### 🧠 Architectural recommendation
+
+For any production mobile app with authentication, use **two `createStore()` instances**:
+
+1. A `secureStore` wired to SecureStore / Keychain / EncryptedStorage — persists tokens, refresh tokens, biometric keys.
+2. An `appStore` wired to AsyncStorage — persists theme, language, last route, cache.
+
+This keeps the secure backend's quota and write cost contained, gives each store its own `debounceTime` and error callbacks, and makes every call site greppable (`secureStore.useFusionState(...)` is self-documenting).
 
 ---
 
