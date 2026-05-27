@@ -83,7 +83,9 @@ esbuild
   .then(() => {
     const stat = fs.statSync(outfile);
     const kb = (stat.size / 1024).toFixed(2);
-    console.log(`[build-demo] wrote ${path.relative(root, outfile)} (${kb} KB)`);
+    // stderr (not stdout) so that callers piping stdout (`npm pack --json`, etc.)
+    // are not polluted by build log lines.
+    console.error(`[build-demo] wrote ${path.relative(root, outfile)} (${kb} KB)`);
   })
   .catch(err => {
     console.error('[build-demo] esbuild failed:', err);
