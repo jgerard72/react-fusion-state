@@ -16,6 +16,9 @@
 **Grade A+ performance** vs Redux/Zustand/Recoil in [benchmarks](PERFORMANCE_BENCHMARK_RESULTS.md).
 
 ### 🎉 **v1.4.0 — Multi-store (headless, Zustand-style)**
+
+> 📚 **v1.4.1 patch** added a [secure storage cookbook](#-custom-storage-adapters-secure-storage-mmkv-) (Expo SecureStore / react-native-keychain / EncryptedStorage) and modernized the dev stack (Jest 30, TypeScript 6.0.3, 0 vulnerabilities). See [CHANGELOG](CHANGELOG.md#141---2026-05-27---docs-cookbook--dependency-modernization).
+
 - 🏗️ **New `createStore()` factory** — autonomous, framework-agnostic store. Use it inside React (`store.Provider` + `store.useFusionState` + `store.useFusionStore`) **or completely outside** (`store.getState()`, `store.setState({...})`, `store.subscribe(cb)`). [Jump to section](#-multi-store-with-createstore-v140)
 - 🔒 **Total isolation between stores** — instantiate as many as you want; mutating store A never notifies any listener on store B. Perfect for library authors, monorepos with feature stores, and Next.js App Router (one store per request).
 - 🧹 **`store.destroy()`** — releases all listeners, flushes pending writes, detaches DevTools. SSR-safe.
