@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-05-27 - Banners refresh & docs harmonization
+
+### Changed (no API change)
+
+- **`assets/hero.png`**: regenerated to align with the v1.4 era. Kept the pedagogical 3-step format (Wrap your app / Use the hook / Run anywhere) but refreshed the visual style (sober cyan + dark, no glow / no neon), bumped the tagline from "zero dependencies" to "0 runtime deps", and added explicit "Auto-detected adapters: localStorage · AsyncStorage · in-memory" in step 3. Compressed via `scripts/compress-assets.js` (PNG palette quantization): **1274 KB → 85 KB (-93%)**.
+- **`assets/quick-start.png`**: regenerated as a 6-card feature grid + `createStore()` code snippet. Cards: 0 runtime deps · TypeScript-first · Built-in persistence · Custom storage adapters (Keychain, SecureStore, MMKV...) · Headless `createStore()` · Fine-grained renders. Replaces the previous version which still showed only the legacy `FusionStateProvider + useFusionState` API and used the inaccurate "No peer deps" claim. Compressed: **1341 KB → 96 KB (-93%)**.
+- **`README.md`**: updated both `assets/hero.png` and `assets/quick-start.png` alt texts to match the new image content and embed SEO keywords (TypeScript, React Native, `createStore`, secure storage). Added a v1.4.2 footnote under the v1.4.0 banner pointing to this entry.
+- **`README.md`**, **`demo/README.md`**, **`GETTING_STARTED.md`**, **`src/PLATFORM_COMPATIBILITY.md`**, **`PERFORMANCE_BENCHMARK_RESULTS.md`**: harmonized the "zero dependencies" copy to **"0 runtime deps"** across user-facing documentation. The peer dependency on React was being incorrectly elided as "no peer deps" in some marketing surfaces (notably the previous `quick-start.png`); the new wording explicitly acknowledges React stays a peer dep.
+- **`src/PLATFORM_COMPATIBILITY.md`**: bumped version pin from the stale `v1.0.0` to the current `v1.4.2`.
+
+No public API surface changed. No new export. The `dist/**/*.js` and `demo/react-fusion-state.umd.js` artifacts were regenerated via `npm run build` to embed the new `v1.4.2` version stamp.
+
 ## [1.4.1] - 2026-05-27 - Docs cookbook & dependency modernization
 
 ### Documentation (no API change)

@@ -1,6 +1,6 @@
 # 🏆 Performance Benchmark Results
 
-**React Fusion State v1.4.1 vs Redux Toolkit vs Zustand vs Recoil**
+**React Fusion State v1.4.2 vs Redux Toolkit vs Zustand vs Recoil**
 
 *Comprehensive performance testing conducted on Node.js v18.19.0 (revalidated on Node 22 for v1.4.0)*  
 *Updated with ultra-simple API, headless multi-store (`createStore()`), and React 18+ compatibility*
@@ -126,7 +126,7 @@ React Fusion State **DOMINATES** the competition with **Grade A+ performance** a
 1. **🥇 React Fusion State - Grade A+ (100/100)**
    - ✅ Perfect re-render prevention
    - ✅ Only library with smart object comparison
-   - ✅ Smallest bundle size + zero dependencies
+   - ✅ Smallest bundle + 0 runtime deps
    - ✅ Best developer experience
 
 2. **🥈 Zustand - Grade B+ (62.5/100)**
@@ -232,7 +232,7 @@ const memoizedUser = useMemo(() => user, [user.id, user.name]); // Manual memoiz
 
 ## 🎯 **Conclusion**
 
-**React Fusion State v1.4.1 is the CLEAR WINNER** with:
+**React Fusion State v1.4.2 is the CLEAR WINNER** with:
 
 ✅ **Superior Performance** - 100% efficiency vs 15% for Redux  
 ✅ **Object.is Optimization** - Fastest possible equality comparison with intelligent fallbacks  
