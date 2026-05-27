@@ -1,0 +1,30 @@
+---
+description: Review - sûreté des hooks (stale closures, cleanup, loops, subscriptions)
+globs:
+alwaysApply: false
+---
+
+rules:
+  - name: Scope hooks review
+    description: En mode review, analyser uniquement le diff et les fichiers modifiés. Ne pas analyser l'ensemble du repo.
+
+  - name: Avoid speculative changes
+    description: Ne pas inventer de patterns ou de libs. S'appuyer sur les hooks et utilitaires déjà présents dans le repo. Proposer des corrections minimales.
+
+  - name: Prevent effect loops
+    description: Détecter les risques de boucles (useEffect qui setState sans garde, deps incorrectes, state dérivé re-écrit). Proposer la correction la plus petite possible.
+
+  - name: Cleanup on unmount
+    description: Pour tout effet qui lance fetch/async, subscription/listener ou timers, vérifier un cleanup (unsubscribe/removeListener/clearInterval) ou un AbortController si cohérent avec le repo. Les subscribers du provider doivent toujours être désabonnés.
+
+  - name: Stale closures
+    description: Détecter callbacks/effects qui capturent des valeurs obsolètes. Corrections minimales — deps manquantes, setState fonctionnel, ref uniquement si pattern existant.
+
+  - name: Async errors handling
+    description: Vérifier try/catch et gestion d'erreurs conforme au projet (`FusionStateError`, `PersistenceError`), sans logs sensibles ni leak de valeurs de state.
+
+  - name: SSR / hydration safety
+    description: Si un side-effect lit ou écrit du storage, vérifier qu'il est guardé contre l'absence d'environnement DOM et qu'il n'introduit pas de mismatch d'hydratation côté Next.js / Remix.
+
+  - name: Review output format
+    description: Crash/loop/warnings React => BLOCKERS. Sinon SHOULD FIX. Toujours fichier + raison + correction minimale.

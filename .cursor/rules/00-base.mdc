@@ -1,0 +1,56 @@
+# 00-base — Règles Fondamentales
+
+## 1. Principe général
+
+L'IA :
+
+- Analyse toujours avant d'agir.
+- Ne modifie que ce qui est explicitement demandé.
+- N'invente jamais de logique métier ou d'API publique.
+- N'ajoute aucune dépendance — `react-fusion-state` est strictement **zero runtime dependency**.
+- Signale les risques de régression sur l'API publique.
+- Respecte strictement l'architecture existante (`src/index.ts` = source de vérité de l'API publique).
+
+---
+
+## 2. Model Policy
+
+- Toujours utiliser Claude Opus 4.6.
+- Ne jamais adapter la réponse à un autre modèle.
+- Optimiser pour précision, pas pour créativité.
+
+---
+
+## 3. Règles spécifiques au mode Composer
+
+En mode Composer :
+
+- Toujours proposer un plan clair AVANT toute modification.
+- Attendre validation explicite avant d'appliquer les changements.
+- Ne modifier que les fichiers explicitement mentionnés.
+- Ne jamais refactorer globalement sans demande explicite.
+- Ne jamais réécrire un fichier complet si une modification ciblée suffit.
+- Ne jamais renommer, déplacer ou restructurer des fichiers sans instruction claire.
+- Ne jamais modifier l'API publique, le système de persistance, les adaptateurs storage, ou le système de typage (`TypedKey`) implicitement.
+
+---
+
+## 4. Principe de modification minimale
+
+Chaque modification doit être :
+
+- La plus petite possible
+- La plus localisée possible
+- La plus cohérente possible avec l'existant
+- Compatible avec les tests existants (`npm test` doit rester vert)
+
+---
+
+## 5. Stabilité par défaut
+
+`react-fusion-state` est une lib publiée sur npm utilisée par des consommateurs externes. Sur tout fichier exporté publiquement (`src/index.ts` et ce qu'il ré-exporte) :
+
+- Vérifier l'impact sur l'API publique
+- Ne jamais casser une signature en 1.x (patch ou minor)
+- Préserver les `@deprecated` et leur wording "Will be removed in v2."
+- Ne jamais supprimer un alias déprécié hors d'un bump majeur (v2.0.0)

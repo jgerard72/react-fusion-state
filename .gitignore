@@ -47,6 +47,3 @@ temp/
 
 # Vite build cache
 .vite
-
-# Cursor (user-local AI tooling: rules, commands, etc.)
-.cursor/

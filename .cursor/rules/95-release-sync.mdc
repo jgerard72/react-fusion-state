@@ -1,0 +1,96 @@
+---
+description: Mandatory doc / demo / build sync when touching version, public API, or shipped artifacts. Prevents stale version banners and orphaned feature pages on every release.
+globs:
+  - "package.json"
+  - "src/**/*.{ts,tsx}"
+  - "dist/**"
+  - "demo/**"
+  - "assets/**"
+  - "CHANGELOG.md"
+  - "README.md"
+  - "DOCUMENTATION.md"
+  - "GETTING_STARTED.md"
+  - "PERFORMANCE_BENCHMARK_RESULTS.md"
+  - "demo/README.md"
+alwaysApply: false
+---
+
+# 95 — Release Sync (docs / demos / build)
+
+This rule fires whenever a change can shift the publishable surface of `react-fusion-state` — the npm tarball, the README badge, the live demo, or any banner a consumer reads on GitHub / npmjs.com. Past releases shipped with `DOCUMENTATION.md` stuck on `1.1.1`, `GETTING_STARTED.md` titled `v1.1.1`, and `PERFORMANCE_BENCHMARK_RESULTS.md` still claiming `v1.0.0 — September 2025`. Each of those slipped through because the AI applied the source change without auditing the doc surface. This rule closes that gap.
+
+## 1. Triggers — when this rule MUST be applied
+
+Apply the full checklist (sections 2-4) BEFORE any commit OR push if the working tree contains any of:
+
+- `package.json` — `version`, `scripts`, `files`, `exports`, `main`, `types`, `peerDependencies`, `engines` changed.
+- `src/**/*.{ts,tsx}` — any change. The published `dist/**` and the docs it backs MUST stay in lockstep.
+- `dist/**` — any change (should never be hand-edited; only via `npm run build`).
+- Removal or rename of any export in `src/index.ts`.
+- Promotion or renaming of a `@deprecated` symbol.
+- New persistence option, new storage adapter, new DevTools surface.
+
+A pure-internal refactor with zero observable behavior change is the only exception — document the rationale in the commit body and explicitly call it out.
+
+## 2. Version pins — EVERY file in this list must match `package.json#version`
+
+These files hardcode a version string. Bump them **in the same commit** as the `package.json` bump. If any one of them lags by even one release, the GitHub home and the npmjs.com README will visibly disagree with the installed version.
+
+| File | What to update |
+| --- | --- |
+| `README.md` | Top version banner (`### vX.Y.Z`), the bundle-size claim (`~X KB gzipped`), and any "(v1.Z.0+)" tag next to a feature heading. |
+| `DOCUMENTATION.md` | `**Version:** X.Y.Z` line at the top AND the "What's New in vX.Y.Z" section heading. |
+| `GETTING_STARTED.md` | The `# 🚀 Getting Started - React Fusion State vX.Y.Z` title AND the `**🎯 React Fusion State vX.Y.Z:**` subtitle. |
+| `PERFORMANCE_BENCHMARK_RESULTS.md` | The "React Fusion State vX.Y.Z vs ..." subtitle, the "*Benchmark conducted: <month> <year>*" footer, AND any "is the CLEAR WINNER" line that names a version. |
+| `demo/README.md` | Top banner / intro version. |
+| `CHANGELOG.md` | A new `## [X.Y.Z] - YYYY-MM-DD - <slogan>` section with Added / Changed / Deprecated / Removed / Fixed / Notes (Keep a Changelog format). `[Unreleased]` must end empty. |
+
+Audit command before commit:
+
+```bash
+grep -rEn "v?1\.[0-9]+\.[0-9]+" \
+  README.md DOCUMENTATION.md GETTING_STARTED.md \
+  PERFORMANCE_BENCHMARK_RESULTS.md demo/README.md
+```
+
+Every hit must be (a) the new version, (b) an intentional historical reference (e.g. `since v1.2.0`), or (c) inside a `<!-- migration -->` table — nothing else.
+
+## 3. Feature pins — EVERY surface that lists features must reflect the new one
+
+For any new public surface (new export, new hook behavior, new factory like `createStore`, new persistence option, new adapter), check **all** these surfaces in the same commit / PR:
+
+- `src/index.ts` — exported AND re-exported under the canonical name.
+- `README.md` — listed in the features list, with a code sample using the canonical API only (NEVER a `@deprecated` alias).
+- `DOCUMENTATION.md` — added to the API table and reference section.
+- `GETTING_STARTED.md` — added to quick-start if it changes the first-time experience.
+- `CHANGELOG.md` — under `Added` for the in-flight version.
+- `demo/README.md` + a `demo/demo-*.html` page if the feature is interactive — every shipped demo must reference the canonical API of the current version.
+- `assets/quick-start.png` / `assets/hero.png` — if the new feature replaces a card or claim shown in the marketing PNGs, regenerate them (`scripts/compress-assets.js` for the recompression step). Mismatched assets are a top source of "looks abandoned" perception.
+- `src/__tests__/public-api.test.ts` — snapshot updated, plus at least one targeted test for the new behavior.
+
+## 4. Build sync — artifacts must travel WITH their source
+
+`dist/**` and `demo/react-fusion-state.umd.js` are checked into the repo and shipped to npm / served by the demo page. They MUST be regenerated in the same commit as any trigger from section 1.
+
+```bash
+npm run build   # wipes dist/, regenerates tsc output, rebuilds demo UMD bundle
+```
+
+The demo bundle embeds the version via the esbuild `footer` (`scripts/build-demo.js`). Skipping the rebuild instantly desyncs the demo's "Version v..." tag from `package.json`. Never commit a version bump without re-running `npm run build` and staging the regenerated `dist/**` + `demo/react-fusion-state.umd.js`.
+
+## 5. STOP gate — refuse to proceed if any of these is true
+
+Before staging or pushing, abort and ASK the user if:
+
+- `package.json#version` differs from any version pin in section 2 — STOP.
+- `src/**` changed but `dist/**` is untouched (build was skipped) — STOP.
+- `src/**` changed but `CHANGELOG.md` `[Unreleased]` (or the in-flight version) has no entry covering it — STOP.
+- A new public export landed in `src/index.ts` but `README.md` / `DOCUMENTATION.md` weren't touched in the same diff — STOP.
+- A `@deprecated` symbol appears in any newly added or modified code sample under `README.md`, `DOCUMENTATION.md`, `GETTING_STARTED.md`, or `demo/**` — STOP.
+- `demo/react-fusion-state.umd.js` was modified by hand (only `scripts/build-demo.js` is allowed to write it) — STOP.
+
+The STOP gate is non-negotiable. Surfacing the gap and asking the user is always cheaper than shipping a stale doc to npm and discovering it in a 1-star review.
+
+## 6. Reference workflow
+
+`/commit` and `/commit-push` (in `.cursor/commands/`) implement the canonical end-to-end flow — they call out the same triggers. When applying this rule outside of those slash commands (direct agent edits), still mirror their structure: gather context → doc & changelog sync → build sync → stage everything together → confirm.

@@ -1,0 +1,22 @@
+---
+description: Cross-platform safety (Web + React Native + SSR)
+globs:
+  - "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+rules:
+  - name: Pas d'API plateforme au top-level
+    description: Ne jamais importer ou appeler `window`, `document`, `localStorage`, `sessionStorage`, `navigator` ou `AsyncStorage` au top-level d'un module. Toujours guarder derrière un check runtime (`typeof window !== 'undefined'`) ou résoudre dynamiquement depuis `src/storage/autoDetect.ts`.
+
+  - name: SSR-safe par défaut
+    description: Le code doit pouvoir tourner dans un environnement Node.js (Next.js, Remix, Jest jsdom-less). Ne jamais supposer que les APIs DOM existent au premier render. Le fallback `createNoopStorageAdapter` est la valeur safe par défaut pour la persistance.
+
+  - name: React Native sans peer dep
+    description: AsyncStorage est résolu dynamiquement via `try/require` dans `asyncStorageAdapter.ts`. Ne jamais l'ajouter aux `peerDependencies` ou `dependencies` — les utilisateurs Web ne doivent pas payer le coût.
+
+  - name: Chaîne d'auto-détection
+    description: L'ordre de détection (Web → RN → memory → noop) dans `src/storage/autoDetect.ts` est intentionnel. Ne pas le casser ou ajouter une nouvelle plateforme sans validation explicite.
+
+  - name: Hydratation SSR
+    description: Le hook `useFusionHydrated` existe pour gérer les mismatches client/serveur. Ne jamais supposer que le state initial chargé depuis storage est disponible synchronement au premier render côté client.
