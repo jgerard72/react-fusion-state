@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-05-27 - Docs cookbook & dependency modernization
+
+### Documentation (no API change)
+
+- **`README.md`**: new top-level section **🔐 Custom Storage Adapters (Secure Storage, MMKV, ...)** with 4 ready-to-copy recipes — `expo-secure-store`, `react-native-encrypted-storage`, `react-native-keychain` (with biometrics), and the **split-sensitive-/-non-sensitive multi-store pattern** built on top of `createStore()`. Surfaces an extensibility point that has always existed (the 3-method `StorageAdapter` contract) but was previously buried as a one-line comment in an unrelated code sample. Also added a forward pointer from the "Built-in Persistence" section and a new "Mix sensitive (Keychain / SecureStore) and non-sensitive (AsyncStorage) data" row in the `createStore()` use-case table.
+- **`SECURITY.md`**: rewrote the "Data Storage" + "Best Practices" sections. Replaced the vague *"encrypt sensitive data before storing"* advice with a concrete table of default backends and their threat models, plus 6 actionable best practices (don't store secrets in the default adapter, split into two stores, treat web storage as public, clear on logout, never enable `debug` in production, no network calls). Added a pointer to the README cookbook.
+- **`src/PLATFORM_COMPATIBILITY.md`**: added a `Secure storage` column to the support matrix and a new **🔐 Secure Storage (mobile)** section listing the 4 compatible libraries with their backend / biometrics / quirks, and pointing to the README cookbook for the recipes.
+- **`DOCUMENTATION.md`**: rewrote the "What's New" section (previously frozen at v1.0.0) to cover v1.4.1 + a recap of v1.4.0 multi-store headline features. Bumped the `**Version:**` pin from the stale `1.1.1` to `1.4.1`.
+- **`GETTING_STARTED.md`**: bumped version pin from the stale `v1.1.1` to `v1.4.1` and refreshed the one-line description to mention `createStore()` and pluggable secure storage.
+- **`PERFORMANCE_BENCHMARK_RESULTS.md`**: bumped version refs from the stale `v1.0.0` to `v1.4.1`, fixed the `~7 KB` bundle claim to the current `~8.5 KB`, and added explicit pointers to per-release CHANGELOG perf budgets (the numerical results in this doc were measured at v1.0.0 — current per-release perf is enforced in CI via `benchmark/v14-headless-bench.js`).
+- **`demo/README.md`**: bumped version banner from `v1.4.0` to `v1.4.1`.
+
+No public API surface changed. No new export. The `dist/**/*.js` and `demo/react-fusion-state.umd.js` artifacts were regenerated via `npm run build` to embed the new `v1.4.1` version stamp.
+
 ### Changed (build infra — no consumer-visible API change)
 
 - **Bumped Jest stack from 29 → 30.** `jest@^30.4.2`, `jest-environment-jsdom@^30.4.1`, `@types/jest@^30.0.0`. `ts-jest@^29.4.11` kept (its peerDeps explicitly support `jest: ^29.0.0 || ^30.0.0`). Closes [#12](https://github.com/jgerard72/react-fusion-state/issues/12).

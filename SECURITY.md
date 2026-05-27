@@ -60,32 +60,66 @@ We appreciate security researchers who help keep React Fusion State secure. With
 
 ### 🔒 Data Storage
 
-React Fusion State stores data in browser localStorage or React Native AsyncStorage. Consider:
+By default, React Fusion State persists data through the **auto-detected** adapter for your runtime:
 
-- **Sensitive data** should be encrypted before storage
-- **localStorage** is accessible to any script on the same origin
-- **AsyncStorage** is more secure but still accessible to the app
+| Runtime | Default backend | Encrypted at rest? | Visible to other apps / scripts? |
+| --- | --- | :-: | :-: |
+| Browser | `localStorage` | ❌ | ✅ Any JS on the same origin |
+| React Native / Expo | `AsyncStorage` | ❌ (plain SQLite / `NSUserDefaults`) | ❌ App-scoped, but readable on rooted / jailbroken devices |
+| Next.js SSR | In-memory (noop) | n/a | n/a |
+
+**None of the default adapters encrypts data at rest.** For anything sensitive (auth tokens, refresh tokens, PII, payment metadata) plug in a secure backend via the [Custom Storage Adapters](./README.md#-custom-storage-adapters-secure-storage-mmkv-) section in the README. The `StorageAdapter` contract is a 3-method interface — wiring `expo-secure-store`, `react-native-keychain` or `react-native-encrypted-storage` takes ~15 lines.
 
 ### 🛡️ Best Practices
 
+#### 1. Never store secrets through the default adapter
+
 ```jsx
-// ❌ Don't store sensitive data directly
-const [password, setPassword] = useFusionState('password', '');
+// ❌ Plain localStorage / AsyncStorage — readable by malware, dev tools, debuggers
+const [token, setToken] = useFusionState('auth.token', null);
 
-// ✅ Encrypt sensitive data before storage
-const [encryptedData, setEncryptedData] = useFusionState('userData', '');
-
-// ✅ Use secure keys for sensitive information
-const [token, setToken] = useFusionState('auth.encrypted_token', null);
+// ✅ Routed through a secure adapter (Keychain / SecureStore / EncryptedStorage)
+//    See README → Custom Storage Adapters for the 4 recipes.
+const [token, setToken] = secureStore.useFusionState('token', null);
 ```
 
-### 🔐 Recommendations
+#### 2. Split sensitive and non-sensitive state into two stores
 
-1. **Encrypt sensitive data** before storing
-2. **Use HTTPS** in production
-3. **Validate data** when loading from storage
-4. **Clear sensitive data** on logout
-5. **Consider token expiration** for auth data
+The recommended layout on mobile is **two `createStore()` instances** — one wired to a secure adapter (auth tokens), one to AsyncStorage (theme, language, cache). See the [split-sensitive-/-non-sensitive recipe](./README.md#pattern-split-sensitive--non-sensitive-with-two-stores) in the README.
+
+#### 3. Treat web storage as public
+
+On the web, anything written to `localStorage` is readable by **any script on the same origin** — including third-party analytics, ad SDKs, and XSS payloads. If you can't avoid persisting a secret on the web, encrypt it explicitly with [Web Crypto API](https://developer.mozilla.org/docs/Web/API/Web_Crypto_API) before passing it to `setState`, and keep the encryption key out of `localStorage`.
+
+#### 4. Clear sensitive data on logout
+
+The store doesn't know what "logout" means — wire it explicitly:
+
+```ts
+// On logout
+secureStore.setState({ token: null, refreshToken: null });
+// or remove individual keys (skips the next save when the adapter is async)
+```
+
+If you used `react-native-keychain` with `accessControl`, also call `Keychain.resetGenericPassword({ service: 'token' })` to remove the Keychain entry itself (the adapter's `removeItem` does this for you).
+
+#### 5. Never enable `debug` in production builds
+
+The `debug` flag on `<FusionStateProvider>` (and on individual `useFusionState({ debug: true })` calls) **prints every state diff and every save payload** to the console. That includes any sensitive value currently in state. Gate it behind `__DEV__` / `process.env.NODE_ENV === 'development'`:
+
+```jsx
+<FusionStateProvider debug={__DEV__}>
+  <App />
+</FusionStateProvider>
+```
+
+#### 6. No network calls — ever
+
+`react-fusion-state` has zero runtime dependencies and **never makes network calls**. If a future contributor proposes adding fetch / XHR / telemetry, this is a security regression and must be refused at code review time (see `.cursor/rules/70-security.mdc`).
+
+### 🔐 Mobile cookbook
+
+For the full copy-paste recipes (Expo SecureStore, react-native-keychain with biometrics, react-native-encrypted-storage, and the two-store split pattern), see the [Custom Storage Adapters](./README.md#-custom-storage-adapters-secure-storage-mmkv-) section in the main README.
 
 ## Vulnerability History
 

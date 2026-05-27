@@ -182,6 +182,7 @@ const itemIds = useFusionStore(
 - ✅ **React Native** (Expo, bare React Native)
 - ✅ **SSR/SSG** (Next.js, Gatsby)
 - ✅ **All bundlers** (Webpack, Vite, Rollup)
+- ✅ **Pluggable storage** — secure storage on mobile (Expo SecureStore, react-native-keychain, react-native-encrypted-storage), MMKV, IndexedDB, cookies, or any custom backend via the 3-method [`StorageAdapter` contract](#-custom-storage-adapters-secure-storage-mmkv-)
 
 ---
 
@@ -232,6 +233,8 @@ See the [Selectors & Derived State](#-selectors--derived-state-v120) section for
   }}
 >
 ```
+
+> Need encryption (mobile Keychain / SecureStore), MMKV, IndexedDB, cookies, or any other backend? Any object implementing the 3-method `StorageAdapter` interface plugs in here. Jump to [Custom Storage Adapters](#-custom-storage-adapters-secure-storage-mmkv-) for ready-to-copy recipes.
 
 ### 🎯 **Optimized Re-renders**
 ```jsx
@@ -289,6 +292,7 @@ open demo/demo-persistence.html
 - [**Interactive Demos**](demo/) - Try all features in your browser
 - [**Code Examples**](src/examples/) - React & React Native examples
 - [**Platform Compatibility**](src/PLATFORM_COMPATIBILITY.md) - Cross-platform guide
+- [**Custom Storage Adapters**](#-custom-storage-adapters-secure-storage-mmkv-) - Cookbook for secure storage on mobile (Keychain, SecureStore, EncryptedStorage) + multi-store split pattern
 
 ### 🛠️ **Development**
 - [**Contributing Guide**](CONTRIBUTING.md) - How to contribute
@@ -480,8 +484,264 @@ export function StoreProvider({ children, initialState }) {
 | Next.js App Router (per-request) | — | ✔ |
 | Read / mutate state from non-React code | — | ✔ |
 | Tests that bypass React entirely | — | ✔ |
+| Mix sensitive (Keychain / SecureStore) and non-sensitive (AsyncStorage) data | — | ✔ ([recipe](#pattern-split-sensitive--non-sensitive-with-two-stores)) |
 
 > **Backward compat:** `FusionStateProvider` is now a 5-line wrapper around `createStore()` — every 1.0-1.3 API still works exactly as before. The public-API snapshot gained one entry (`createStore`), nothing was removed or renamed.
+
+---
+
+## 🔐 Custom Storage Adapters (Secure Storage, MMKV, ...)
+
+`react-fusion-state` ships four built-in adapters (`createLocalStorageAdapter`, `createAsyncStorageAdapter`, `createMemoryStorageAdapter`, `createNoopStorageAdapter`) and **auto-detects the right one** based on the runtime. But the storage layer is fully pluggable — anything implementing the 3-method `StorageAdapter` interface works:
+
+```ts
+export interface StorageAdapter {
+  getItem:    (key: string) => Promise<string | null>;
+  setItem:    (key: string, value: string) => Promise<void>;
+  removeItem: (key: string) => Promise<void>;
+}
+```
+
+Below are 4 ready-to-copy recipes for the most common production needs on mobile. None of them ship inside the npm package — that would force a dependency choice on you. Pick the one matching your stack.
+
+### Recipe 1 — Expo: `expo-secure-store`
+
+iOS Keychain + Android EncryptedSharedPreferences, managed by Expo. Best fit for tokens and small secrets (~2 KB max per value on iOS).
+
+```bash
+npx expo install expo-secure-store
+```
+
+```ts
+// storage/secureStoreAdapter.ts (your app)
+import * as SecureStore from 'expo-secure-store';
+import type { StorageAdapter } from 'react-fusion-state';
+
+export const createSecureStoreAdapter = (debug = false): StorageAdapter => ({
+  async getItem(key) {
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch (e) {
+      if (debug) console.error('[SecureStore] read', key, e);
+      return null;
+    }
+  },
+  async setItem(key, value) {
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch (e) {
+      if (debug) console.error('[SecureStore] write', key, e);
+    }
+  },
+  async removeItem(key) {
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch (e) {
+      if (debug) console.error('[SecureStore] delete', key, e);
+    }
+  },
+});
+```
+
+```tsx
+import { FusionStateProvider } from 'react-fusion-state';
+import { createSecureStoreAdapter } from './storage/secureStoreAdapter';
+
+const secureAdapter = createSecureStoreAdapter(__DEV__);
+
+export default function App() {
+  return (
+    <FusionStateProvider
+      persistence={{
+        adapter: secureAdapter,
+        persistKeys: ['auth.token', 'auth.refreshToken'],
+        debounceTime: 1000,
+        onSaveError: (e) => console.warn('SecureStore save failed:', e),
+      }}
+    >
+      <RootNavigator />
+    </FusionStateProvider>
+  );
+}
+```
+
+> **iOS limit:** Keychain values are capped at ~2 KB. Use this adapter for tokens and small secrets only — not for the full state tree.
+> **Allowed key chars:** `[A-Za-z0-9._-]`. Slashes and most punctuation will throw on iOS. Prefer dot-namespaced keys (`auth.token`, never `auth/token`).
+
+### Recipe 2 — Bare React Native: `react-native-encrypted-storage`
+
+The simplest option: its API is already aligned on AsyncStorage's, so you can pass it straight to `createAsyncStorageAdapter` — with one thin wrapper because `getItem` resolves to `undefined` (not `null`) on missing keys.
+
+```bash
+npm i react-native-encrypted-storage
+cd ios && pod install
+```
+
+```tsx
+import EncryptedStorage from 'react-native-encrypted-storage';
+import { FusionStateProvider, createAsyncStorageAdapter } from 'react-fusion-state';
+
+const secureAdapter = createAsyncStorageAdapter({
+  getItem:    async (key)        => (await EncryptedStorage.getItem(key)) ?? null,
+  setItem:    (key, value)       => EncryptedStorage.setItem(key, value),
+  removeItem: (key)              => EncryptedStorage.removeItem(key),
+});
+
+export default function App() {
+  return (
+    <FusionStateProvider
+      persistence={{
+        adapter: secureAdapter,
+        persistKeys: ['auth.token', 'biometric.publicKey'],
+        debounceTime: 800,
+      }}
+    >
+      <RootNavigator />
+    </FusionStateProvider>
+  );
+}
+```
+
+Native backend: iOS Keychain + Android EncryptedSharedPreferences. No biometrics out of the box (use Recipe 3 if you need them).
+
+### Recipe 3 — Bare React Native: `react-native-keychain` (with biometrics)
+
+`react-native-keychain`'s API is credential-oriented (`setGenericPassword(username, password, options)`). We map one FusionState key to one Keychain `service`:
+
+```bash
+npm i react-native-keychain
+cd ios && pod install
+```
+
+```ts
+// storage/keychainAdapter.ts (your app)
+import * as Keychain from 'react-native-keychain';
+import type { StorageAdapter } from 'react-fusion-state';
+
+export const createKeychainAdapter = (
+  baseOptions: Keychain.Options = {},
+  debug = false,
+): StorageAdapter => ({
+  async getItem(key) {
+    try {
+      const creds = await Keychain.getGenericPassword({ ...baseOptions, service: key });
+      return creds ? creds.password : null;
+    } catch (e) {
+      if (debug) console.error('[Keychain] read', key, e);
+      return null;
+    }
+  },
+  async setItem(key, value) {
+    try {
+      await Keychain.setGenericPassword('fusion', value, { ...baseOptions, service: key });
+    } catch (e) {
+      if (debug) console.error('[Keychain] write', key, e);
+    }
+  },
+  async removeItem(key) {
+    try {
+      await Keychain.resetGenericPassword({ ...baseOptions, service: key });
+    } catch (e) {
+      if (debug) console.error('[Keychain] delete', key, e);
+    }
+  },
+});
+```
+
+```tsx
+import * as Keychain from 'react-native-keychain';
+import { createKeychainAdapter } from './storage/keychainAdapter';
+
+const secureAdapter = createKeychainAdapter({
+  accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+  accessible:    Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+});
+```
+
+> **Biometric prompts cost UX.** Each `getItem` triggers Face ID / Touch ID / fingerprint. Bump `debounceTime` to 2000–3000 ms and use it strictly for keys the user must unlock on demand (token reveal, payment confirmation). For "remember me until logout" cases, drop the `accessControl` flag.
+
+### Pattern: split sensitive / non-sensitive with two stores
+
+The idiomatic v1.4 way to mix encrypted and plain storage is **two `createStore()` instances** — one wired to your secure adapter, one to AsyncStorage. Each gets its own `debounceTime`, its own error callbacks, and the React hooks resolve to the correct one because they're closed over the store:
+
+```ts
+// stores/appStore.ts — non-sensitive (theme, prefs, last route, ...)
+import { createStore, createAsyncStorageAdapter } from 'react-fusion-state';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export const appStore = createStore({
+  initialState: { theme: 'dark', language: 'en' },
+  persistence: {
+    adapter:      createAsyncStorageAdapter(AsyncStorage),
+    persistKeys:  ['theme', 'language', 'lastRoute'],
+    debounceTime: 300,
+  },
+});
+
+// stores/secureStore.ts — sensitive (tokens, refresh tokens, biometric keys)
+import { createStore } from 'react-fusion-state';
+import { createSecureStoreAdapter } from '../storage/secureStoreAdapter';
+
+export const secureStore = createStore({
+  initialState: { token: null, refreshToken: null },
+  persistence: {
+    adapter:      createSecureStoreAdapter(),
+    persistKeys:  ['token', 'refreshToken'],
+    debounceTime: 1000,
+  },
+});
+```
+
+```tsx
+// App.tsx
+export default function App() {
+  return (
+    <appStore.Provider>
+      <secureStore.Provider>
+        <RootNavigator />
+      </secureStore.Provider>
+    </appStore.Provider>
+  );
+}
+
+// Inside any component
+function LoginScreen() {
+  const [token, setToken] = secureStore.useFusionState('token', null);
+  const [theme]            = appStore.useFusionState('theme', 'dark');
+  // ...
+}
+```
+
+Why this beats a "smart" single adapter that splits keys internally:
+
+- **Explicit & greppable.** `secureStore.X` reads as "this came from the Keychain" at every call site — no central allow-list of sensitive keys to keep in sync.
+- **Independent tuning.** 300 ms debounce for AsyncStorage (cheap), 1000+ ms for SecureStore (expensive, IPC + crypto).
+- **Independent failure modes.** `onSaveError` for the secure store can trigger a re-auth flow without polluting the app-state callback.
+- **Zero bundle impact.** The pattern uses APIs that already exist — no `createSplitAdapter` import to ship.
+
+### Writing your own adapter
+
+Anything that satisfies the 3-method contract works — IndexedDB, MMKV, cookies, a remote KV store, an in-memory mock for tests. The full type lives in [`src/storage/storageAdapters.ts`](src/storage/storageAdapters.ts):
+
+```ts
+export interface StorageAdapter {
+  getItem:    (key: string) => Promise<string | null>;
+  setItem:    (key: string, value: string) => Promise<void>;
+  removeItem: (key: string) => Promise<void>;
+}
+
+// Optional: opt into synchronous hydration on the web (instant first paint).
+export interface ExtendedStorageAdapter extends StorageAdapter {
+  getItemSync?: (key: string) => string | null;
+}
+```
+
+Rules of thumb when implementing one:
+
+- **Never throw.** Catch internally and return `null` from `getItem` / no-op from `setItem`/`removeItem`. The provider must never crash because the disk filled up.
+- **Pass the existing `debug` flag down** so users can opt into your `console.error` calls via `<FusionStateProvider debug>`.
+- **Stay synchronous-at-import.** No top-level `localStorage.getItem`, no synchronous `require()` of native modules — wrap them inside the factory (the lib follows the same pattern in [`src/storage/autoDetect.ts`](src/storage/autoDetect.ts)).
+- **Implement `getItemSync` only when it's truly sync.** It's read by the engine to deliver instant hydration on web — returning a faked value here breaks SSR mismatches.
 
 ---
 
