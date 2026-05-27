@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-05-27 - Docs alignment with v1.2.0
+
+### Changed
+
+- **README** rewritten to match the actual v1.2.0 surface. The `🎉 v1.1.1 …` highlights banner is replaced with v1.2.0 (Selectors API + Provider refactor, 74 → 116 tests, zero breaking change). A `Cross-Key Selectors (v1.2.0+)` entry is added to *Key Features* with a runnable example and a crossref to the long Selectors section. The *Advanced Performance Patterns* snippet is reworked to mix `useFusionState`, `useFusionStore` and `shallow`.
+- **Bundle size** figure corrected: `~6.4 KB` / `~7 KB` → **`~7.5 KB`** gzipped (measured with `esbuild --minify` + gzip on `dist/index.js` with `react`/`react-dom`/`react-native` as externals). Updated in the hero alt-text, the *Performance Champion* list and the comparison table.
+- **Migration to v2 (preview)** intro is reworded to be version-agnostic ("legacy aliases since v1.1" instead of "v1.1.x marks…").
+
+### Fixed
+
+- **Removed `keyPrefix` from the persistence example** — it was never a real option (only appears in a single test marked as `'ignored'`). The Advanced Persistence snippet now shows the real fields: `persistKeys`, `debounce`, `adapter`, `onLoadError`, `onSaveError`.
+- **Removed `{ debug: true }` per-key example on `useFusionState`** — the option is typed in `UseFusionStateOptions` but never read by the hook (no-op). The *Debug Mode* section now documents the real `<FusionStateProvider debug>` and `devTools` props.
+- **Three broken internal anchors repaired**, including `#-migration-to-v2-preview` which was silently failing because the `🗺️` emoji in the heading carried an invisible `U+FE0F` variation selector that shifted the slug. The heading now uses `🗺` (U+1F5FA) without the variation selector, matching the link.
+
+### Notes
+
+- **Patch release, docs-only.** No source code, build output or behavior change vs `1.2.0` — same exact JS surface, same exact tarball contents except `README.md`, `CHANGELOG.md` and `package.json`. Published primarily to refresh the README on `npmjs.com`, which was baked from the pre-correction tree at `1.2.0` publish time.
+
 ## [1.2.0] - 2026-05-27 - Selectors API & Provider Refactor
 
 ### Added

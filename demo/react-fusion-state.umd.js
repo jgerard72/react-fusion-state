@@ -1508,4 +1508,4 @@ var ReactFusionState = (() => {
   });
   return require_index();
 })();
-ReactFusionState.VERSION = "1.2.0";
+ReactFusionState.VERSION = "1.2.1";
