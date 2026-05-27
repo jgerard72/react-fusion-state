@@ -34,6 +34,20 @@ updates:
           - prettier
           - typescript
           - tsconfig-paths*
+    ignore:
+      # Hold off major bumps that require manual migration passes.
+      # Tracked as dedicated tech-debt issues; flip these off once each
+      # migration has landed on a separate branch with green CI.
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest-environment-jsdom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
