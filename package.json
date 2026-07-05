@@ -28,6 +28,7 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "test": "jest",
+    "test:types": "npm run build && tsc --noEmit -p test-types/tsconfig.json",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build",

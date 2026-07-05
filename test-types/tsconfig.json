@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "jsx": "react",
+    "strict": true,
+    "noEmit": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "..",
+    "paths": {
+      "react-fusion-state": ["dist/index.d.ts"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"]
+}
