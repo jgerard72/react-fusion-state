@@ -1,6 +1,6 @@
 {
   "name": "react-fusion-state",
-  "version": "0.0.67",
+  "version": "1.5.0",
   "homepage": "https://github.com/jgerard72/react-fusion-state/master/imags/react-fusion-state.png",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
