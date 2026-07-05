@@ -1090,9 +1090,11 @@ function useFusionState(key, initialValue, options) {
   React.useEffect(() => {
     initializeState();
   }, [initializeState]);
-  const [localValue, setLocalValue] = React.useState(() => state[key]);
+  const [localValue, setLocalValue] = React.useState(
+    () => key in state ? state[key] : initialValue
+  );
   React.useEffect(() => {
-    if (!skipLocalState) {
+    if (!skipLocalState && key in state) {
       const newValue = state[key];
       if (newValue !== localValue) {
         setLocalValue(newValue);
@@ -1119,9 +1121,7 @@ function useFusionState(key, initialValue, options) {
 var import_lodash = __toESM(require_lodash());
 var useFusionStateLog = (keys, options = {}) => {
   const { state } = useGlobalState();
-  const [selectedState, setSelectedState] = React.useState({});
   const previousState = React.useRef({});
-  const previousKeys = React.useRef(void 0);
   const {
     trackChanges = false,
     changeDetection = "reference",
@@ -1141,9 +1141,6 @@ var useFusionStateLog = (keys, options = {}) => {
     [changeDetection]
   );
   const filteredState = React.useMemo(() => {
-    if (keys && (0, import_lodash.default)(keys, previousKeys.current)) {
-      return void 0;
-    }
     if (!keys || keys.length === 0) {
       return state;
     }
@@ -1153,11 +1150,9 @@ var useFusionStateLog = (keys, options = {}) => {
         result[key] = state[key];
       }
     });
-    previousKeys.current = keys;
     return result;
   }, [state, keys]);
   React.useEffect(() => {
-    if (!filteredState) return;
     let changes;
     if (trackChanges) {
       changes = {};
@@ -1175,14 +1170,13 @@ var useFusionStateLog = (keys, options = {}) => {
         changes = void 0;
       }
     }
-    setSelectedState(filteredState);
     previousState.current = { ...filteredState };
     if (consoleLog && (changes || !trackChanges)) {
       const logData = formatter ? formatter(filteredState, changes) : { state: filteredState, ...changes && { changes } };
       console.log("[FusionState Log]", logData);
     }
   }, [filteredState, trackChanges, consoleLog, formatter, compareValues]);
-  return selectedState;
+  return filteredState;
 };
 function usePersistentState(key, initialValue) {
   const persistKey = key.startsWith("persist.") ? key : `persist.${key}`;

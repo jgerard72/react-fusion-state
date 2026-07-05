@@ -1,5 +1,5 @@
 import {useGlobalState} from '@core/FusionStateProvider';
-import {useEffect, useState, useRef, useMemo, useCallback} from 'react';
+import {useEffect, useRef, useMemo, useCallback} from 'react';
 import isEqual from 'lodash.isequal';
 import {simpleDeepEqual} from '@core/utils';
 
@@ -46,11 +46,9 @@ export const useFusionStateLog = (
   options: FusionStateLogOptions = {},
 ): SelectedState => {
   const {state} = useGlobalState();
-  const [selectedState, setSelectedState] = useState<SelectedState>({});
 
   // Track previous state for change detection
   const previousState = useRef<SelectedState>({});
-  const previousKeys = useRef<StateKey[] | undefined>(undefined);
 
   // Default options
   const {
@@ -76,11 +74,6 @@ export const useFusionStateLog = (
 
   // Filter state based on keys
   const filteredState = useMemo(() => {
-    // If keys are the same as before, don't recalculate
-    if (keys && isEqual(keys, previousKeys.current)) {
-      return undefined; // Skip calculation, will handle in useEffect
-    }
-
     // If no keys provided, use the entire state
     if (!keys || keys.length === 0) {
       return state;
@@ -94,13 +87,10 @@ export const useFusionStateLog = (
       }
     });
 
-    previousKeys.current = keys;
     return result;
   }, [state, keys]);
 
   useEffect(() => {
-    if (!filteredState) return; // Skip if no new filtered state
-
     // Calculate changes if needed
     let changes: SelectedState | undefined;
 
@@ -124,9 +114,6 @@ export const useFusionStateLog = (
       }
     }
 
-    // Update selected state with filtered state
-    setSelectedState(filteredState);
-
     // Save current state as previous for next comparison
     previousState.current = {...filteredState};
 
@@ -140,5 +127,5 @@ export const useFusionStateLog = (
     }
   }, [filteredState, trackChanges, consoleLog, formatter, compareValues]);
 
-  return selectedState;
+  return filteredState;
 };

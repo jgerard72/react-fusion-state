@@ -113,12 +113,8 @@ describe('Integration Tests', () => {
           presetValue: 'preset',
           counter: 100,
         }}>
-        <div data-testid="counter">
-          <Counter />
-        </div>
-        <div data-testid="logger">
-          <StateLogger />
-        </div>
+        <Counter />
+        <StateLogger />
       </FusionStateProvider>,
     );
 

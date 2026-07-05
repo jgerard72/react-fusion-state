@@ -1,8 +1,7 @@
 import React from 'react';
-import {render, screen, act, renderHook} from '@testing-library/react';
+import {act, renderHook, waitFor} from '@testing-library/react';
 import {FusionStateProvider, useFusionState, useFusionStateLog} from '../index';
 
-// Wrapper for renderHook tests
 const wrapper = ({children}: {children: React.ReactNode}) => (
   <FusionStateProvider>{children}</FusionStateProvider>
 );
@@ -16,80 +15,71 @@ describe('useFusionStateLog', () => {
     jest.restoreAllMocks();
   });
 
-  test('returns the full state when no keys are provided', () => {
-    const {result: stateResult} = renderHook(
-      () => useFusionState('testKey', 'testValue'),
+  test('returns the full state when no keys are provided', async () => {
+    const {result} = renderHook(
+      () => {
+        useFusionState('testKey', 'testValue');
+        return useFusionStateLog();
+      },
       {wrapper},
     );
 
-    const {result: logResult} = renderHook(() => useFusionStateLog(), {
-      wrapper,
+    await waitFor(() => {
+      expect(result.current).toHaveProperty('testKey', 'testValue');
     });
-
-    expect(logResult.current).toHaveProperty('testKey', 'testValue');
   });
 
-  test('returns only selected keys when provided', () => {
-    const {result: counterResult} = renderHook(
-      () => useFusionState('counter', 10),
+  test('returns only selected keys when provided', async () => {
+    const {result} = renderHook(
+      () => {
+        useFusionState('counter', 10);
+        useFusionState('name', 'John');
+        return useFusionStateLog(['counter']);
+      },
       {wrapper},
     );
 
-    const {result: nameResult} = renderHook(
-      () => useFusionState('name', 'John'),
-      {wrapper},
-    );
-
-    const {result: logResult} = renderHook(
-      () => useFusionStateLog(['counter']),
-      {wrapper},
-    );
-
-    expect(logResult.current).toHaveProperty('counter', 10);
-    expect(logResult.current).not.toHaveProperty('name');
+    await waitFor(() => {
+      expect(result.current).toHaveProperty('counter', 10);
+    });
+    expect(result.current).not.toHaveProperty('name');
   });
 
-  test('tracks changes when trackChanges option is enabled', () => {
-    const {result: stateResult} = renderHook(
-      () => useFusionState('counter', 0),
-      {wrapper},
-    );
-
-    // Prepare console.log spy to capture arguments
+  test('tracks changes when trackChanges option is enabled', async () => {
     const consoleLogSpy = jest.spyOn(console, 'log');
 
-    const {result: logResult, rerender} = renderHook(
-      () =>
-        useFusionStateLog(['counter'], {
+    const {result} = renderHook(
+      () => {
+        const [, setCounter] = useFusionState('counter', 0);
+        const log = useFusionStateLog(['counter'], {
           trackChanges: true,
           consoleLog: true,
-        }),
+        });
+        return {setCounter, log};
+      },
       {wrapper},
     );
 
-    // Update the state
-    act(() => {
-      stateResult.current[1](1);
+    await waitFor(() => {
+      expect(result.current.log).toHaveProperty('counter', 0);
     });
 
-    // Force rerender of the log hook
-    rerender();
+    act(() => {
+      result.current.setCounter(1);
+    });
 
-    // Console.log should have been called with state changes
-    expect(consoleLogSpy).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(consoleLogSpy).toHaveBeenCalled();
+    });
 
-    // The logged data should contain both the state and changes
-    const loggedData = consoleLogSpy.mock.calls[0][1];
+    const loggedData = consoleLogSpy.mock.calls.find(
+      call => call[0] === '[FusionState Log]',
+    )?.[1];
     expect(loggedData).toHaveProperty('state');
     expect(loggedData).toHaveProperty('changes');
   });
 
-  test('uses custom formatter when provided', () => {
-    const {result: stateResult} = renderHook(
-      () => useFusionState('counter', 0),
-      {wrapper},
-    );
-
+  test('uses custom formatter when provided', async () => {
     const formatter = jest.fn().mockImplementation(state => ({
       formattedState: state,
       timestamp: 'test-timestamp',
@@ -97,29 +87,34 @@ describe('useFusionStateLog', () => {
 
     const consoleLogSpy = jest.spyOn(console, 'log');
 
-    const {result: logResult, rerender} = renderHook(
-      () =>
-        useFusionStateLog(['counter'], {
+    const {result} = renderHook(
+      () => {
+        const [, setCounter] = useFusionState('counter', 0);
+        const log = useFusionStateLog(['counter'], {
           consoleLog: true,
           formatter,
-        }),
+        });
+        return {setCounter, log};
+      },
       {wrapper},
     );
 
-    // Update the state
-    act(() => {
-      stateResult.current[1](1);
+    await waitFor(() => {
+      expect(result.current.log).toHaveProperty('counter', 0);
     });
 
-    // Force rerender of the log hook
-    rerender();
+    act(() => {
+      result.current.setCounter(1);
+    });
 
-    // Formatter should have been called
-    expect(formatter).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(formatter).toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalled();
+    });
 
-    // Console.log should have been called with formatted data
-    expect(consoleLogSpy).toHaveBeenCalled();
-    const loggedData = consoleLogSpy.mock.calls[0][1];
+    const loggedData = consoleLogSpy.mock.calls.find(
+      call => call[0] === '[FusionState Log]',
+    )?.[1];
     expect(loggedData).toHaveProperty('formattedState');
     expect(loggedData).toHaveProperty('timestamp', 'test-timestamp');
   });
