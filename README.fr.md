@@ -200,6 +200,15 @@ export default function App() {
 
 ## Exemples
 
+Le dépôt contient des exemples de référence complets pour :
+
+- État global de base
+- Persistance
+- Hooks composés
+- Usage TypeScript
+
+Consultez **[src/examples/README.md](./src/examples/README.md)** pour la liste des fichiers et comment les copier dans votre application.
+
 ### Mode debug
 
 ```jsx

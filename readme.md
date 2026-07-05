@@ -200,6 +200,15 @@ export default function App() {
 
 ## Examples
 
+The repository includes complete reference examples for:
+
+- Basic global state
+- Persistence
+- Composed hooks
+- TypeScript usage
+
+See **[src/examples/README.md](./src/examples/README.md)** for file descriptions and how to copy them into your app.
+
 ### Debug mode
 
 ```jsx
