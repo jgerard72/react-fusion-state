@@ -65,11 +65,15 @@ export function useFusionState<T>(
     initializeState();
   }, [initializeState]);
 
-  // Use local state only if not skipping it (performance optimization)
-  const [localValue, setLocalValue] = useState<T>(() => state[key] as T);
+  // Use local state only if not skipping it (performance optimization).
+  // Fall back to initialValue on first render when the key is not yet in global state
+  // (global seeding runs in useEffect).
+  const [localValue, setLocalValue] = useState<T>(
+    () => (key in state ? state[key] : initialValue) as T,
+  );
 
   useEffect(() => {
-    if (!skipLocalState) {
+    if (!skipLocalState && key in state) {
       const newValue = state[key] as T;
       if (newValue !== localValue) {
         setLocalValue(newValue);
