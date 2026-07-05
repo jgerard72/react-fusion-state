@@ -5,10 +5,20 @@ import {
 } from './storageAdapters';
 
 /**
- * Détecte automatiquement l'adaptateur de stockage le plus approprié
- * en fonction de l'environnement d'exécution.
+ * Pick the best available {@link StorageAdapter} for the current runtime.
  *
- * @returns Le meilleur adaptateur de stockage disponible
+ * Resolution order: `localStorage` (web) → noop fallback. React Native
+ * environments receive a console warning — pass
+ * {@link createLocalStorageAdapter} or a custom adapter explicitly.
+ *
+ * @returns A working {@link StorageAdapter} for the current environment
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={{ adapter: detectBestStorageAdapter() }}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 export function detectBestStorageAdapter(): StorageAdapter {
   // Vérifier si localStorage est disponible (environnement navigateur)
@@ -46,10 +56,17 @@ export function detectBestStorageAdapter(): StorageAdapter {
 }
 
 /**
- * Crée un adaptateur de stockage en mémoire pour les tests ou lorsque
- * la persistance n'est pas disponible.
+ * In-memory {@link StorageAdapter} for tests and ephemeral sessions.
  *
- * @returns Un adaptateur qui stocke les données en mémoire
+ * Data is scoped to the returned adapter instance and lost on page reload.
+ *
+ * @returns Memory-backed {@link StorageAdapter}
+ *
+ * @example
+ * ```ts
+ * const adapter = createMemoryStorageAdapter();
+ * await adapter.setItem('k', 'v');
+ * ```
  */
 export function createMemoryStorageAdapter(): StorageAdapter {
   const storage = new Map<string, string>();

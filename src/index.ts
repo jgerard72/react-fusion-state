@@ -21,7 +21,17 @@ export type {
   PersistenceConfig,
   SimplePersistenceConfig,
   UseFusionStateOptions,
+  PersistenceKeys,
+  PersistenceKeysConfig,
+  PersistenceKeyFilter,
+  FusionStatePersistenceProp,
 } from '@core/types';
+export type {FusionStateProviderProps} from '@core/FusionStateProvider';
+export type {
+  FusionStateLogOptions,
+  FusionStateLogSnapshot,
+  FusionStateLogKey,
+} from '@core/useFusionStateLog';
 export {FusionStateErrorMessages} from '@core/types';
 
 // Utilitaires

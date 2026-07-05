@@ -1,8 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useGlobalState} from '@core/FusionStateProvider';
 import {
-  GlobalState,
-  SetStateAction,
   StateUpdater,
   FusionStateErrorMessages,
   UseFusionStateOptions,
@@ -10,14 +8,31 @@ import {
 import {formatErrorMessage} from '@core/utils';
 
 /**
- * Custom hook to manage a piece of state within the global fusion state.
+ * Subscribe to a single global state key. API mirrors React's `useState`, but
+ * the value is shared across all components under the same
+ * {@link FusionStateProvider}.
  *
- * @template T - The type of the state value.
- * @param {string} key - The key for the state value in the global state.
- * @param {T} [initialValue] - The initial value for the state if it is not already set.
- * @param {UseFusionStateOptions} [options] - Additional options for the hook.
- * @returns {[T, StateUpdater<T>]} - Returns the current state value and a function to update it.
- * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
+ * @template T - Type of the value stored at `key`
+ * @param key - Unique string identifier for this slice of global state
+ * @param initialValue - Seeded on first mount when `key` is not already in global state
+ * @param options - Optional performance tuning (see {@link UseFusionStateOptions})
+ * @returns Tuple `[value, setValue]` — same ergonomics as `useState`
+ * @throws {@link FusionStateErrorMessages.KEY_ALREADY_INITIALIZING} when two components race to initialize the same key
+ * @throws {@link FusionStateErrorMessages.KEY_MISSING_NO_INITIAL} when the key is missing and no `initialValue` was provided
+ *
+ * @example
+ * ```tsx
+ * function Counter() {
+ *   const [count, setCount] = useFusionState('counter', 0);
+ *   return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
+ * }
+ * ```
+ *
+ * @example
+ * ```tsx
+ * interface User { name: string; email: string }
+ * const [user, setUser] = useFusionState<User>('user', { name: '', email: '' });
+ * ```
  */
 export function useFusionState<T>(
   key: string,

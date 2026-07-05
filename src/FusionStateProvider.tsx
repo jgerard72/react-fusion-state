@@ -14,6 +14,7 @@ import {
   FusionStateErrorMessages,
   PersistenceConfig,
   SimplePersistenceConfig,
+  FusionStatePersistenceProp,
 } from '@core/types';
 import {createNoopStorageAdapter} from '@storage/storageAdapters';
 import {detectBestStorageAdapter} from '@storage/autoDetect';
@@ -24,9 +25,22 @@ const GlobalStateContext = createContext<
 >(undefined);
 
 /**
- * Hook to access the global state context
- * @returns The global state context
- * @throws Error if used outside of a FusionStateProvider
+ * Access the raw global fusion state context.
+ *
+ * Prefer {@link useFusionState} for per-key subscriptions. This hook is
+ * primarily useful for debugging, custom integrations, or reading the full
+ * state object.
+ *
+ * @returns The global state context for the nearest {@link FusionStateProvider}
+ * @throws {@link FusionStateErrorMessages.PROVIDER_MISSING} when called outside a provider
+ *
+ * @example
+ * ```tsx
+ * function DebugPanel() {
+ *   const { state } = useGlobalState();
+ *   return <pre>{JSON.stringify(state, null, 2)}</pre>;
+ * }
+ * ```
  */
 export const useGlobalState = () => {
   const context = useContext(GlobalStateContext);
@@ -38,25 +52,27 @@ export const useGlobalState = () => {
   return context;
 };
 
-interface FusionStateProviderProps {
-  /** Child components that will have access to fusion state */
+/**
+ * Props for {@link FusionStateProvider}.
+ */
+export interface FusionStateProviderProps {
+  /** Child components that will have access to fusion state. */
   children: ReactNode;
-  /** Optional initial state values */
+  /** Seed values merged into global state when the provider mounts. */
   initialState?: GlobalState;
-  /** Enable debug mode which logs state changes to console */
+  /**
+   * Log state diffs and persistence activity to the console.
+   * Avoid enabling in production — logs may contain user data.
+   */
   debug?: boolean;
   /**
-   * Configuration pour la persistance - peuvent être:
-   * - true: active la persistance pour toutes les clés avec les valeurs par défaut
-   * - tableau de chaînes: active la persistance uniquement pour les clés spécifiées
-   * - objet: configuration détaillée avec clés, préfixe, etc.
-   * - objet complet PersistenceConfig: configuration avancée (rétrocompatibilité)
+   * Persistence configuration:
+   * - `true` — enable with defaults (persists keys prefixed `persist.`)
+   * - `string[]` — persist only the listed keys
+   * - {@link SimplePersistenceConfig} — simplified options (`debounce`, `keyPrefix`, …)
+   * - {@link PersistenceConfig} — full control (`loadOnInit`, `saveOnChange`, …)
    */
-  persistence?:
-    | boolean
-    | string[]
-    | SimplePersistenceConfig
-    | PersistenceConfig;
+  persistence?: FusionStatePersistenceProp;
 }
 
 /**
@@ -137,8 +153,17 @@ function normalizePersistenceConfig(
 }
 
 /**
- * Provider component for React Fusion State
- * Manages the global state and provides access to all child components
+ * Root provider that owns the global fusion state tree.
+ *
+ * Wrap your application (or a subtree) once. All {@link useFusionState} calls
+ * inside descendants share the same key namespace.
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider initialState={{ theme: 'light' }} persistence={['user']}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 export const FusionStateProvider: React.FC<FusionStateProviderProps> = memo(
   ({children, initialState = {}, debug = false, persistence}) => {

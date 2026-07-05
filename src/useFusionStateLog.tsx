@@ -1,54 +1,79 @@
 import {useGlobalState} from '@core/FusionStateProvider';
+import {FusionStateErrorMessages} from '@core/types';
 import {useEffect, useRef, useMemo, useCallback} from 'react';
 import isEqual from 'lodash.isequal';
 import {simpleDeepEqual} from '@core/utils';
 
-type StateKey = string;
-type SelectedState = Record<string, unknown>;
+/** State key identifier used by {@link useFusionStateLog}. */
+export type FusionStateLogKey = string;
 
 /**
- * Options for the useFusionStateLog hook
+ * Snapshot of global state returned by {@link useFusionStateLog}.
+ * When `keys` are provided, only those entries are included.
  */
-interface FusionStateLogOptions {
+export type FusionStateLogSnapshot = Record<string, unknown>;
+
+/**
+ * Options for {@link useFusionStateLog}.
+ *
+ * @example
+ * ```tsx
+ * const slice = useFusionStateLog(['counter', 'user'], {
+ *   trackChanges: true,
+ *   consoleLog: true,
+ *   changeDetection: 'simple',
+ * });
+ * ```
+ */
+export interface FusionStateLogOptions {
   /**
-   * Whether to calculate and include differences between
-   * current and previous state in the returned object
+   * Compute a `changes` object (previous vs current) for console output.
+   * Does not change the returned snapshot shape.
    */
   trackChanges?: boolean;
 
   /**
-   * How to track changes. Default is 'reference' which is faster
-   * but might miss deeply nested changes. 'deep' uses lodash.isEqual
-   * for deep equality checks.
+   * Equality strategy when `trackChanges` is enabled.
+   * - `'reference'` — fast `===` check (default)
+   * - `'deep'` — `lodash.isequal`
+   * - `'simple'` — {@link simpleDeepEqual} (JSON-based)
    */
   changeDetection?: 'reference' | 'deep' | 'simple';
 
-  /**
-   * Custom formatter function for console logging
-   */
-  formatter?: (state: SelectedState, changes?: SelectedState) => unknown;
+  /** Transform the payload written to `console.log` when `consoleLog` is true. */
+  formatter?: (
+    state: FusionStateLogSnapshot,
+    changes?: FusionStateLogSnapshot,
+  ) => unknown;
 
-  /**
-   * Whether to automatically log to console
-   */
+  /** Mirror the selected snapshot (and optional changes) to `console.log`. */
   consoleLog?: boolean;
 }
 
 /**
- * Hook to observe and track changes in the global fusion state
+ * Observe a slice of global state for debugging.
  *
- * @param keys - Optional array of keys to watch (if undefined, watches all keys)
- * @param options - Additional configuration options
- * @returns The selected state from the global state
+ * @param keys - Keys to include. When omitted, the full global state is returned.
+ * @param options - Change tracking and console logging options
+ * @returns A snapshot of the selected keys from global state
+ * @throws {@link FusionStateErrorMessages.PROVIDER_MISSING} when used outside a provider (via {@link useGlobalState})
+ *
+ * @example
+ * ```tsx
+ * function StateInspector() {
+ *   const state = useFusionStateLog();
+ *   return <pre>{JSON.stringify(state, null, 2)}</pre>;
+ * }
+ * ```
  */
 export const useFusionStateLog = (
-  keys?: StateKey[],
+  keys?: FusionStateLogKey[],
   options: FusionStateLogOptions = {},
-): SelectedState => {
+): FusionStateLogSnapshot => {
   const {state} = useGlobalState();
 
   // Track previous state for change detection
-  const previousState = useRef<SelectedState>({});
+  const previousState = useRef<FusionStateLogSnapshot>({});
 
   // Default options
   const {
@@ -80,7 +105,7 @@ export const useFusionStateLog = (
     }
 
     // Otherwise, filter to include only the requested keys
-    const result: SelectedState = {};
+    const result: FusionStateLogSnapshot = {};
     keys.forEach(key => {
       if (key in state) {
         result[key] = state[key];
@@ -92,7 +117,7 @@ export const useFusionStateLog = (
 
   useEffect(() => {
     // Calculate changes if needed
-    let changes: SelectedState | undefined;
+    let changes: FusionStateLogSnapshot | undefined;
 
     if (trackChanges) {
       changes = {};

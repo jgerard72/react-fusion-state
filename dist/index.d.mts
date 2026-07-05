@@ -1,125 +1,228 @@
 import React, { ReactNode } from 'react';
 
 /**
- * Interface for storage adapters that developers can implement
- * for their specific platform (web, React Native, Expo, etc.)
+ * Platform-agnostic persistence contract.
+ *
+ * Implement this interface to back {@link FusionStateProvider} persistence
+ * on any storage backend (localStorage, AsyncStorage, MMKV, secure storage, …).
+ *
+ * @example
+ * ```ts
+ * const adapter: StorageAdapter = {
+ *   async getItem(key) { return myStore.read(key); },
+ *   async setItem(key, value) { myStore.write(key, value); },
+ *   async removeItem(key) { myStore.delete(key); },
+ * };
+ * ```
  */
 interface StorageAdapter {
     /**
-     * Get a value from storage
-     * @param key Storage key
-     * @returns Promise that resolves to the stored value or null if not found
+     * Read a serialized value from storage.
+     * @param key - Storage key
+     * @returns Stored string or `null` when missing
      */
     getItem: (key: string) => Promise<string | null>;
     /**
-     * Save a value to storage
-     * @param key Storage key
-     * @param value Value to store (will be JSON stringified)
-     * @returns Promise that resolves when storage is complete
+     * Persist a serialized value.
+     * @param key - Storage key
+     * @param value - Already-serialized payload (the provider uses `JSON.stringify`)
      */
     setItem: (key: string, value: string) => Promise<void>;
     /**
-     * Remove a value from storage
-     * @param key Storage key
-     * @returns Promise that resolves when removal is complete
+     * Delete a stored value.
+     * @param key - Storage key
      */
     removeItem: (key: string) => Promise<void>;
 }
 /**
- * No-operation adapter for when persistence is not required
- * @returns A storage adapter that does nothing (used as fallback)
+ * Fallback adapter that discards all reads/writes.
+ *
+ * Used automatically in SSR/test environments where no real storage exists.
+ *
+ * @returns No-op {@link StorageAdapter}
  */
 declare const createNoopStorageAdapter: () => StorageAdapter;
 /**
- * Create a localStorage adapter for web applications
- * @returns A storage adapter that uses browser's localStorage
+ * Web adapter backed by `localStorage`.
+ *
+ * @returns {@link StorageAdapter} using the browser's `localStorage` API
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={{ adapter: createLocalStorageAdapter() }}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 declare const createLocalStorageAdapter: () => StorageAdapter;
+/**
+ * @deprecated Use {@link createNoopStorageAdapter} instead.
+ * Alias kept for backward compatibility.
+ */
 declare const NoopStorageAdapter: () => StorageAdapter;
 
 /**
- * Common types for React Fusion State
+ * Common types for React Fusion State.
+ *
+ * @packageDocumentation
  */
-/** Global state storage type */
+/**
+ * Global state bag stored by {@link FusionStateProvider}.
+ * Keys are arbitrary strings; values are typed per hook via the generic `T`
+ * in {@link useFusionState}.
+ */
 type GlobalState = Record<string, unknown>;
-/** Function to update state with value or updater function */
+/**
+ * Value or updater function accepted by {@link StateUpdater}.
+ *
+ * @template T - State value type
+ */
 type SetStateAction<T> = T | ((prevState: T) => T);
-/** State updater function type */
+/**
+ * Setter returned by {@link useFusionState}. Mirrors React's `useState` setter.
+ *
+ * @template T - State value type
+ */
 type StateUpdater<T> = (value: SetStateAction<T>) => void;
-/** Type for the global fusion state context */
+/**
+ * Filter predicate for deciding which keys are persisted.
+ *
+ * @param key - State key being evaluated
+ * @param value - Current value for the key (may be `undefined` during config normalization)
+ * @returns `true` when the key should be written to storage
+ */
+type PersistenceKeyFilter = (key: string, value?: unknown) => boolean;
+/**
+ * Accepted shapes for `persistKeys` in {@link SimplePersistenceConfig}.
+ *
+ * @template T - Optional schema type for typed key lists (defaults to {@link GlobalState})
+ */
+type PersistenceKeys<T extends Record<string, unknown> = GlobalState> = keyof T extends string ? boolean | (keyof T)[] | PersistenceKeyFilter : boolean | string[] | PersistenceKeyFilter;
+/**
+ * Accepted shapes for `persistKeys` in {@link PersistenceConfig}.
+ *
+ * @template T - Optional schema type for typed key lists (defaults to {@link GlobalState})
+ */
+type PersistenceKeysConfig<T extends Record<string, unknown> = GlobalState> = keyof T extends string ? (keyof T)[] | PersistenceKeyFilter : string[] | PersistenceKeyFilter;
+/**
+ * Accepted `persistence` prop values for {@link FusionStateProvider}.
+ */
+type FusionStatePersistenceProp = boolean | string[] | SimplePersistenceConfig | PersistenceConfig;
+/**
+ * React context value exposed by {@link useGlobalState}.
+ */
 interface GlobalFusionStateContextType {
+    /** Current global state snapshot. */
     state: GlobalState;
+    /** Replace or update the full global state object. */
     setState: React.Dispatch<React.SetStateAction<GlobalState>>;
+    /**
+     * Keys currently being initialized. Primarily used internally to detect
+     * concurrent first-mount races for the same key.
+     *
+     * @internal
+     */
     initializingKeys: Set<string>;
 }
 /**
- * Configuration simplifiée pour la persistance.
- * Utilisée pour la nouvelle API simplifiée du FusionStateProvider.
+ * Simplified persistence configuration for {@link FusionStateProvider}.
+ *
+ * When `persistKeys` is omitted and `persistence={true}`, only keys prefixed
+ * with `persist.` are saved by default.
+ *
+ * @template T - Optional schema type for typed `persistKeys` lists
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider
+ *   persistence={{
+ *     persistKeys: ['user', 'theme'],
+ *     debounce: 300,
+ *     keyPrefix: 'my_app',
+ *   }}
+ * >
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 interface SimplePersistenceConfig<T extends Record<string, unknown> = GlobalState> {
     /**
-     * Clés à persister - si non fournies, toutes les clés d'état seront persistées
-     * Peut être un tableau de clés ou une fonction de filtre
-     * La fonction de filtre peut maintenant recevoir la valeur actuelle de l'état pour une prise de décision plus précise
+     * Keys to persist. When omitted with `persistence={true}`, defaults to keys
+     * starting with `persist.`. Can be `true` (persist all), a key list, or a
+     * filter function receiving `(key, value?)`.
      */
-    persistKeys?: keyof T extends string ? boolean | (keyof T)[] | ((key: string, value?: unknown) => boolean) : boolean | string[] | ((key: string, value?: unknown) => boolean);
+    persistKeys?: PersistenceKeys<T>;
     /**
-     * Préfixe de clé de stockage pour l'espace de noms (défaut: 'fusion_state')
-     * Cela aide à éviter les collisions avec d'autres stockages dans la même application.
+     * Storage namespace prefix (default: `'fusion_state'`).
+     * Helps avoid collisions with other libraries using the same storage backend.
      */
     keyPrefix?: string;
     /**
-     * Temps de debounce en ms (0 = sauvegarde immédiate)
-     * Augmenter cette valeur réduit le nombre d'écritures mais peut perdre les changements récents
+     * Debounce interval in milliseconds before writing to storage.
+     * `0` saves immediately. Higher values reduce I/O but may lose recent
+     * changes if the app closes before the debounce fires.
      */
     debounce?: number;
     /**
-     * Adaptateur de stockage personnalisé (facultatif)
-     * Si non spécifié, le meilleur adaptateur disponible sera automatiquement détecté
+     * Custom storage adapter. When omitted, {@link detectBestStorageAdapter}
+     * picks the best available backend for the current runtime.
      */
     adapter?: StorageAdapter;
-    /** Fonction de callback personnalisée pour gérer la sauvegarde (appelée à la place de la logique par défaut) */
+    /**
+     * Override the default save implementation. Called instead of the built-in
+     * JSON serialization when provided.
+     */
     customSaveCallback?: (state: GlobalState, adapter: StorageAdapter, keyPrefix: string) => Promise<void>;
 }
 /**
- * Configuration pour la persistance d'état en stockage.
- * Définit comment l'état doit être sauvegardé et chargé.
+ * Full persistence configuration with explicit load/save toggles.
+ *
+ * @template T - Optional schema type for typed `persistKeys` lists
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider
+ *   persistence={{
+ *     adapter: createLocalStorageAdapter(),
+ *     persistKeys: (key) => key.startsWith('persist.'),
+ *     loadOnInit: true,
+ *     saveOnChange: true,
+ *     debounceTime: 500,
+ *   }}
+ * >
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 interface PersistenceConfig<T extends Record<string, unknown> = GlobalState> {
-    /**
-     * L'adaptateur de stockage qui gère les opérations de lecture/écriture.
-     * Implémentez l'interface StorageAdapter pour votre plateforme spécifique.
-     */
+    /** Storage adapter that performs read/write operations. */
     adapter: StorageAdapter;
-    /**
-     * Préfixe de clé de stockage pour l'espace de noms (défaut: 'fusion_state')
-     * Cela aide à éviter les collisions avec d'autres stockages dans la même application.
-     */
+    /** Storage namespace prefix (default: `'fusion_state'`). */
     keyPrefix?: string;
+    /** Keys to persist — key list or filter function `(key, value?) => boolean`. */
+    persistKeys?: PersistenceKeysConfig<T>;
     /**
-     * Clés à persister - si non fournies, toutes les clés d'état seront persistées
-     * Peut être un tableau de clés ou une fonction de filtre
-     * La fonction de filtre peut maintenant recevoir la valeur actuelle de l'état pour une prise de décision plus précise
-     */
-    persistKeys?: keyof T extends string ? (keyof T)[] | ((key: string, value?: unknown) => boolean) : string[] | ((key: string, value?: unknown) => boolean);
-    /**
-     * Charger l'état depuis le stockage à l'initialisation
-     * Lorsque vrai, le provider tentera de restaurer l'état depuis le stockage à son montage.
+     * Load persisted state when the provider mounts (default: `true` when
+     * normalized from simplified config).
      */
     loadOnInit?: boolean;
     /**
-     * Sauvegarder l'état dans le stockage quand il change
-     * Lorsque vrai, les changements à l'état seront automatiquement persistés.
+     * Persist state on every change (default: `true` when normalized from
+     * simplified config).
      */
     saveOnChange?: boolean;
     /**
-     * Temps de debounce en ms pour sauvegarder les changements d'état
-     * (défaut: 0, signifiant sauvegarde immédiate)
-     * Des valeurs plus élevées réduisent les écritures mais peuvent perdre des changements récents à la fermeture de l'app.
+     * Debounce interval in milliseconds before writing to storage.
+     * `0` saves immediately.
      */
     debounceTime?: number;
 }
-/** Messages d'erreur enum pour des rapports d'erreur cohérents */
+/**
+ * Stable error message templates used across the library.
+ *
+ * Placeholders use `{0}`, `{1}`, … and are substituted by
+ * {@link formatErrorMessage}.
+ */
 declare enum FusionStateErrorMessages {
     PROVIDER_MISSING = "ReactFusionState Error: useFusionState must be used within a FusionStateProvider",
     KEY_ALREADY_INITIALIZING = "ReactFusionState Error: Key \"{0}\" is already being initialized. Consider checking if the key is being initialized elsewhere or if there's a logic error.",
@@ -129,141 +232,233 @@ declare enum FusionStateErrorMessages {
     STORAGE_ADAPTER_MISSING = "ReactFusionState Error: Storage adapter is required for persistence configuration"
 }
 /**
- * Options pour la consommation de fusion state
+ * Per-hook options for {@link useFusionState}.
+ *
+ * @example
+ * ```tsx
+ * const [fps, setFps] = useFusionState('fps', 60, { skipLocalState: true });
+ * ```
  */
 interface UseFusionStateOptions {
     /**
-     * Sauter la synchronisation d'état local pour l'optimisation des performances
-     * Lorsque vrai, le hook lira directement depuis l'état global, ce qui peut améliorer les performances
-     * mais peut causer plus de re-rendus dans certains cas.
+     * Read directly from global state instead of mirroring into local React
+     * state. Can reduce synchronization overhead for high-frequency updates,
+     * but may cause extra re-renders when many components subscribe to the
+     * same key.
      */
     skipLocalState?: boolean;
 }
 
 /**
- * Custom hook to manage a piece of state within the global fusion state.
+ * Subscribe to a single global state key. API mirrors React's `useState`, but
+ * the value is shared across all components under the same
+ * {@link FusionStateProvider}.
  *
- * @template T - The type of the state value.
- * @param {string} key - The key for the state value in the global state.
- * @param {T} [initialValue] - The initial value for the state if it is not already set.
- * @param {UseFusionStateOptions} [options] - Additional options for the hook.
- * @returns {[T, StateUpdater<T>]} - Returns the current state value and a function to update it.
- * @throws Will throw an error if the key is already being initialized or if the key does not exist and no initial value is provided.
+ * @template T - Type of the value stored at `key`
+ * @param key - Unique string identifier for this slice of global state
+ * @param initialValue - Seeded on first mount when `key` is not already in global state
+ * @param options - Optional performance tuning (see {@link UseFusionStateOptions})
+ * @returns Tuple `[value, setValue]` — same ergonomics as `useState`
+ * @throws {@link FusionStateErrorMessages.KEY_ALREADY_INITIALIZING} when two components race to initialize the same key
+ * @throws {@link FusionStateErrorMessages.KEY_MISSING_NO_INITIAL} when the key is missing and no `initialValue` was provided
+ *
+ * @example
+ * ```tsx
+ * function Counter() {
+ *   const [count, setCount] = useFusionState('counter', 0);
+ *   return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
+ * }
+ * ```
+ *
+ * @example
+ * ```tsx
+ * interface User { name: string; email: string }
+ * const [user, setUser] = useFusionState<User>('user', { name: '', email: '' });
+ * ```
  */
 declare function useFusionState<T>(key: string, initialValue?: T, options?: UseFusionStateOptions): [T, StateUpdater<T>];
 
 /**
- * Hook to access the global state context
- * @returns The global state context
- * @throws Error if used outside of a FusionStateProvider
+ * Access the raw global fusion state context.
+ *
+ * Prefer {@link useFusionState} for per-key subscriptions. This hook is
+ * primarily useful for debugging, custom integrations, or reading the full
+ * state object.
+ *
+ * @returns The global state context for the nearest {@link FusionStateProvider}
+ * @throws {@link FusionStateErrorMessages.PROVIDER_MISSING} when called outside a provider
+ *
+ * @example
+ * ```tsx
+ * function DebugPanel() {
+ *   const { state } = useGlobalState();
+ *   return <pre>{JSON.stringify(state, null, 2)}</pre>;
+ * }
+ * ```
  */
 declare const useGlobalState: () => GlobalFusionStateContextType;
+/**
+ * Props for {@link FusionStateProvider}.
+ */
 interface FusionStateProviderProps {
-    /** Child components that will have access to fusion state */
+    /** Child components that will have access to fusion state. */
     children: ReactNode;
-    /** Optional initial state values */
+    /** Seed values merged into global state when the provider mounts. */
     initialState?: GlobalState;
-    /** Enable debug mode which logs state changes to console */
+    /**
+     * Log state diffs and persistence activity to the console.
+     * Avoid enabling in production — logs may contain user data.
+     */
     debug?: boolean;
     /**
-     * Configuration pour la persistance - peuvent être:
-     * - true: active la persistance pour toutes les clés avec les valeurs par défaut
-     * - tableau de chaînes: active la persistance uniquement pour les clés spécifiées
-     * - objet: configuration détaillée avec clés, préfixe, etc.
-     * - objet complet PersistenceConfig: configuration avancée (rétrocompatibilité)
+     * Persistence configuration:
+     * - `true` — enable with defaults (persists keys prefixed `persist.`)
+     * - `string[]` — persist only the listed keys
+     * - {@link SimplePersistenceConfig} — simplified options (`debounce`, `keyPrefix`, …)
+     * - {@link PersistenceConfig} — full control (`loadOnInit`, `saveOnChange`, …)
      */
-    persistence?: boolean | string[] | SimplePersistenceConfig | PersistenceConfig;
+    persistence?: FusionStatePersistenceProp;
 }
 /**
- * Provider component for React Fusion State
- * Manages the global state and provides access to all child components
+ * Root provider that owns the global fusion state tree.
+ *
+ * Wrap your application (or a subtree) once. All {@link useFusionState} calls
+ * inside descendants share the same key namespace.
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider initialState={{ theme: 'light' }} persistence={['user']}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 declare const FusionStateProvider: React.FC<FusionStateProviderProps>;
 
-type StateKey = string;
-type SelectedState = Record<string, unknown>;
+/** State key identifier used by {@link useFusionStateLog}. */
+type FusionStateLogKey = string;
 /**
- * Options for the useFusionStateLog hook
+ * Snapshot of global state returned by {@link useFusionStateLog}.
+ * When `keys` are provided, only those entries are included.
+ */
+type FusionStateLogSnapshot = Record<string, unknown>;
+/**
+ * Options for {@link useFusionStateLog}.
+ *
+ * @example
+ * ```tsx
+ * const slice = useFusionStateLog(['counter', 'user'], {
+ *   trackChanges: true,
+ *   consoleLog: true,
+ *   changeDetection: 'simple',
+ * });
+ * ```
  */
 interface FusionStateLogOptions {
     /**
-     * Whether to calculate and include differences between
-     * current and previous state in the returned object
+     * Compute a `changes` object (previous vs current) for console output.
+     * Does not change the returned snapshot shape.
      */
     trackChanges?: boolean;
     /**
-     * How to track changes. Default is 'reference' which is faster
-     * but might miss deeply nested changes. 'deep' uses lodash.isEqual
-     * for deep equality checks.
+     * Equality strategy when `trackChanges` is enabled.
+     * - `'reference'` — fast `===` check (default)
+     * - `'deep'` — `lodash.isequal`
+     * - `'simple'` — {@link simpleDeepEqual} (JSON-based)
      */
     changeDetection?: 'reference' | 'deep' | 'simple';
-    /**
-     * Custom formatter function for console logging
-     */
-    formatter?: (state: SelectedState, changes?: SelectedState) => unknown;
-    /**
-     * Whether to automatically log to console
-     */
+    /** Transform the payload written to `console.log` when `consoleLog` is true. */
+    formatter?: (state: FusionStateLogSnapshot, changes?: FusionStateLogSnapshot) => unknown;
+    /** Mirror the selected snapshot (and optional changes) to `console.log`. */
     consoleLog?: boolean;
 }
 /**
- * Hook to observe and track changes in the global fusion state
+ * Observe a slice of global state for debugging.
  *
- * @param keys - Optional array of keys to watch (if undefined, watches all keys)
- * @param options - Additional configuration options
- * @returns The selected state from the global state
+ * @param keys - Keys to include. When omitted, the full global state is returned.
+ * @param options - Change tracking and console logging options
+ * @returns A snapshot of the selected keys from global state
+ * @throws {@link FusionStateErrorMessages.PROVIDER_MISSING} when used outside a provider (via {@link useGlobalState})
+ *
+ * @example
+ * ```tsx
+ * function StateInspector() {
+ *   const state = useFusionStateLog();
+ *   return <pre>{JSON.stringify(state, null, 2)}</pre>;
+ * }
+ * ```
  */
-declare const useFusionStateLog: (keys?: StateKey[], options?: FusionStateLogOptions) => SelectedState;
+declare const useFusionStateLog: (keys?: FusionStateLogKey[], options?: FusionStateLogOptions) => FusionStateLogSnapshot;
 
 /**
- * Hook pour les données qui doivent persister automatiquement.
- * Ce hook préfixe automatiquement la clé avec 'persist.' pour assurer
- * que les données seront sauvegardées entre les sessions avec la
- * configuration par défaut de FusionStateProvider.
+ * Convenience wrapper around {@link useFusionState} that auto-prefixes keys
+ * with `persist.` so they match the default filter when
+ * `persistence={true}` on {@link FusionStateProvider}.
  *
- * @template T - Le type de la valeur d'état
- * @param {string} key - La clé pour la valeur d'état (sera préfixée avec 'persist.')
- * @param {T} initialValue - La valeur initiale
- * @returns {[T, StateUpdater<T>]} - La valeur actuelle et une fonction pour la mettre à jour
+ * @template T - Type of the stored value
+ * @param key - Logical key (prefixed with `persist.` unless already present)
+ * @param initialValue - Initial value seeded on first mount
+ * @returns `[value, setValue]` tuple identical to {@link useFusionState}
+ *
+ * @example
+ * ```tsx
+ * const [token, setToken] = usePersistentState('auth.token', '');
+ * // Stored under global key "persist.auth.token"
+ * ```
  */
 declare function usePersistentState<T>(key: string, initialValue: T): [T, StateUpdater<T>];
 /**
- * Hook pour les données qui changent fréquemment, optimisé pour les performances.
- * Utilise skipLocalState: true pour éviter la synchronisation locale,
- * ce qui peut améliorer les performances mais peut entraîner plus de re-rendus.
+ * High-frequency variant of {@link useFusionState} with `skipLocalState: true`.
  *
- * @template T - Le type de la valeur d'état
- * @param {string} key - La clé pour la valeur d'état
- * @param {T} initialValue - La valeur initiale
- * @returns {[T, StateUpdater<T>]} - La valeur actuelle et une fonction pour la mettre à jour
+ * @template T - Type of the stored value
+ * @param key - Global state key
+ * @param initialValue - Initial value seeded on first mount
+ * @returns `[value, setValue]` tuple identical to {@link useFusionState}
+ *
+ * @example
+ * ```tsx
+ * const [mouse, setMouse] = useFrequentState('pointer', { x: 0, y: 0 });
+ * ```
  */
 declare function useFrequentState<T>(key: string, initialValue: T): [T, StateUpdater<T>];
 /**
- * Hook pour gérer les états de formulaire avec des fonctions helpers.
+ * Form state helper built on {@link useFusionState}.
  *
- * @template T - Le type de l'objet formulaire (Record<string, any>)
- * @param {string} formKey - La clé pour le formulaire dans l'état global
- * @param {T} initialValues - Les valeurs initiales du formulaire
- * @returns {[T, (field: keyof T, value: any) => void, () => void]} -
- *   Les valeurs du formulaire, une fonction pour mettre à jour un champ, et une fonction de réinitialisation
+ * @template T - Form shape (`Record<string, unknown>` fields)
+ * @param formKey - Global key holding the form object
+ * @param initialValues - Default field values (also used by `resetForm`)
+ * @returns `[values, updateField, resetForm]`
+ *
+ * @example
+ * ```tsx
+ * const [form, updateField, reset] = useFormState('signup', { email: '', name: '' });
+ * updateField('email', 'a@b.com');
+ * ```
  */
 declare function useFormState<T extends Record<string, any>>(formKey: string, initialValues: T): [T, (field: keyof T, value: any) => void, () => void];
 /**
- * Hook pour gérer un compteur avec des fonctions d'incrémentation et de décrémentation.
+ * Counter helper with increment, decrement, and direct set.
  *
- * @param {string} key - La clé pour le compteur dans l'état global
- * @param {number} initialValue - La valeur initiale du compteur (défaut: 0)
- * @returns {[number, () => void, () => void, (value: number) => void]} -
- *   La valeur du compteur, fonction incrémenter, fonction décrémenter, fonction définir valeur
+ * @param key - Global state key for the counter
+ * @param initialValue - Starting count (default: `0`)
+ * @returns `[count, increment, decrement, setValue]`
+ *
+ * @example
+ * ```tsx
+ * const [count, inc, dec] = useCounter('likes', 0);
+ * ```
  */
 declare function useCounter(key: string, initialValue?: number): [number, () => void, () => void, (value: number) => void];
 /**
- * Hook pour gérer un état booléen (toggle) avec une fonction de basculement.
+ * Boolean toggle helper with explicit setter.
  *
- * @param {string} key - La clé pour la valeur booléenne dans l'état global
- * @param {boolean} initialValue - La valeur initiale (défaut: false)
- * @returns {[boolean, () => void, (value: boolean) => void]} -
- *   La valeur booléenne, fonction de basculement, fonction setter
+ * @param key - Global state key for the flag
+ * @param initialValue - Starting value (default: `false`)
+ * @returns `[value, toggle, setValue]`
+ *
+ * @example
+ * ```tsx
+ * const [open, toggle, setOpen] = useToggle('sidebar.open');
+ * ```
  */
 declare function useToggle(key: string, initialValue?: boolean): [boolean, () => void, (value: boolean) => void];
 
@@ -294,18 +489,35 @@ declare function debounce<T extends (...args: any[]) => any>(fn: T, delay: numbe
 declare function simpleDeepEqual(a: unknown, b: unknown): boolean;
 
 /**
- * Détecte automatiquement l'adaptateur de stockage le plus approprié
- * en fonction de l'environnement d'exécution.
+ * Pick the best available {@link StorageAdapter} for the current runtime.
  *
- * @returns Le meilleur adaptateur de stockage disponible
+ * Resolution order: `localStorage` (web) → noop fallback. React Native
+ * environments receive a console warning — pass
+ * {@link createLocalStorageAdapter} or a custom adapter explicitly.
+ *
+ * @returns A working {@link StorageAdapter} for the current environment
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={{ adapter: detectBestStorageAdapter() }}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
 declare function detectBestStorageAdapter(): StorageAdapter;
 /**
- * Crée un adaptateur de stockage en mémoire pour les tests ou lorsque
- * la persistance n'est pas disponible.
+ * In-memory {@link StorageAdapter} for tests and ephemeral sessions.
  *
- * @returns Un adaptateur qui stocke les données en mémoire
+ * Data is scoped to the returned adapter instance and lost on page reload.
+ *
+ * @returns Memory-backed {@link StorageAdapter}
+ *
+ * @example
+ * ```ts
+ * const adapter = createMemoryStorageAdapter();
+ * await adapter.setItem('k', 'v');
+ * ```
  */
 declare function createMemoryStorageAdapter(): StorageAdapter;
 
-export { FusionStateErrorMessages, FusionStateProvider, type GlobalFusionStateContextType, type GlobalState, NoopStorageAdapter, type PersistenceConfig, type SetStateAction, type SimplePersistenceConfig, type StateUpdater, type StorageAdapter, type UseFusionStateOptions, createLocalStorageAdapter, createMemoryStorageAdapter, createNoopStorageAdapter, debounce, detectBestStorageAdapter, formatErrorMessage, simpleDeepEqual, useCounter, useFormState, useFrequentState, useFusionState, useFusionStateLog, useGlobalState, usePersistentState, useToggle };
+export { FusionStateErrorMessages, type FusionStateLogKey, type FusionStateLogOptions, type FusionStateLogSnapshot, type FusionStatePersistenceProp, FusionStateProvider, type FusionStateProviderProps, type GlobalFusionStateContextType, type GlobalState, NoopStorageAdapter, type PersistenceConfig, type PersistenceKeyFilter, type PersistenceKeys, type PersistenceKeysConfig, type SetStateAction, type SimplePersistenceConfig, type StateUpdater, type StorageAdapter, type UseFusionStateOptions, createLocalStorageAdapter, createMemoryStorageAdapter, createNoopStorageAdapter, debounce, detectBestStorageAdapter, formatErrorMessage, simpleDeepEqual, useCounter, useFormState, useFrequentState, useFusionState, useFusionStateLog, useGlobalState, usePersistentState, useToggle };
