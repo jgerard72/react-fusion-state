@@ -1,17 +1,22 @@
 import {useFusionState} from '@core/useFusionState';
-import {StateUpdater, SetStateAction} from '@core/types';
+import {StateUpdater} from '@core/types';
 import {useCallback} from 'react';
 
 /**
- * Hook pour les données qui doivent persister automatiquement.
- * Ce hook préfixe automatiquement la clé avec 'persist.' pour assurer
- * que les données seront sauvegardées entre les sessions avec la
- * configuration par défaut de FusionStateProvider.
+ * Convenience wrapper around {@link useFusionState} that auto-prefixes keys
+ * with `persist.` so they match the default filter when
+ * `persistence={true}` on {@link FusionStateProvider}.
  *
- * @template T - Le type de la valeur d'état
- * @param {string} key - La clé pour la valeur d'état (sera préfixée avec 'persist.')
- * @param {T} initialValue - La valeur initiale
- * @returns {[T, StateUpdater<T>]} - La valeur actuelle et une fonction pour la mettre à jour
+ * @template T - Type of the stored value
+ * @param key - Logical key (prefixed with `persist.` unless already present)
+ * @param initialValue - Initial value seeded on first mount
+ * @returns `[value, setValue]` tuple identical to {@link useFusionState}
+ *
+ * @example
+ * ```tsx
+ * const [token, setToken] = usePersistentState('auth.token', '');
+ * // Stored under global key "persist.auth.token"
+ * ```
  */
 export function usePersistentState<T>(
   key: string,
@@ -25,14 +30,17 @@ export function usePersistentState<T>(
 }
 
 /**
- * Hook pour les données qui changent fréquemment, optimisé pour les performances.
- * Utilise skipLocalState: true pour éviter la synchronisation locale,
- * ce qui peut améliorer les performances mais peut entraîner plus de re-rendus.
+ * High-frequency variant of {@link useFusionState} with `skipLocalState: true`.
  *
- * @template T - Le type de la valeur d'état
- * @param {string} key - La clé pour la valeur d'état
- * @param {T} initialValue - La valeur initiale
- * @returns {[T, StateUpdater<T>]} - La valeur actuelle et une fonction pour la mettre à jour
+ * @template T - Type of the stored value
+ * @param key - Global state key
+ * @param initialValue - Initial value seeded on first mount
+ * @returns `[value, setValue]` tuple identical to {@link useFusionState}
+ *
+ * @example
+ * ```tsx
+ * const [mouse, setMouse] = useFrequentState('pointer', { x: 0, y: 0 });
+ * ```
  */
 export function useFrequentState<T>(
   key: string,
@@ -42,13 +50,18 @@ export function useFrequentState<T>(
 }
 
 /**
- * Hook pour gérer les états de formulaire avec des fonctions helpers.
+ * Form state helper built on {@link useFusionState}.
  *
- * @template T - Le type de l'objet formulaire (Record<string, any>)
- * @param {string} formKey - La clé pour le formulaire dans l'état global
- * @param {T} initialValues - Les valeurs initiales du formulaire
- * @returns {[T, (field: keyof T, value: any) => void, () => void]} -
- *   Les valeurs du formulaire, une fonction pour mettre à jour un champ, et une fonction de réinitialisation
+ * @template T - Form shape (`Record<string, unknown>` fields)
+ * @param formKey - Global key holding the form object
+ * @param initialValues - Default field values (also used by `resetForm`)
+ * @returns `[values, updateField, resetForm]`
+ *
+ * @example
+ * ```tsx
+ * const [form, updateField, reset] = useFormState('signup', { email: '', name: '' });
+ * updateField('email', 'a@b.com');
+ * ```
  */
 export function useFormState<T extends Record<string, any>>(
   formKey: string,
@@ -76,12 +89,16 @@ export function useFormState<T extends Record<string, any>>(
 }
 
 /**
- * Hook pour gérer un compteur avec des fonctions d'incrémentation et de décrémentation.
+ * Counter helper with increment, decrement, and direct set.
  *
- * @param {string} key - La clé pour le compteur dans l'état global
- * @param {number} initialValue - La valeur initiale du compteur (défaut: 0)
- * @returns {[number, () => void, () => void, (value: number) => void]} -
- *   La valeur du compteur, fonction incrémenter, fonction décrémenter, fonction définir valeur
+ * @param key - Global state key for the counter
+ * @param initialValue - Starting count (default: `0`)
+ * @returns `[count, increment, decrement, setValue]`
+ *
+ * @example
+ * ```tsx
+ * const [count, inc, dec] = useCounter('likes', 0);
+ * ```
  */
 export function useCounter(
   key: string,
@@ -108,12 +125,16 @@ export function useCounter(
 }
 
 /**
- * Hook pour gérer un état booléen (toggle) avec une fonction de basculement.
+ * Boolean toggle helper with explicit setter.
  *
- * @param {string} key - La clé pour la valeur booléenne dans l'état global
- * @param {boolean} initialValue - La valeur initiale (défaut: false)
- * @returns {[boolean, () => void, (value: boolean) => void]} -
- *   La valeur booléenne, fonction de basculement, fonction setter
+ * @param key - Global state key for the flag
+ * @param initialValue - Starting value (default: `false`)
+ * @returns `[value, toggle, setValue]`
+ *
+ * @example
+ * ```tsx
+ * const [open, toggle, setOpen] = useToggle('sidebar.open');
+ * ```
  */
 export function useToggle(
   key: string,
