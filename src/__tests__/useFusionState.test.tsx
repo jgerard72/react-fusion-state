@@ -122,23 +122,16 @@ describe('useFusionState', () => {
     }).toThrow(errorMessage);
   });
 
-  test('automatic optimization works without options', () => {
-    const {result} = renderHook(() => useFusionState('optimizedKey', 10), {
-      wrapper,
-    });
+  test('skipLocalState option provides performance optimization', () => {
+    const {result} = renderHook(
+      () => useFusionState('optimizedKey', 10, {skipLocalState: true}),
+      {wrapper},
+    );
 
     expect(result.current[0]).toBe(10);
 
     act(() => {
       result.current[1](20);
-    });
-
-    expect(result.current[0]).toBe(20);
-
-    // Test automatic optimization: same value should not cause unnecessary updates
-    const setValue = result.current[1];
-    act(() => {
-      setValue(20); // Same value
     });
 
     expect(result.current[0]).toBe(20);

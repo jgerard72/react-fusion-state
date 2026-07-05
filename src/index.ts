@@ -1,103 +1,18 @@
-// Core API - v1.0 Ultra Simple
-import {useFusionState} from './useFusionState';
-import {FusionStateProvider} from './FusionStateProvider';
-import {deprecate, deprecateComponent} from './utils/deprecation';
+// Core hooks
+export {useFusionState} from '@core/useFusionState';
+export {FusionStateProvider, useGlobalState} from '@core/FusionStateProvider';
+export {useFusionStateLog} from '@core/useFusionStateLog';
 
-export {useFusionState, FusionStateProvider};
-
-// v1.2 — Cross-key selectors (Zustand-style derived state)
-export {useFusionStore, shallow} from './useFusionStore';
-
-// v1.4 — Multi-store factory (headless + per-store React bindings)
-export {createStore} from './store/createStore';
-export type {Store, CreateStoreOptions, StoreProviderProps} from './store/types';
-
-// React Native Support
-import {createAsyncStorageAdapter} from './storage/asyncStorageAdapter';
-
-export {createAsyncStorageAdapter};
-
-// Advanced/Internal (backward compatibility only)
-export {useFusionStateLog} from './useFusionStateLog';
-export {useFusionHydrated} from './useFusionHydrated';
-export {useGlobalState} from './FusionStateProvider';
-
+// Hooks composés (simplifiés)
 export {
-  createKey,
-  createNamespacedKey,
-  isTypedKey,
-  extractKeyName,
-  AppKeys,
-  UserKeys,
-} from './createKey';
-export type {TypedKey, ExtractKeyType} from './createKey';
+  usePersistentState,
+  useFrequentState,
+  useFormState,
+  useCounter,
+  useToggle,
+} from '@core/composedHooks';
 
-export {
-  createDevTools,
-  getDevTools,
-  useDevTools,
-  DevToolsActions,
-} from './devtools';
-export type {DevToolsConfig} from './devtools';
-
-/**
- * @deprecated Use {@link useFusionState} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const useSharedState = deprecate(
-  useFusionState,
-  'useSharedState',
-  'useFusionState',
-  'hook',
-);
-/**
- * @deprecated Use {@link useFusionState} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const usePersistentState = deprecate(
-  useFusionState,
-  'usePersistentState',
-  'useFusionState',
-  'hook',
-);
-/**
- * @deprecated Use {@link useFusionState} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const useAppState = deprecate(
-  useFusionState,
-  'useAppState',
-  'useFusionState',
-  'hook',
-);
-/**
- * @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first mount (since v1.3.0).
- */
-export const GlobalStateProvider = deprecateComponent(
-  FusionStateProvider,
-  'GlobalStateProvider',
-  'FusionStateProvider',
-);
-/**
- * @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first mount (since v1.3.0).
- */
-export const StateProvider = deprecateComponent(
-  FusionStateProvider,
-  'StateProvider',
-  'FusionStateProvider',
-);
-/**
- * @deprecated Use {@link FusionStateProvider} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first mount (since v1.3.0).
- */
-export const AppStateProvider = deprecateComponent(
-  FusionStateProvider,
-  'AppStateProvider',
-  'FusionStateProvider',
-);
-
+// Types principaux
 export type {
   GlobalState,
   SetStateAction,
@@ -106,83 +21,31 @@ export type {
   PersistenceConfig,
   SimplePersistenceConfig,
   UseFusionStateOptions,
-} from './types';
-
-export {
-  FusionStateErrorMessages,
-  FusionStateError,
-  PersistenceError,
-} from './types';
-
-export {formatErrorMessage, debounce, simpleDeepEqual} from './utils';
-
-import {
-  createNoopStorageAdapter,
-  createLocalStorageAdapter,
-} from './storage/storageAdapters';
-import {
-  detectBestStorageAdapter,
-  createMemoryStorageAdapter,
-} from './storage/autoDetect';
-
-export {
-  createNoopStorageAdapter,
-  createLocalStorageAdapter,
-  NoopStorageAdapter,
-} from './storage/storageAdapters';
-export {
-  detectBestStorageAdapter,
-  createMemoryStorageAdapter,
-  isSSREnvironment,
-} from './storage/autoDetect';
-
-/**
- * @deprecated Use {@link createLocalStorageAdapter} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const createWebStorageAdapter = deprecate(
-  createLocalStorageAdapter,
-  'createWebStorageAdapter',
-  'createLocalStorageAdapter',
-);
-/**
- * @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const createRNStorageAdapter = deprecate(
-  createAsyncStorageAdapter,
-  'createRNStorageAdapter',
-  'createAsyncStorageAdapter',
-);
-/**
- * @deprecated Use {@link createAsyncStorageAdapter} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const createMobileStorageAdapter = deprecate(
-  createAsyncStorageAdapter,
-  'createMobileStorageAdapter',
-  'createAsyncStorageAdapter',
-);
-/**
- * @deprecated Use {@link createMemoryStorageAdapter} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const createInMemoryAdapter = deprecate(
-  createMemoryStorageAdapter,
-  'createInMemoryAdapter',
-  'createMemoryStorageAdapter',
-);
-/**
- * @deprecated Use {@link detectBestStorageAdapter} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
- */
-export const autoDetectStorage = deprecate(
-  detectBestStorageAdapter,
-  'autoDetectStorage',
-  'detectBestStorageAdapter',
-);
-
+  PersistenceKeys,
+  PersistenceKeysConfig,
+  PersistenceKeyFilter,
+  FusionStatePersistenceProp,
+} from '@core/types';
+export type {FusionStateProviderProps} from '@core/FusionStateProvider';
 export type {
-  StorageAdapter,
-  ExtendedStorageAdapter,
-} from './storage/storageAdapters';
+  FusionStateLogOptions,
+  FusionStateLogSnapshot,
+  FusionStateLogKey,
+} from '@core/useFusionStateLog';
+export {FusionStateErrorMessages} from '@core/types';
+
+// Utilitaires
+export {formatErrorMessage, debounce, simpleDeepEqual} from '@core/utils';
+
+// Exports pour la persistance
+export {
+  createNoopStorageAdapter,
+  createLocalStorageAdapter,
+  // Pour la compatibilité avec les versions précédentes
+  NoopStorageAdapter,
+} from '@storage/storageAdapters';
+export {
+  detectBestStorageAdapter,
+  createMemoryStorageAdapter,
+} from '@storage/autoDetect';
+export type {StorageAdapter} from '@storage/storageAdapters';

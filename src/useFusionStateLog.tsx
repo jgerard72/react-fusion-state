@@ -1,76 +1,79 @@
-import {useGlobalState} from './FusionStateProvider';
+import {useGlobalState} from '@core/FusionStateProvider';
+import {FusionStateErrorMessages} from '@core/types';
 import {useEffect, useRef, useMemo, useCallback} from 'react';
-import {simpleDeepEqual} from './utils';
+import isEqual from 'lodash.isequal';
+import {simpleDeepEqual} from '@core/utils';
 
-type StateKey = string;
-type SelectedState = Record<string, unknown>;
+/** State key identifier used by {@link useFusionStateLog}. */
+export type FusionStateLogKey = string;
 
 /**
- * Options for the useFusionStateLog hook
+ * Snapshot of global state returned by {@link useFusionStateLog}.
+ * When `keys` are provided, only those entries are included.
  */
-interface FusionStateLogOptions {
+export type FusionStateLogSnapshot = Record<string, unknown>;
+
+/**
+ * Options for {@link useFusionStateLog}.
+ *
+ * @example
+ * ```tsx
+ * const slice = useFusionStateLog(['counter', 'user'], {
+ *   trackChanges: true,
+ *   consoleLog: true,
+ *   changeDetection: 'simple',
+ * });
+ * ```
+ */
+export interface FusionStateLogOptions {
   /**
-   * Whether to calculate and include differences between
-   * current and previous state in the returned object
+   * Compute a `changes` object (previous vs current) for console output.
+   * Does not change the returned snapshot shape.
    */
   trackChanges?: boolean;
 
   /**
-   * How to track changes. Default is 'reference' which is faster
-   * but might miss deeply nested changes. 'deep' and 'simple' are
-   * equivalent and use a custom deep equality check.
+   * Equality strategy when `trackChanges` is enabled.
+   * - `'reference'` — fast `===` check (default)
+   * - `'deep'` — `lodash.isequal`
+   * - `'simple'` — {@link simpleDeepEqual} (JSON-based)
    */
   changeDetection?: 'reference' | 'deep' | 'simple';
 
-  /**
-   * Custom formatter function for console logging
-   */
-  formatter?: (state: SelectedState, changes?: SelectedState) => unknown;
+  /** Transform the payload written to `console.log` when `consoleLog` is true. */
+  formatter?: (
+    state: FusionStateLogSnapshot,
+    changes?: FusionStateLogSnapshot,
+  ) => unknown;
 
-  /**
-   * Whether to automatically log to console
-   */
+  /** Mirror the selected snapshot (and optional changes) to `console.log`. */
   consoleLog?: boolean;
 }
 
 /**
- * Hook to observe and track changes in the global fusion state
+ * Observe a slice of global state for debugging.
  *
- * @param keys - Optional array of keys to watch (if undefined, watches all keys)
- * @param options - Additional configuration options
- * @returns The selected state from the global state
+ * @param keys - Keys to include. When omitted, the full global state is returned.
+ * @param options - Change tracking and console logging options
+ * @returns A snapshot of the selected keys from global state
+ * @throws {@link FusionStateErrorMessages.PROVIDER_MISSING} when used outside a provider (via {@link useGlobalState})
+ *
+ * @example
+ * ```tsx
+ * function StateInspector() {
+ *   const state = useFusionStateLog();
+ *   return <pre>{JSON.stringify(state, null, 2)}</pre>;
+ * }
+ * ```
  */
 export const useFusionStateLog = (
-  keys?: StateKey[],
+  keys?: FusionStateLogKey[],
   options: FusionStateLogOptions = {},
-): SelectedState => {
+): FusionStateLogSnapshot => {
   const {state} = useGlobalState();
 
-  // Stable hash for the keys array so identical key lists across renders
-  // don't bust the memo (caller doesn't have to memoize the array).
-  const keysHash = useMemo(() => {
-    if (!keys || keys.length === 0) return '';
-    return `${keys.length}:${keys.join('\u0001')}`;
-  }, [keys]);
-
-  // Filter state based on keys
-  const filteredState = useMemo(() => {
-    if (!keys || keys.length === 0) {
-      return state;
-    }
-
-    const result: SelectedState = {};
-    for (const key of keys) {
-      if (key in state) {
-        result[key] = state[key];
-      }
-    }
-    return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, keysHash]);
-
   // Track previous state for change detection
-  const previousState = useRef<SelectedState>({});
+  const previousState = useRef<FusionStateLogSnapshot>({});
 
   // Default options
   const {
@@ -80,36 +83,66 @@ export const useFusionStateLog = (
     consoleLog = false,
   } = options;
 
-  // 'deep' and 'simple' are equivalent (simpleDeepEqual is an alias of customIsEqual).
-  // Both go through the same path; 'reference' uses === for speed.
+  // Compare values based on selected change detection method
   const compareValues = useCallback(
     (a: unknown, b: unknown): boolean => {
-      return changeDetection === 'reference' ? a === b : simpleDeepEqual(a, b);
+      if (changeDetection === 'reference') {
+        return a === b;
+      } else if (changeDetection === 'deep') {
+        return isEqual(a, b);
+      } else {
+        return simpleDeepEqual(a, b);
+      }
     },
     [changeDetection],
   );
 
+  // Filter state based on keys
+  const filteredState = useMemo(() => {
+    // If no keys provided, use the entire state
+    if (!keys || keys.length === 0) {
+      return state;
+    }
+
+    // Otherwise, filter to include only the requested keys
+    const result: FusionStateLogSnapshot = {};
+    keys.forEach(key => {
+      if (key in state) {
+        result[key] = state[key];
+      }
+    });
+
+    return result;
+  }, [state, keys]);
+
   useEffect(() => {
-    let changes: SelectedState | undefined;
+    // Calculate changes if needed
+    let changes: FusionStateLogSnapshot | undefined;
 
     if (trackChanges) {
       changes = {};
-      for (const [key, value] of Object.entries(filteredState)) {
+      Object.entries(filteredState).forEach(([key, value]) => {
         const prevValue = previousState.current[key];
-        if (!compareValues(value, prevValue)) {
-          changes[key] = {
+        const hasChanged = !compareValues(value, prevValue);
+
+        if (hasChanged) {
+          changes![key] = {
             previous: prevValue,
             current: value,
           };
         }
-      }
+      });
+
+      // If no changes detected, don't update
       if (Object.keys(changes).length === 0) {
         changes = undefined;
       }
     }
 
+    // Save current state as previous for next comparison
     previousState.current = {...filteredState};
 
+    // Log to console if enabled
     if (consoleLog && (changes || !trackChanges)) {
       const logData = formatter
         ? formatter(filteredState, changes)

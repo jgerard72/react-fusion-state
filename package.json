@@ -1,82 +1,71 @@
 {
   "name": "react-fusion-state",
-  "version": "1.4.2",
-  "description": "Simple, fast React state management with zero dependencies, built-in persistence (localStorage / AsyncStorage), TypeScript inference, and a compact bundle.",
-  "keywords": [
-    "react",
-    "react-native",
-    "state-management",
-    "global-state",
-    "hooks",
-    "persistence",
-    "localstorage",
-    "asyncstorage",
-    "typescript",
-    "zero-dependency",
-    "lightweight",
-    "fusion-state",
-    "redux-alternative",
-    "zustand-alternative",
-    "recoil-alternative",
-    "ssr"
-  ],
-  "homepage": "https://github.com/jgerard72/react-fusion-state#readme",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "sideEffects": false,
-  "engines": {
-    "node": ">=16"
+  "version": "1.5.0",
+  "homepage": "https://github.com/jgerard72/react-fusion-state/master/imags/react-fusion-state.png",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "author": "Jacques GERARD <jgrd93@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jgerard72/react-fusion-state.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jgerard72/react-fusion-state/issues"
+    "url": "https://github.com/jgerard72/react-fusion-state"
   },
   "scripts": {
-    "build": "rm -rf dist/* && tsc -p tsconfig-build.json && npm run build:demo",
-    "build:demo": "node scripts/build-demo.js",
+    "build": "tsup",
     "format": "prettier --write .",
+    "lint": "eslint .",
     "test": "jest",
+    "test:types": "npm run build && tsc --noEmit -p test-types/tsconfig.json",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepare": "npm run build",
-    "dev": "tsc -w -p tsconfig-build.json",
-    "demo": "npm run build && open demo/demo-persistence.html",
-    "benchmark": "node benchmark/final-performance-report.js",
-    "benchmark:detailed": "node benchmark/performance-comparison.js",
-    "benchmark:bundle": "node benchmark/bundle-size-analysis.js",
-    "publish:dry": "npm publish --dry-run",
-    "publish:performance": "npm publish && echo '🏆 Published with zero dependencies and benchmark-proven performance!'"
+    "prepublishOnly": "npm run build",
+    "dev": "tsc -w -p tsconfig-build.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE.md",
-    "PERFORMANCE_BENCHMARK_RESULTS.md"
+  "keywords": [
+    "react",
+    "state-management",
+    "global-state",
+    "react-native"
   ],
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.3.1"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "esbuild": "^0.28.0",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
-    "prettier": "^3.8.3",
-    "ts-jest": "^29.4.11",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/lodash.isequal": "^4.5.8",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^7.32.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lodash.isequal": "^4.5.0",
+    "prettier": "^3.3.2",
+    "ts-jest": "^29.2.6",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
-    "typescript": "^6.0.3"
+    "tsup": "^8.4.0",
+    "typescript": "^4.0.0"
   }
 }

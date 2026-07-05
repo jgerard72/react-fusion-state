@@ -3,158 +3,70 @@ import {
   createNoopStorageAdapter,
   createLocalStorageAdapter,
 } from './storageAdapters';
-import {createAsyncStorageAdapter} from './asyncStorageAdapter';
 
 /**
- * Detects if we are in a Server-Side Rendering environment
- * @returns true if running on server (Node.js), false if running in browser or React Native
- */
-export function isSSREnvironment(): boolean {
-  // React Native also has no window, but has navigator.product === 'ReactNative'
-  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-    return false;
-  }
-  return typeof window === 'undefined';
-}
-
-/**
- * Cached adapter from the first detection pass. Detection is environment-driven
- * and the environment doesn't change for the lifetime of a JS context, so we
- * resolve once and reuse — avoids a `localStorage.setItem` probe on every
- * Provider mount and any side effects of `require('react-native')`.
- */
-let cachedAdapter: StorageAdapter | null = null;
-
-/**
- * Automatically detects the most appropriate storage adapter
- * based on the runtime environment. Result is memoized at module scope.
+ * Pick the best available {@link StorageAdapter} for the current runtime.
  *
- * @param debug - Whether to enable debug logging
- * @returns The best available storage adapter
+ * Resolution order: `localStorage` (web) → noop fallback. React Native
+ * environments receive a console warning — pass
+ * {@link createLocalStorageAdapter} or a custom adapter explicitly.
+ *
+ * @returns A working {@link StorageAdapter} for the current environment
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={{ adapter: detectBestStorageAdapter() }}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
-export function detectBestStorageAdapter(debug = false): StorageAdapter {
-  if (cachedAdapter) return cachedAdapter;
-  cachedAdapter = resolveAdapter(debug);
-  return cachedAdapter;
-}
-
-function resolveAdapter(debug: boolean): StorageAdapter {
-  // SSR Detection first (prevents server crashes)
-  if (isSSREnvironment()) {
-    if (debug) {
-      console.info(
-        '[FusionState] SSR environment detected, using memory-only mode.',
-      );
-    }
-    return createNoopStorageAdapter();
-  }
-
-  // Detect React Native second (more reliable)
-  if (isReactNativeEnvironment()) {
-    // Try to auto-load AsyncStorage if available
+export function detectBestStorageAdapter(): StorageAdapter {
+  // Vérifier si localStorage est disponible (environnement navigateur)
+  if (typeof window !== 'undefined' && window.localStorage) {
     try {
-      // Avoid static resolution by bundlers; resolve only at runtime in RN
-      const req = Function(
-        'try { return typeof require !== "undefined" && require; } catch(_) { return undefined; }',
-      )() as unknown as undefined | ((m: string) => any);
-      const modName = '@react-native-async-storage/async-storage';
-      const AsyncStorage = req ? req(modName) : undefined;
-      if (AsyncStorage) {
-        if (debug) {
-          console.info(
-            '[FusionState] Using AsyncStorage adapter (auto-detected).',
-          );
-        }
-        const asImpl = (AsyncStorage.default || AsyncStorage) as {
-          getItem: (k: string) => Promise<string | null>;
-          setItem: (k: string, v: string) => Promise<void>;
-          removeItem: (k: string) => Promise<void>;
-        };
-        return createAsyncStorageAdapter(asImpl, debug);
-      }
-      if (debug) {
-        console.info(
-          '[FusionState] React Native detected but AsyncStorage not found. Falling back to memory adapter. ',
-        );
-      }
-    } catch (e) {
-      if (debug) {
-        console.warn('[FusionState] Failed to load AsyncStorage adapter:', e);
-      }
-    }
-    return createNoopStorageAdapter();
-  }
-
-  // Check if localStorage is available (browser environment)
-  if (isWebEnvironment()) {
-    try {
-      // Test if localStorage is actually available (can be disabled)
+      // Tester si localStorage est réellement disponible (peut être désactivé)
       window.localStorage.setItem('fusion_test', 'test');
       window.localStorage.removeItem('fusion_test');
-      return createLocalStorageAdapter(debug);
+      return createLocalStorageAdapter();
     } catch (e) {
-      if (debug) {
-        console.warn(
-          '[FusionState] localStorage detected but not available:',
-          e,
-        );
-      }
+      console.warn('localStorage détecté mais non disponible:', e);
     }
   }
 
-  // Fallback: use a no-op adapter
-  if (debug) {
-    console.info('[FusionState] No storage detected, using memory-only mode.');
+  // Si nous sommes dans un environnement React Native, essayer de détecter AsyncStorage
+  // Note: Ceci est une détection heuristique car nous ne pouvons pas importer AsyncStorage directement
+  if (
+    typeof global !== 'undefined' &&
+    typeof navigator !== 'undefined' &&
+    navigator.product === 'ReactNative'
+  ) {
+    try {
+      // L'utilisateur devra fournir un adaptateur personnalisé pour AsyncStorage
+      console.warn(
+        'Environnement React Native détecté. ' +
+          'Veuillez fournir explicitement un adaptateur pour AsyncStorage.',
+      );
+    } catch (e) {
+      // Ignorer les erreurs potentielles
+    }
   }
+
+  // Fallback: utiliser un adaptateur qui ne fait rien
   return createNoopStorageAdapter();
 }
 
 /**
- * Detects if we are in a React Native environment
- */
-function isReactNativeEnvironment(): boolean {
-  // Check navigator.product
-  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-    return true;
-  }
-
-  // Method 2: Check existence of global without window
-  if (typeof global !== 'undefined' && typeof window === 'undefined') {
-    return true;
-  }
-
-  // Method 3: Check React Native specific APIs
-  if (
-    typeof global !== 'undefined' &&
-    // @ts-ignore - Runtime check
-    (global.__fbBatchedBridge || global.nativeCallSyncHook)
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Detects if we are in a web environment
- */
-function isWebEnvironment(): boolean {
-  try {
-    return (
-      typeof window !== 'undefined' &&
-      typeof window.localStorage !== 'undefined'
-    );
-  } catch {
-    // localStorage can be disabled in some browsers
-    return false;
-  }
-}
-
-/**
- * Creates an in-memory storage adapter for tests or when
- * persistence is not available.
+ * In-memory {@link StorageAdapter} for tests and ephemeral sessions.
  *
- * @returns An adapter that stores data in memory
+ * Data is scoped to the returned adapter instance and lost on page reload.
+ *
+ * @returns Memory-backed {@link StorageAdapter}
+ *
+ * @example
+ * ```ts
+ * const adapter = createMemoryStorageAdapter();
+ * await adapter.setItem('k', 'v');
+ * ```
  */
 export function createMemoryStorageAdapter(): StorageAdapter {
   const storage = new Map<string, string>();

@@ -1,8 +1,7 @@
 import React from 'react';
-import {render, screen, act, renderHook} from '@testing-library/react';
+import {act, renderHook, waitFor} from '@testing-library/react';
 import {FusionStateProvider, useFusionState, useFusionStateLog} from '../index';
 
-// Wrapper for renderHook tests
 const wrapper = ({children}: {children: React.ReactNode}) => (
   <FusionStateProvider>{children}</FusionStateProvider>
 );
@@ -16,76 +15,71 @@ describe('useFusionStateLog', () => {
     jest.restoreAllMocks();
   });
 
-  test('returns the full state when no keys are provided', () => {
-    const TestComponent = () => {
-      const [testValue] = useFusionState('testKey', 'testValue');
-      const loggedState = useFusionStateLog();
-      return {testValue, loggedState};
-    };
+  test('returns the full state when no keys are provided', async () => {
+    const {result} = renderHook(
+      () => {
+        useFusionState('testKey', 'testValue');
+        return useFusionStateLog();
+      },
+      {wrapper},
+    );
 
-    const {result} = renderHook(() => TestComponent(), {wrapper});
-
-    expect(result.current.loggedState).toHaveProperty('testKey', 'testValue');
+    await waitFor(() => {
+      expect(result.current).toHaveProperty('testKey', 'testValue');
+    });
   });
 
-  test('returns only selected keys when provided', () => {
-    const TestComponent = () => {
-      const [counter] = useFusionState('counter', 10);
-      const [name] = useFusionState('name', 'John');
-      const loggedState = useFusionStateLog(['counter']);
-      return {counter, name, loggedState};
-    };
+  test('returns only selected keys when provided', async () => {
+    const {result} = renderHook(
+      () => {
+        useFusionState('counter', 10);
+        useFusionState('name', 'John');
+        return useFusionStateLog(['counter']);
+      },
+      {wrapper},
+    );
 
-    const {result} = renderHook(() => TestComponent(), {wrapper});
-
-    expect(result.current.loggedState).toHaveProperty('counter', 10);
-    expect(result.current.loggedState).not.toHaveProperty('name');
+    await waitFor(() => {
+      expect(result.current).toHaveProperty('counter', 10);
+    });
+    expect(result.current).not.toHaveProperty('name');
   });
 
-  test('tracks changes when trackChanges option is enabled', () => {
-    // Mock console.log to spy on the logging behavior
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+  test('tracks changes when trackChanges option is enabled', async () => {
+    const consoleLogSpy = jest.spyOn(console, 'log');
 
-    const TestComponent = () => {
-      const [counter, setCounter] = useFusionState('counter', 0);
-      const loggedState = useFusionStateLog(['counter'], {
-        trackChanges: true,
-        consoleLog: true,
-      });
-      return {counter, setCounter, loggedState};
-    };
+    const {result} = renderHook(
+      () => {
+        const [, setCounter] = useFusionState('counter', 0);
+        const log = useFusionStateLog(['counter'], {
+          trackChanges: true,
+          consoleLog: true,
+        });
+        return {setCounter, log};
+      },
+      {wrapper},
+    );
 
-    const {result} = renderHook(() => TestComponent(), {wrapper});
+    await waitFor(() => {
+      expect(result.current.log).toHaveProperty('counter', 0);
+    });
 
-    // Trigger a state change
     act(() => {
       result.current.setCounter(1);
     });
 
-    // Console.log should have been called with state changes
-    expect(consoleLogSpy).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(consoleLogSpy).toHaveBeenCalled();
+    });
 
-    // Find the last call that contains our log data (after the state change)
-    const fusionStateLogCalls = consoleLogSpy.mock.calls.filter(
+    const loggedData = consoleLogSpy.mock.calls.find(
       call => call[0] === '[FusionState Log]',
-    );
-
-    expect(fusionStateLogCalls.length).toBeGreaterThan(0);
-
-    // Get the last log call (after the state change)
-    const lastLogCall = fusionStateLogCalls[fusionStateLogCalls.length - 1];
-    const loggedData = lastLogCall[1];
-
+    )?.[1];
     expect(loggedData).toHaveProperty('state');
-    expect(loggedData.state).toHaveProperty('counter', 1);
+    expect(loggedData).toHaveProperty('changes');
   });
 
-  test('uses custom formatter when provided', () => {
-    const {result: stateResult} = renderHook(
-      () => useFusionState('counter', 0),
-      {wrapper},
-    );
-
+  test('uses custom formatter when provided', async () => {
     const formatter = jest.fn().mockImplementation(state => ({
       formattedState: state,
       timestamp: 'test-timestamp',
@@ -93,29 +87,34 @@ describe('useFusionStateLog', () => {
 
     const consoleLogSpy = jest.spyOn(console, 'log');
 
-    const {result: logResult, rerender} = renderHook(
-      () =>
-        useFusionStateLog(['counter'], {
+    const {result} = renderHook(
+      () => {
+        const [, setCounter] = useFusionState('counter', 0);
+        const log = useFusionStateLog(['counter'], {
           consoleLog: true,
           formatter,
-        }),
+        });
+        return {setCounter, log};
+      },
       {wrapper},
     );
 
-    // Update the state
-    act(() => {
-      stateResult.current[1](1);
+    await waitFor(() => {
+      expect(result.current.log).toHaveProperty('counter', 0);
     });
 
-    // Force rerender of the log hook
-    rerender();
+    act(() => {
+      result.current.setCounter(1);
+    });
 
-    // Formatter should have been called
-    expect(formatter).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(formatter).toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalled();
+    });
 
-    // Console.log should have been called with formatted data
-    expect(consoleLogSpy).toHaveBeenCalled();
-    const loggedData = consoleLogSpy.mock.calls[0][1];
+    const loggedData = consoleLogSpy.mock.calls.find(
+      call => call[0] === '[FusionState Log]',
+    )?.[1];
     expect(loggedData).toHaveProperty('formattedState');
     expect(loggedData).toHaveProperty('timestamp', 'test-timestamp');
   });

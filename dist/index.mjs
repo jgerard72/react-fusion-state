@@ -1,10 +1,4 @@
-'use strict';
-
-var React = require('react');
-
-function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
-
-var React__default = /*#__PURE__*/_interopDefault(React);
+import React, { createContext, memo, useMemo, useRef, useState, useEffect, useContext, useCallback } from 'react';
 
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -835,9 +829,9 @@ function simpleDeepEqual(a, b) {
 }
 
 // src/FusionStateProvider.tsx
-var GlobalStateContext = React.createContext(void 0);
+var GlobalStateContext = createContext(void 0);
 var useGlobalState = () => {
-  const context = React.useContext(GlobalStateContext);
+  const context = useContext(GlobalStateContext);
   if (!context) {
     throw new Error("ReactFusionState Error: useFusionState must be used within a FusionStateProvider" /* PROVIDER_MISSING */);
   }
@@ -889,15 +883,15 @@ function normalizePersistenceConfig(config) {
     saveOnChange: true
   };
 }
-var FusionStateProvider = React.memo(
+var FusionStateProvider = memo(
   ({ children, initialState = {}, debug = false, persistence }) => {
     var _a, _b, _c, _d, _e, _f, _g;
-    const normalizedPersistence = React.useMemo(
+    const normalizedPersistence = useMemo(
       () => normalizePersistenceConfig(persistence),
       [persistence]
     );
-    const persistenceRef = React.useRef(normalizedPersistence);
-    const storageAdapter = React.useMemo(
+    const persistenceRef = useRef(normalizedPersistence);
+    const storageAdapter = useMemo(
       () => {
         var _a2;
         return ((_a2 = persistenceRef.current) == null ? void 0 : _a2.adapter) || createNoopStorageAdapter();
@@ -908,11 +902,11 @@ var FusionStateProvider = React.memo(
     const shouldLoadOnInit = (_c = (_b = persistenceRef.current) == null ? void 0 : _b.loadOnInit) != null ? _c : true;
     const shouldSaveOnChange = (_e = (_d = persistenceRef.current) == null ? void 0 : _d.saveOnChange) != null ? _e : true;
     const debounceTime = (_g = (_f = persistenceRef.current) == null ? void 0 : _f.debounceTime) != null ? _g : 0;
-    const [state, setStateRaw] = React.useState(initialState);
-    const initializingKeys = React.useRef(/* @__PURE__ */ new Set());
-    const isInitialLoadDone = React.useRef(false);
-    const prevPersistedState = React.useRef({});
-    React.useEffect(() => {
+    const [state, setStateRaw] = useState(initialState);
+    const initializingKeys = useRef(/* @__PURE__ */ new Set());
+    const isInitialLoadDone = useRef(false);
+    const prevPersistedState = useRef({});
+    useEffect(() => {
       if (shouldLoadOnInit && !isInitialLoadDone.current && storageAdapter) {
         const loadStateFromStorage = async () => {
           try {
@@ -946,7 +940,7 @@ var FusionStateProvider = React.memo(
         loadStateFromStorage();
       }
     }, [storageAdapter, keyPrefix, shouldLoadOnInit, debug]);
-    const filterPersistKeys = React.useMemo(() => {
+    const filterPersistKeys = useMemo(() => {
       return (newState) => {
         var _a2;
         const persistKeys = (_a2 = persistenceRef.current) == null ? void 0 : _a2.persistKeys;
@@ -969,7 +963,7 @@ var FusionStateProvider = React.memo(
         return filteredState;
       };
     }, []);
-    const saveStateToStorage = React.useMemo(() => {
+    const saveStateToStorage = useMemo(() => {
       const save = async (newState) => {
         if (!storageAdapter || !shouldSaveOnChange) return;
         try {
@@ -1018,7 +1012,7 @@ var FusionStateProvider = React.memo(
       debounceTime,
       filterPersistKeys
     ]);
-    const setState = React.useMemo(() => {
+    const setState = useMemo(() => {
       const setStateWithPersistence = (updater) => {
         setStateRaw((prevState) => {
           const nextState = typeof updater === "function" ? updater(prevState) : updater;
@@ -1041,7 +1035,7 @@ var FusionStateProvider = React.memo(
       };
       return setStateWithPersistence;
     }, [debug, setStateRaw, shouldSaveOnChange, saveStateToStorage]);
-    const value = React.useMemo(
+    const value = useMemo(
       () => ({
         state,
         setState,
@@ -1049,7 +1043,7 @@ var FusionStateProvider = React.memo(
       }),
       [state, setState]
     );
-    return /* @__PURE__ */ React__default.default.createElement(GlobalStateContext.Provider, { value }, children);
+    return /* @__PURE__ */ React.createElement(GlobalStateContext.Provider, { value }, children);
   }
 );
 
@@ -1057,10 +1051,10 @@ var FusionStateProvider = React.memo(
 function useFusionState(key, initialValue, options) {
   var _a;
   const { state, setState, initializingKeys } = useGlobalState();
-  const isInitialized = React.useRef(false);
+  const isInitialized = useRef(false);
   const skipLocalState = (_a = options == null ? void 0 : options.skipLocalState) != null ? _a : false;
-  const initializing = React.useRef(/* @__PURE__ */ new Set());
-  const initializeState = React.useCallback(() => {
+  const initializing = useRef(/* @__PURE__ */ new Set());
+  const initializeState = useCallback(() => {
     if (!isInitialized.current) {
       if (initialValue !== void 0 && !(key in state)) {
         if (initializingKeys.has(key)) {
@@ -1087,13 +1081,13 @@ function useFusionState(key, initialValue, options) {
       }
     }
   }, [initialValue, key, state, setState, initializingKeys]);
-  React.useEffect(() => {
+  useEffect(() => {
     initializeState();
   }, [initializeState]);
-  const [localValue, setLocalValue] = React.useState(
+  const [localValue, setLocalValue] = useState(
     () => key in state ? state[key] : initialValue
   );
-  React.useEffect(() => {
+  useEffect(() => {
     if (!skipLocalState && key in state) {
       const newValue = state[key];
       if (newValue !== localValue) {
@@ -1101,7 +1095,7 @@ function useFusionState(key, initialValue, options) {
       }
     }
   }, [state, key, localValue, skipLocalState]);
-  const setValue = React.useCallback(
+  const setValue = useCallback(
     (newValue) => {
       setState((prevState) => {
         const currentValue = prevState[key];
@@ -1121,14 +1115,14 @@ function useFusionState(key, initialValue, options) {
 var import_lodash = __toESM(require_lodash());
 var useFusionStateLog = (keys, options = {}) => {
   const { state } = useGlobalState();
-  const previousState = React.useRef({});
+  const previousState = useRef({});
   const {
     trackChanges = false,
     changeDetection = "reference",
     formatter = void 0,
     consoleLog = false
   } = options;
-  const compareValues = React.useCallback(
+  const compareValues = useCallback(
     (a, b) => {
       if (changeDetection === "reference") {
         return a === b;
@@ -1140,7 +1134,7 @@ var useFusionStateLog = (keys, options = {}) => {
     },
     [changeDetection]
   );
-  const filteredState = React.useMemo(() => {
+  const filteredState = useMemo(() => {
     if (!keys || keys.length === 0) {
       return state;
     }
@@ -1152,7 +1146,7 @@ var useFusionStateLog = (keys, options = {}) => {
     });
     return result;
   }, [state, keys]);
-  React.useEffect(() => {
+  useEffect(() => {
     let changes;
     if (trackChanges) {
       changes = {};
@@ -1187,7 +1181,7 @@ function useFrequentState(key, initialValue) {
 }
 function useFormState(formKey, initialValues) {
   const [formData, setFormData] = useFusionState(formKey, initialValues);
-  const updateField = React.useCallback(
+  const updateField = useCallback(
     (field, value) => {
       setFormData((prev) => ({
         ...prev,
@@ -1196,20 +1190,20 @@ function useFormState(formKey, initialValues) {
     },
     [setFormData]
   );
-  const resetForm = React.useCallback(() => {
+  const resetForm = useCallback(() => {
     setFormData(initialValues);
   }, [setFormData, initialValues]);
   return [formData, updateField, resetForm];
 }
 function useCounter(key, initialValue = 0) {
   const [count, setCount] = useFusionState(key, initialValue);
-  const increment = React.useCallback(() => {
+  const increment = useCallback(() => {
     setCount((prev) => prev + 1);
   }, [setCount]);
-  const decrement = React.useCallback(() => {
+  const decrement = useCallback(() => {
     setCount((prev) => prev - 1);
   }, [setCount]);
-  const setValue = React.useCallback(
+  const setValue = useCallback(
     (value) => {
       setCount(value);
     },
@@ -1219,29 +1213,12 @@ function useCounter(key, initialValue = 0) {
 }
 function useToggle(key, initialValue = false) {
   const [value, setValue] = useFusionState(key, initialValue);
-  const toggle = React.useCallback(() => {
+  const toggle = useCallback(() => {
     setValue((prev) => !prev);
   }, [setValue]);
   return [value, toggle, setValue];
 }
 
-exports.FusionStateErrorMessages = FusionStateErrorMessages;
-exports.FusionStateProvider = FusionStateProvider;
-exports.NoopStorageAdapter = NoopStorageAdapter;
-exports.createLocalStorageAdapter = createLocalStorageAdapter;
-exports.createMemoryStorageAdapter = createMemoryStorageAdapter;
-exports.createNoopStorageAdapter = createNoopStorageAdapter;
-exports.debounce = debounce;
-exports.detectBestStorageAdapter = detectBestStorageAdapter;
-exports.formatErrorMessage = formatErrorMessage;
-exports.simpleDeepEqual = simpleDeepEqual;
-exports.useCounter = useCounter;
-exports.useFormState = useFormState;
-exports.useFrequentState = useFrequentState;
-exports.useFusionState = useFusionState;
-exports.useFusionStateLog = useFusionStateLog;
-exports.useGlobalState = useGlobalState;
-exports.usePersistentState = usePersistentState;
-exports.useToggle = useToggle;
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
+export { FusionStateErrorMessages, FusionStateProvider, NoopStorageAdapter, createLocalStorageAdapter, createMemoryStorageAdapter, createNoopStorageAdapter, debounce, detectBestStorageAdapter, formatErrorMessage, simpleDeepEqual, useCounter, useFormState, useFrequentState, useFusionState, useFusionStateLog, useGlobalState, usePersistentState, useToggle };
+//# sourceMappingURL=index.mjs.map
+//# sourceMappingURL=index.mjs.map

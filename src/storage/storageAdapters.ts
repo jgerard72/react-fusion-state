@@ -1,34 +1,46 @@
 /**
- * Interface for storage adapters that developers can implement
- * for their specific platform (web, React Native, Expo, etc.)
+ * Platform-agnostic persistence contract.
+ *
+ * Implement this interface to back {@link FusionStateProvider} persistence
+ * on any storage backend (localStorage, AsyncStorage, MMKV, secure storage, …).
+ *
+ * @example
+ * ```ts
+ * const adapter: StorageAdapter = {
+ *   async getItem(key) { return myStore.read(key); },
+ *   async setItem(key, value) { myStore.write(key, value); },
+ *   async removeItem(key) { myStore.delete(key); },
+ * };
+ * ```
  */
 export interface StorageAdapter {
   /**
-   * Get a value from storage
-   * @param key Storage key
-   * @returns Promise that resolves to the stored value or null if not found
+   * Read a serialized value from storage.
+   * @param key - Storage key
+   * @returns Stored string or `null` when missing
    */
   getItem: (key: string) => Promise<string | null>;
 
   /**
-   * Save a value to storage
-   * @param key Storage key
-   * @param value Value to store (will be JSON stringified)
-   * @returns Promise that resolves when storage is complete
+   * Persist a serialized value.
+   * @param key - Storage key
+   * @param value - Already-serialized payload (the provider uses `JSON.stringify`)
    */
   setItem: (key: string, value: string) => Promise<void>;
 
   /**
-   * Remove a value from storage
-   * @param key Storage key
-   * @returns Promise that resolves when removal is complete
+   * Delete a stored value.
+   * @param key - Storage key
    */
   removeItem: (key: string) => Promise<void>;
 }
 
 /**
- * No-operation adapter for when persistence is not required
- * @returns A storage adapter that does nothing (used as fallback)
+ * Fallback adapter that discards all reads/writes.
+ *
+ * Used automatically in SSR/test environments where no real storage exists.
+ *
+ * @returns No-op {@link StorageAdapter}
  */
 export const createNoopStorageAdapter = (): StorageAdapter => ({
   async getItem(key: string): Promise<string | null> {
@@ -45,84 +57,46 @@ export const createNoopStorageAdapter = (): StorageAdapter => ({
 });
 
 /**
- * Extended storage adapter interface that supports synchronous operations
+ * Web adapter backed by `localStorage`.
+ *
+ * @returns {@link StorageAdapter} using the browser's `localStorage` API
+ *
+ * @example
+ * ```tsx
+ * <FusionStateProvider persistence={{ adapter: createLocalStorageAdapter() }}>
+ *   <App />
+ * </FusionStateProvider>
+ * ```
  */
-export interface ExtendedStorageAdapter extends StorageAdapter {
-  /** Optional synchronous getItem for localStorage compatibility */
-  getItemSync?: (key: string) => string | null;
-}
-
-/**
- * Create a localStorage adapter for web applications
- * @param debug - Whether to enable debug logging
- * @returns A storage adapter that uses browser's localStorage
- */
-export const createLocalStorageAdapter = (
-  debug = false,
-): ExtendedStorageAdapter => {
-  // Check if localStorage is available
-  if (typeof localStorage === 'undefined') {
-    if (debug) {
-      console.warn(
-        'localStorage is not available, falling back to noop adapter',
-      );
+export const createLocalStorageAdapter = (): StorageAdapter => ({
+  async getItem(key: string): Promise<string | null> {
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.error('Error reading from localStorage:', error);
+      return null;
     }
-    return createNoopStorageAdapter();
-  }
+  },
 
-  return {
-    async getItem(key: string): Promise<string | null> {
-      try {
-        return localStorage.getItem(key);
-      } catch (error) {
-        if (debug) {
-          console.error('Error reading from localStorage:', error);
-        }
-        return null;
-      }
-    },
+  async setItem(key: string, value: string): Promise<void> {
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {
+      console.error('Error writing to localStorage:', error);
+    }
+  },
 
-    getItemSync(key: string): string | null {
-      try {
-        return localStorage.getItem(key);
-      } catch (error) {
-        if (debug) {
-          console.error('Error reading from localStorage:', error);
-        }
-        return null;
-      }
-    },
-
-    async setItem(key: string, value: string): Promise<void> {
-      try {
-        localStorage.setItem(key, value);
-      } catch (error) {
-        if (debug) {
-          console.error('Error writing to localStorage:', error);
-        }
-      }
-    },
-
-    async removeItem(key: string): Promise<void> {
-      try {
-        localStorage.removeItem(key);
-      } catch (error) {
-        if (debug) {
-          console.error('Error removing from localStorage:', error);
-        }
-      }
-    },
-  };
-};
-
-import {deprecate} from '../utils/deprecation';
+  async removeItem(key: string): Promise<void> {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing from localStorage:', error);
+    }
+  },
+});
 
 /**
- * @deprecated Use {@link createNoopStorageAdapter} instead. Will be removed in v2.
- * Emits a one-time `console.warn` on first call (since v1.3.0).
+ * @deprecated Use {@link createNoopStorageAdapter} instead.
+ * Alias kept for backward compatibility.
  */
-export const NoopStorageAdapter = deprecate(
-  createNoopStorageAdapter,
-  'NoopStorageAdapter',
-  'createNoopStorageAdapter',
-);
+export const NoopStorageAdapter = createNoopStorageAdapter;
